@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Box Rush 产品模块图</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+:root{
+  --bg:#F7F7F3; --surface:#FFFFFF; --ink:#1A1A1A; --muted:#6B6B6B; --line:#E4E3DC;
+  --accent:#3B3FD8; --accent-soft:#E9EAFB; --teal:#0F9D8A; --teal-soft:#E2F4F1;
+  --amber:#B77400; --no:#C23B3B; --p2:#9A9A92;
+  --user:#3B3FD8; --merchant:#0F9D8A; --ops:#B77400;
+  --sans:"Noto Sans SC","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --muted:#A0A0A0; --line:#2C2D31;
+    --accent:#8C8FF5; --accent-soft:#25264A; --teal:#3CC4B0; --teal-soft:#16322E;
+    --amber:#E3A33A; --no:#E57373; --p2:#76766F;
+    --user:#8C8FF5; --merchant:#3CC4B0; --ops:#E3A33A;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --muted:#A0A0A0; --line:#2C2D31;
+  --accent:#8C8FF5; --accent-soft:#25264A; --teal:#3CC4B0; --teal-soft:#16322E;
+  --amber:#E3A33A; --no:#E57373; --p2:#76766F;
+  --user:#8C8FF5; --merchant:#3CC4B0; --ops:#E3A33A;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.6;padding-inline:20px;padding-block:32px 56px}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:40px}
+h1,h2,h3{margin:0;text-wrap:balance}
+header{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-end;justify-content:space-between}
+.brand{display:flex;flex-direction:column;gap:6px}
+.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--muted)}
+h1{font-size:30px;font-weight:900;letter-spacing:.01em}
+h1 .jp{font-weight:500;color:var(--muted);font-size:18px;margin-left:10px}
+.lede{color:var(--muted);max-width:60ch;margin:0}
+.stats{display:flex;gap:28px;flex-wrap:wrap}
+.stat{display:flex;flex-direction:column}
+.stat b{font-family:var(--mono);font-size:26px;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat span{font-size:12px;color:var(--muted)}
+
+.legend{display:flex;flex-wrap:wrap;gap:16px;align-items:center;font-size:13px;color:var(--muted)}
+.legend .item{display:flex;gap:6px;align-items:center}
+.toggle{margin-left:auto;display:inline-flex;border:1px solid var(--line);border-radius:999px;background:var(--surface);padding:3px}
+.toggle button{font:inherit;font-size:13px;border:0;background:transparent;color:var(--muted);padding:5px 14px;border-radius:999px;cursor:pointer}
+.toggle button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.toggle button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.dot{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block}
+.dot.p0{background:var(--accent)}
+.dot.p1{border:1.5px solid var(--accent);background:transparent}
+.dot.p2{border:1.5px dashed var(--p2);background:transparent}
+.dot.no{background:transparent;position:relative}
+.dot.no::before{content:"";position:absolute;left:-1px;right:-1px;top:3px;height:2px;background:var(--no);transform:rotate(-35deg)}
+
+/* flow */
+.flow{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+.flow h2{font-size:15px}
+.flow-scroll{overflow-x:auto}
+.steps{display:flex;gap:0;min-width:880px;list-style:none;margin:0;padding:0}
+.steps li{flex:1;position:relative;padding:10px 12px 10px 18px;background:var(--bg);border-block:1px solid var(--line);font-size:13px}
+.steps li:first-child{border-left:1px solid var(--line);border-radius:8px 0 0 8px;padding-left:14px}
+.steps li:last-child{border-right:1px solid var(--line);border-radius:0 8px 8px 0}
+.steps li:not(:last-child)::after{content:"";position:absolute;right:-9px;top:50%;width:16px;height:16px;background:var(--bg);border-top:1px solid var(--line);border-right:1px solid var(--line);transform:translateY(-50%) rotate(45deg);z-index:1}
+.steps .n{font-family:var(--mono);font-size:11px;color:var(--muted);display:block}
+.steps .t{font-weight:700;display:block}
+.steps .who{font-size:11px;color:var(--muted)}
+
+/* sections */
+.side{display:flex;flex-direction:column;gap:14px}
+.side-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:2px solid var(--c);padding-bottom:8px}
+.side-head h2{font-size:20px;font-weight:900;color:var(--c)}
+.side-head .meta{color:var(--muted);font-size:13px}
+.side-head .note{margin-left:auto;font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;align-items:start}
+
+.mod{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px 12px;display:flex;flex-direction:column;gap:10px}
+.mod-top{display:flex;align-items:baseline;gap:8px}
+.code{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--c);background:color-mix(in srgb,var(--c) 12%,transparent);padding:1px 7px;border-radius:5px}
+.mod h3{font-size:15px;font-weight:700}
+.mod .count{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
+.bar{display:flex;height:4px;border-radius:2px;overflow:hidden;background:var(--line)}
+.bar i{display:block}
+.bar .b0{background:var(--accent)}
+.bar .b1{background:color-mix(in srgb,var(--accent) 35%,transparent)}
+.bar .b2{background:var(--p2);opacity:.45}
+.feats{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.feats li{display:flex;gap:8px;align-items:baseline;font-size:13px}
+.feats li .dot{transform:translateY(-1px)}
+.feats li.is-no{color:var(--muted);text-decoration:line-through}
+.feats li.is-p1,.feats li.is-p2{color:var(--muted)}
+.tag{font-size:11px;color:var(--teal);background:var(--teal-soft);border-radius:4px;padding:0 5px;white-space:nowrap}
+.mod .why{font-size:12px;color:var(--muted);border-top:1px dashed var(--line);padding-top:8px;margin:0}
+body.mvp-only .feats li:not(.is-p0){display:none}
+body.mvp-only .mod.no-mvp{display:none}
+
+/* foundation */
+.foundation{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+.foundation h2{font-size:15px}
+.foundation p{margin:0;color:var(--muted);font-size:13px}
+.sv{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.sv div{border:1px solid var(--line);border-radius:8px;padding:8px 10px;display:flex;gap:8px;align-items:baseline;font-size:13px}
+.sv code{font-family:var(--mono);font-size:11px;color:var(--muted)}
+
+.bottom{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.box{border:1px solid var(--line);border-radius:10px;padding:16px 18px;background:var(--surface);display:flex;flex-direction:column;gap:8px}
+.box h2{font-size:15px}
+.box ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:13px}
+.box .muted{color:var(--muted)}
+footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;display:flex;flex-wrap:wrap;gap:6px 18px}
+footer code{font-family:var(--mono)}
+@media (max-width:520px){ h1{font-size:24px} .toggle{margin-left:0} }
+</style>
+<style>body{margin:0} [hidden]{display:none!important}</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <span class="eyebrow"><a href="index.html" style="color:inherit">← 导航</a> · 团队内部 · 初步版本 · 2026-09-24 更新</span>
+      <h1>Box Rush 产品模块图<span class="jp">BOXラッシュ</span></h1>
+      <p class="lede">日本市场的 TCG 众筹开卡平台（Web）。下面是目前拆出的全部模块和功能点，实心点是 MVP 要做的，其余按阶段推进。</p>
+    </div>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <div class="legend">
+    <span class="item"><span class="dot p0"></span>MVP</span>
+    <span class="item"><span class="dot p1"></span>P1 · 验证后首批</span>
+    <span class="item"><span class="dot p2"></span>P2 · 规模化后</span>
+    <span class="item"><span class="dot no"></span>明确不做</span>
+    <span class="item"><span class="tag">可验证</span>信任相关功能</span>
+    <div class="toggle" role="group" aria-label="显示范围">
+      <button type="button" id="btn-all" aria-pressed="true">全部功能</button>
+      <button type="button" id="btn-mvp" aria-pressed="false">只看 MVP</button>
+    </div>
+  </div>
+
+  <section class="flow" aria-labelledby="flow-h">
+    <h2 id="flow-h">一场开盒怎么走完（场次主流程）</h2>
+    <div class="flow-scroll">
+      <ol class="steps">
+        <li><span class="n">1</span><span class="t">创建场次</span><span class="who">商家 · 不变量校验</span></li>
+        <li><span class="n">2</span><span class="t">入仓验封</span><span class="who">运营 · 入仓后才能开售</span></li>
+        <li><span class="n">3</span><span class="t">审核 + 种子承诺</span><span class="who">运营 / 系统</span></li>
+        <li><span class="n">4</span><span class="t">售位</span><span class="who">用户 · 满员才开</span></li>
+        <li><span class="n">5</span><span class="t">分位公示</span><span class="who">系统 · 开盒前公布</span></li>
+        <li><span class="n">6</span><span class="t">集中开盒 + 录像</span><span class="who">运营 · 平台相机</span></li>
+        <li><span class="n">7</span><span class="t">归属 + 开盒记录</span><span class="who">系统 / 运营</span></li>
+        <li><span class="n">8</span><span class="t">寄存 · 合单发货</span><span class="who">运营 → 用户</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <div id="sides"></div>
+
+  <section class="foundation" aria-labelledby="sv-h">
+    <h2 id="sv-h">平台服务层（所有模块的底座）</h2>
+    <p>随机和录像只由这一层执行，商家和自营团队都没有调用权限。</p>
+    <div class="sv" id="sv"></div>
+  </section>
+
+  <div class="bottom">
+    <section class="box">
+      <h2>明确不做</h2>
+      <ul>
+        <li>充值点数、站内余额、提现</li>
+        <li>回收 / 卖回平台 / ポイント変換</li>
+        <li>刮卡等平台生成随机的小游戏</li>
+        <li>按消费额计、每月重置的会员等级</li>
+        <li>直播打赏；原生 App（只做 Web）</li>
+        <li>商城（密封盒 / 单卡直售）</li>
+        <li>年龄验证、未成年人专项功能</li>
+      </ul>
+    </section>
+    <section class="box">
+      <h2>参考来源</h2>
+      <ul>
+        <li><b>功能</b>参考 HOBBY STOCKS（中国大陆拆卡 App）</li>
+        <li><b>前端</b>参考 DOPA（日本 Oripa 头部），只借界面，不借机制</li>
+        <li><b>支付</b>走第三方聚合，首选 Stripe</li>
+        <li class="muted">分队单元从"球队"换成キャラクター枠；开盒从商家自播换成平台集中开盒</li>
+      </ul>
+    </section>
+    <section class="box">
+      <h2>MVP 要回答的问题</h2>
+      <ul>
+        <li><b>m</b>：用户愿意为"可验证开封"多付多少</li>
+        <li><b>k</b>：平均每次发货能合并几位（低于 3 模式不成立）</li>
+        <li class="muted">MVP 自营 + 集中开盒 + 集中仓，先不做直播</li>
+      </ul>
+    </section>
+  </div>
+
+  <footer>
+    <span>来源：<code>docs/breaking-platform.md</code> §8.3.3 / 第 8 章，2026-09-24 同步</span>
+    <span>编号 M / F 与文档一致，方便对照</span>
+    <span>初步拆解，评审后会调整</span>
+  </footer>
+</div>
+
+<script>
+const TRUST="可验证";
+const DATA=[
+ {side:"user",name:"用户端",note:"Web · 手机优先",mods:[
+  {c:"M1",n:"账户与安全",f:[["注册 / 登录（SMS、Apple、Google、LINE）",0],["收货地址管理",0],["支付方式管理",0],["通知设置",0],["退会 / 数据删除",0],["首次引导（玩法教育）",0],["特商法 / 规约 / 隐私页",0],["规约：未成年人须家长同意",0]]},
+  {c:"M2",n:"消费保护",why:"一般消费保护，也是资本叙事的证据",f:[["月额 / 单笔上限",0],["夜间大额二次确认",0],["自我排除（暂停购位）",1],["消费月报",1]]},
+  {c:"M3",n:"场次发现",f:[["品类 Tab",0],["排序（开盒时间 / 残り率 / 单价）",0],["场次卡片",0],["玩法筛选",0],["低单价入门区",0],["Banner / 运营位",0],["搜索（系列 / 角色 / 商家）",1],["开盒预告条",1],["商家页",1]]},
+  {c:"M4",n:"场次详情与购位",why:"组队拆卡的核心页",f:[["标的展示（封条照片、参考价）",0],["分位方案 + 保底承诺",0],["分位清单展开",0],["种子承诺 hash",0,TRUST],["选位（位图实时状态）",0],["随机买 N 位",0],["整盒买断",0],["锁位 + 超时释放",0],["限购",0],["\"满员才开\"说明",0],["规则快照（只读）",0],["不可取消说明",0],["DRAFT 顺位 / 代选规则",1]]},
+  {c:"M5",n:"支付与订单",why:"第三方聚合，首选 Stripe",f:[["Stripe 支付（卡 / Apple Pay / Google Pay / 便利店）",0],["PayPay（须 Stripe 审核）",1],["订单列表 / 详情",0],["流拍自动原路退款",0],["退款进度",0],["领收書下载",1]]},
+  {c:"M6",n:"マイ枠（等待中）",f:[["我的位（按状态分组）",0],["分位公示",0,TRUST],["分位公示动画",1],["开盒时间加日历",1],["DRAFT 选卡会话",1]]},
+  {c:"M7",n:"开盒（LIVE）",f:[["录像回放（带时间点标记）",0,TRUST],["定时直播 + 小窗 / 画中画",1],["直播叠加层",1],["开封高光动画",1],["弹幕",2]]},
+  {c:"M8",n:"结果与验证",why:"DOPA / HOBBY STOCKS 都没有的部分",f:[["归属明细",0],["每张卡跳录像时间点",0,TRUST],["一键验证（页内复算）",0,TRUST],["复算脚本下载",0,TRUST],["公开开盒记录页（免登录）",0,TRUST],["申诉（自动附证据）",0],["自营 vs 第三方统计公开",1,TRUST],["单卡参考价",1]]},
+  {c:"M9",n:"卡片仓库与发货",why:"寄存 + 合单直接决定 k",f:[["仓库列表",0],["集中仓寄存",0],["合单发货",0],["物流追踪",0],["卡片详情（来源、录像）",0],["高额卡保险配送",1],["寄存超期规则",1],["评级代送",2]]},
+  {c:"M10",n:"会员与成长",f:[["会员等级（按场次数，不月度重置）",1],["优先购位 / 寄存期延长",1],["收藏图鉴",1],["关注角色 → 上架通知",1],["好友邀请",2]]},
+  {c:"M11",n:"通知",why:"邮件 + LINE 为主，Web Push 补充",f:[["满员 / 流拍退款",0],["分位公示",0],["开盒开始 / 录像发布",0],["发货 / 签收 / 寄存将超期",0],["异常（中止、顺延、仲裁）",0],["关注角色新场次",1],["残口提醒（仅订阅用户）",1],["PWA 安装引导",1]]},
+  {c:"M12",n:"客服与帮助",f:[["FAQ / 玩法说明",0],["公正性说明",0],["客服工单",0],["申诉入口",0]]}
+ ]},
+ {side:"merchant",name:"商家端",note:"MVP 只给自营团队用",mods:[
+  {c:"M14",n:"入驻与店铺",f:[["入驻（古物商許可验真）",1],["店铺资料",1],["子账号权限",1],["保证金",1]]},
+  {c:"M15",n:"场次管理",why:"商家没有碰随机和录像的入口",f:[["场次创建向导",0],["实时不变量校验",0,TRUST],["分位方案编辑器",0],["角色枠清单（引用模板）",0],["兜底条款必填",0],["定价 + 隐含溢价显示",0],["上架后只读快照",0],["DRAFT 代选规则",1],["场次复制",1]]},
+  {c:"M16",n:"标的交付",f:[["入仓预约",0],["交付 / 验封状态",0],["进货凭证上传",0]]},
+  {c:"M17",n:"数据与结算",f:[["场次看板",1],["结算明细",1],["分级与违约记录",1],["佣金发票下载",1]]}
+ ]},
+ {side:"ops",name:"运营端",note:"MVP 工作量的大头",mods:[
+  {c:"M18",n:"商品主数据",why:"角色枠自动归属全靠它",f:[["系列 / SKU",0],["收录卡表（含角色标签）",0],["角色枠模板",0],["参考市价数据源",1]]},
+  {c:"M19",n:"货源与库存",f:[["采购登记",0],["古物台帳",0],["入库验封（封条拍照）",0,TRUST],["库存状态",0],["货源分配留痕",1,TRUST]]},
+  {c:"M20",n:"场次运营",f:[["审核队列",0],["开盒排期（工位容量）",0],["定价实验（测 m）",0],["运营位配置",0],["自营标识",0]]},
+  {c:"M21",n:"开盒与归属",why:"平板工位端 + 平台相机",f:[["工位流程（扫码 → 录像 → 逐包）",0],["录像采集（仅平台相机）",0,TRUST],["逐卡识别录入",0],["自动归属",0],["人工归属（双人复核）",0],["清单外卡处理",0],["录像中断 → 场次中止",0],["每场工时记录",0],["DRAFT 会话托管",1]]},
+  {c:"M22",n:"仓储与发货",f:[["按用户货位上架",0],["合单拣货",0],["打包规范",0],["发货 / 运单回传",0],["寄存超期处理",1],["盘点",1]]},
+  {c:"M23",n:"客服与仲裁",f:[["工单系统",0],["仲裁台（录像 + 归属对照）",0,TRUST],["裁定执行",0],["FAQ 内容维护",0]]},
+  {c:"M24",n:"风控与合规",f:[["关联账号识别",0],["异常消费监控",0],["权限隔离",0,TRUST],["不可变审计日志",0,TRUST],["商家违约处置",1]]},
+  {c:"M25",n:"财务",f:[["托管（Stripe）",0],["原路退款",0],["对账",0],["商家结算（Stripe Connect）",1],["佣金 / 费率",1],["保证金扣划",1],["インボイス",1]]},
+  {c:"M26",n:"数据与实验",f:[["m / k 看板",0],["漏斗与核心指标",0],["每场人力工时",0],["A/B（参考价显示）",0],["自营 vs 第三方统计",1]]}
+ ]}
+];
+const SV=[["SV1","约束校验"],["SV2","分位引擎"],["SV3","可验证随机"],["SV4","影像采集与归档"],["SV5","场次状态机"],["SV6","开盒记录"],["SV7","商家治理"],["SV8","托管结算"],["SV9","归属与履约"]];
+const COLOR={user:"var(--user)",merchant:"var(--merchant)",ops:"var(--ops)"};
+const PCLS={"0":"p0","1":"p1","2":"p2","-1":"no"};
+const PLAB={"0":"MVP","1":"P1","2":"P2","-1":"不做"};
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+
+let total=0,mvp=0,mods=0;
+const sides=document.getElementById("sides");
+sides.style.display="flex";sides.style.flexDirection="column";sides.style.gap="36px";
+DATA.forEach(side=>{
+  const feats=side.mods.flatMap(m=>m.f);
+  const sm=feats.filter(f=>f[1]===0).length;
+  total+=feats.length; mvp+=sm; mods+=side.mods.length;
+  const sec=document.createElement("section");
+  sec.className="side"; sec.style.setProperty("--c",COLOR[side.side]);
+  sec.innerHTML=`<div class="side-head"><h2>${side.name}</h2><span class="meta">${side.mods.length} 个模块 · ${feats.length} 个功能点 · MVP ${sm}</span><span class="note">${side.note}</span></div><div class="grid"></div>`;
+  const grid=sec.querySelector(".grid");
+  side.mods.forEach(m=>{
+    const n=m.f.length, c0=m.f.filter(f=>f[1]===0).length, c1=m.f.filter(f=>f[1]===1).length, c2=n-c0-c1;
+    const el=document.createElement("article");
+    el.className="mod"+(c0===0?" no-mvp":"");
+    el.innerHTML=`<div class="mod-top"><span class="code">${m.c}</span><h3>${esc(m.n)}</h3><span class="count">${c0}/${n} MVP</span></div>
+      <div class="bar" aria-hidden="true"><i class="b0" style="width:${c0/n*100}%"></i><i class="b1" style="width:${c1/n*100}%"></i><i class="b2" style="width:${c2/n*100}%"></i></div>
+      <ul class="feats">${m.f.map(f=>`<li class="is-${PCLS[f[1]]}"><span class="dot ${PCLS[f[1]]}" title="${PLAB[f[1]]}"></span><span>${esc(f[0])}${f[2]?` <span class="tag">${f[2]}</span>`:""}</span></li>`).join("")}</ul>
+      ${m.why?`<p class="why">${esc(m.why)}</p>`:""}`;
+    grid.appendChild(el);
+  });
+  sides.appendChild(sec);
+});
+document.getElementById("stats").innerHTML=
+  [[mods,"模块"],[total,"功能点"],[mvp,"MVP 功能点"],[53,"MVP 页面"]]
+  .map(([v,l])=>`<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("");
+document.getElementById("sv").innerHTML=SV.map(([c,n])=>`<div><code>${c}</code><span>${n}</span></div>`).join("");
+
+const bAll=document.getElementById("btn-all"), bMvp=document.getElementById("btn-mvp");
+function setMode(m){
+  document.body.classList.toggle("mvp-only",m==="mvp");
+  bAll.setAttribute("aria-pressed",m!=="mvp"); bMvp.setAttribute("aria-pressed",m==="mvp");
+  try{localStorage.setItem("br-mode",m)}catch(e){}
+}
+bAll.addEventListener("click",()=>setMode("all"));
+bMvp.addEventListener("click",()=>setMode("mvp"));
+try{ if(localStorage.getItem("br-mode")==="mvp") setMode("mvp"); }catch(e){}
+</script>
+</body>
+</html>

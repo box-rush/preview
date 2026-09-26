@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>BOXラッシュ 预览</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Sans+JP:wght@700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Tokens: card-lottery-docs · docs/breaking-platform.md §9.2 */
+:root{
+  --bg:#FAFAF7; --surface:#FFFFFF; --ink:#1A1A1A; --ink-2:#6B6B6B; --line:#E6E5DE; --track:#ECEBE4;
+  --accent:#3B3FD8; --accent-ink:#FFFFFF; --accent-soft:#ECEDFC;
+  --trust:#0F9D8A; --trust-soft:#E1F3F0;
+  --sans:"Noto Sans SC","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  --jp:"Noto Sans JP","Hiragino Sans",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --ink-2:#A0A0A0; --line:#2A2B2F; --track:#2A2B2F;
+    --accent:#8E91F7; --accent-ink:#111214; --accent-soft:#23244A;
+    --trust:#3CC4B0; --trust-soft:#15302C;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --ink-2:#A0A0A0; --line:#2A2B2F; --track:#2A2B2F;
+  --accent:#8E91F7; --accent-ink:#111214; --accent-soft:#23244A;
+  --trust:#3CC4B0; --trust-soft:#15302C;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;padding-inline:20px;padding-block:40px 64px}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:8px}
+.wrap{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:40px}
+h1,h2,h3{margin:0;text-wrap:balance}
+
+header{display:flex;flex-direction:column;gap:12px}
+.mark{font-family:var(--jp);font-weight:900;font-size:28px;display:flex;align-items:center;gap:2px;letter-spacing:.02em}
+.mark i{font-style:normal;background:var(--accent);color:var(--accent-ink);padding:0 7px;border-radius:6px;margin-right:3px;font-family:var(--mono);font-size:23px;line-height:1.35}
+.mark small{font-family:var(--sans);font-size:13px;font-weight:500;color:var(--ink-2);margin-left:12px;letter-spacing:.08em}
+.lede{margin:0;color:var(--ink-2);max-width:62ch}
+.meta{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--ink-2)}
+.meta code{font-family:var(--mono);font-size:12px}
+
+section{display:flex;flex-direction:column;gap:14px}
+.sec-h{display:flex;align-items:baseline;gap:12px;border-bottom:1px solid var(--line);padding-bottom:8px}
+.sec-h h2{font-size:17px;font-weight:900}
+.sec-h span{font-size:12.5px;color:var(--ink-2)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:10px;text-decoration:none;transition:border-color .15s,transform .15s}
+.card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.card .top{display:flex;align-items:center;gap:8px}
+.code{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);background:var(--accent-soft);padding:1px 7px;border-radius:5px}
+.status{margin-left:auto;font-size:11.5px;color:var(--trust);background:var(--trust-soft);border-radius:999px;padding:1px 9px;font-weight:700}
+.card h3{font-size:17px;font-weight:900}
+.card p{margin:0;font-size:13.5px;color:var(--ink-2)}
+.facts{display:flex;flex-wrap:wrap;gap:6px}
+.facts span{font-size:12px;border:1px solid var(--line);border-radius:6px;padding:1px 8px;color:var(--ink-2)}
+.facts b{font-family:var(--mono);color:var(--ink)}
+.deep{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.deep a{font-size:12.5px;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:3px 11px;background:var(--bg)}
+.deep a:hover{border-color:var(--accent);color:var(--accent)}
+.card .go{margin-top:auto;font-size:13px;font-weight:700;color:var(--accent)}
+
+.todo{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:0 24px}
+.todo li{display:flex;gap:10px;align-items:baseline;padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px;color:var(--ink-2)}
+.todo .c{font-family:var(--mono);font-size:12px;min-width:44px}
+.todo .p{margin-left:auto;font-size:11px;border:1px solid var(--line);border-radius:4px;padding:0 6px}
+
+footer{font-size:12.5px;color:var(--ink-2);border-top:1px solid var(--line);padding-top:16px;display:flex;flex-direction:column;gap:4px}
+@media (prefers-reduced-motion: reduce){ .card{transition:none} .card:hover{transform:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="mark"><i>BOX</i>ラッシュ<small>预览 · 团队内部</small></div>
+    <p class="lede">Box Rush 的产品模块示意图和界面原型汇总。所有页面都是静态 HTML，数据为示例；原型的布局与规则来自设计文档第 9 章的 prompt。</p>
+    <div class="meta"><span>最后更新 2026-09-26</span><span>设计文档 <code>card-lottery-docs / docs/breaking-platform.md</code></span></div>
+  </header>
+
+  <section aria-labelledby="h-product">
+    <div class="sec-h"><h2 id="h-product">产品</h2><span>对应设计文档第 8 章</span></div>
+    <div class="grid">
+      <a class="card" href="modules.html">
+        <div class="top"><span class="code">MAP</span><span class="status">2026-09-24</span></div>
+        <h3>产品模块示意图</h3>
+        <p>用户端、商家端、运营端的全部模块和功能点，标注 MVP / P1 / P2，可切换"只看 MVP"。</p>
+        <div class="facts"><span><b>25</b> 模块</span><span><b>153</b> 功能点</span><span>MVP <b>104</b></span><span>MVP <b>53</b> 页</span></div>
+        <span class="go">打开 →</span>
+      </a>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-proto">
+    <div class="sec-h"><h2 id="h-proto">界面原型</h2><span>手机优先，适配平板（≥768px）与桌面（≥1024px）</span></div>
+    <div class="grid">
+      <a class="card" href="prototype/ui-01-home.html">
+        <div class="top"><span class="code">UI-01</span><span class="status">已生成</span></div>
+        <h3>首页</h3>
+        <p>Banner、品类 Tab、排序与玩法筛选、入门区、场次卡片。顶部"原型设置"可切换参考价格 A/B 与加载 / 空状态。</p>
+        <span class="go">打开 →</span>
+      </a>
+      <div class="card" style="cursor:default">
+        <div class="top"><span class="code">UI-02</span><span class="status">已生成</span></div>
+        <h3>场次详情 + 规则快照</h3>
+        <p>封印写真、保底、分位方案、满员进度、种子承诺、开封时刻、规则全文；底部购买栏三种状态。</p>
+        <div class="deep">
+          <a href="prototype/ui-02-lottery.html#L001">キャラ枠 · 选位</a>
+          <a href="prototype/ui-02-lottery.html#L002">パック番号 · 随机</a>
+          <a href="prototype/ui-02-lottery.html#L009">已结束</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-todo">
+    <div class="sec-h"><h2 id="h-todo">待生成</h2><span>第 9 章已有 prompt，尚未生成原型</span></div>
+    <ul class="todo">
+      <li><span class="c">UI-03</span>选位<span class="p">MVP</span></li>
+      <li><span class="c">UI-04</span>确认与支付 + 支付结果<span class="p">MVP</span></li>
+      <li><span class="c">UI-05</span>マイ枠 + 场次进度<span class="p">MVP</span></li>
+      <li><span class="c">UI-06</span>分位公示演出<span class="p">P1</span></li>
+      <li><span class="c">UI-07</span>录像回放<span class="p">MVP</span></li>
+      <li><span class="c">UI-08</span>开盒结果<span class="p">MVP</span></li>
+      <li><span class="c">UI-09</span>验证页 + 公开验证站<span class="p">MVP</span></li>
+      <li><span class="c">UI-10</span>仓库 + 发货申请<span class="p">MVP</span></li>
+      <li><span class="c">UI-11</span>首次引导<span class="p">MVP</span></li>
+      <li><span class="c">UI-12</span>消费保护设置<span class="p">MVP</span></li>
+      <li><span class="c">UI-13</span>场次创建向导 + 分位编辑器（商家）<span class="p">MVP</span></li>
+      <li><span class="c">UI-14</span>开盒工位端（运营）<span class="p">MVP</span></li>
+      <li><span class="c">UI-15</span>归属工作台（运营）<span class="p">MVP</span></li>
+      <li><span class="c">UI-16</span>仓储拣货与合单（运营）<span class="p">MVP</span></li>
+      <li><span class="c">UI-17</span>数据看板 m / k（运营）<span class="p">MVP</span></li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>原型中的场次、价格、卡号、商家名均为示例，不代表真实商品或商家。</span>
+    <span>内容更新方式见本仓库 README。</span>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<!-- Box Rush 原型 UI-01 首页。由 docs/breaking-platform.md §9.4 UI-01 prompt 生成；静态单文件，无需构建，直接用浏览器打开。手机优先，768px / 1024px 两档适配平板与桌面。 -->
+<title>BOXラッシュ ホーム</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Tokens: docs/breaking-platform.md §9.2 */
+:root{
+  --hdr:61px; --gut:16px;
+  --ground:#EEEEE8;
+  --bg:#FAFAF7; --surface:#FFFFFF; --ink:#1A1A1A; --ink-2:#6B6B6B; --line:#E6E5DE; --track:#ECEBE4;
+  --accent:#3B3FD8; --accent-ink:#FFFFFF; --accent-soft:#ECEDFC;
+  --trust:#0F9D8A; --trust-soft:#E1F3F0;
+  --warn:#D98A00; --warn-soft:#FBF0DC; --error:#D14343;
+  --skel:#ECEBE4; --skel-hi:#F6F5F0;
+  --shadow:0 1px 2px rgba(20,20,40,.06),0 4px 14px rgba(20,20,40,.05);
+  --sans:"Noto Sans JP","Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic",Meiryo,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#0A0B0C;
+    --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --ink-2:#A0A0A0; --line:#2A2B2F; --track:#2A2B2F;
+    --accent:#8E91F7; --accent-ink:#111214; --accent-soft:#23244A;
+    --trust:#3CC4B0; --trust-soft:#15302C;
+    --warn:#F0A73A; --warn-soft:#3A2C12; --error:#EF6B6B;
+    --skel:#222326; --skel-hi:#2B2C30;
+    --shadow:0 1px 2px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#0A0B0C;
+  --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --ink-2:#A0A0A0; --line:#2A2B2F; --track:#2A2B2F;
+  --accent:#8E91F7; --accent-ink:#111214; --accent-soft:#23244A;
+  --trust:#3CC4B0; --trust-soft:#15302C;
+  --warn:#F0A73A; --warn-soft:#3A2C12; --error:#EF6B6B;
+  --skel:#222326; --skel-hi:#2B2C30;
+  --shadow:0 1px 2px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.num{font-variant-numeric:tabular-nums}
+
+.app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))}
+
+/* prototype strip (meta, not part of the product UI) */
+.proto{background:var(--ink);color:var(--bg);font-size:12px}
+.proto summary{padding:6px 16px;cursor:pointer;list-style:none;display:flex;gap:8px;align-items:center}
+.proto summary::-webkit-details-marker{display:none}
+.proto summary::before{content:"▸";transition:transform .15s}
+.proto[open] summary::before{transform:rotate(90deg)}
+.proto .opts{padding:4px 16px 12px;display:flex;flex-direction:column;gap:8px}
+.proto .row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.proto .row>span{min-width:88px;opacity:.75}
+.proto button{background:transparent;border:1px solid color-mix(in srgb,var(--bg) 40%,transparent);color:var(--bg);border-radius:999px;padding:2px 10px;font-size:12px;cursor:pointer}
+.proto button[aria-pressed="true"]{background:var(--bg);color:var(--ink)}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:10px;padding:10px var(--gut)}
+.mark{display:flex;align-items:baseline;gap:8px}
+.mark b{font-weight:900;font-size:19px;letter-spacing:.02em;display:flex;align-items:center;gap:1px}
+.mark b i{font-style:normal;background:var(--accent);color:var(--accent-ink);padding:0 5px;border-radius:5px;margin-right:2px;font-family:var(--mono);font-size:16px;line-height:1.35}
+.mark small{font-size:10px;letter-spacing:.18em;color:var(--ink-2);font-variant:small-caps;text-transform:lowercase}
+.bar .sp{flex:1}
+.icon-btn{width:40px;height:40px;border-radius:50%;border:0;background:transparent;display:grid;place-items:center;cursor:pointer;color:var(--ink);position:relative}
+.icon-btn:hover{background:var(--track)}
+.icon-btn .badge{position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--bg)}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:13px}
+svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding:0 calc(var(--gut) - 4px)}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;border:0;background:transparent;padding:8px 10px 10px;font-weight:500;color:var(--ink-2);cursor:pointer;position:relative;font-size:14px}
+.tab[aria-selected="true"]{color:var(--ink);font-weight:700}
+.tab[aria-selected="true"]::after{content:"";position:absolute;left:10px;right:10px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:var(--accent)}
+
+main{display:flex;flex-direction:column;gap:18px;padding-block:14px 8px}
+.wrap{width:100%;max-width:1200px;margin-inline:auto}
+
+/* category bar: below the banner, sticks under the header */
+.catbar{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--hdr));z-index:15;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.dnav{display:none}
+
+/* carousel */
+.carousel{position:relative}
+.slides{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;gap:10px;padding:0 var(--gut);scroll-padding:0 var(--gut)}
+.slides::-webkit-scrollbar{display:none}
+.slide{flex:0 0 100%;scroll-snap-align:start;border-radius:14px;padding:16px 18px;min-height:132px;display:flex;flex-direction:column;justify-content:space-between;gap:10px;position:relative;overflow:hidden}
+.slide .kicker{font-size:11px;font-weight:700;letter-spacing:.12em}
+.slide h3{margin:0;font-size:18px;font-weight:900;line-height:1.35;text-wrap:balance}
+.slide p{margin:0;font-size:12.5px;opacity:.85}
+.s1{background:linear-gradient(135deg,#2A2DA8,#3B3FD8 55%,#5B5FE6);color:#fff}
+.s2{background:var(--trust-soft);color:var(--ink);border:1px solid color-mix(in srgb,var(--trust) 30%,transparent)}
+.s2 .kicker{color:var(--trust)}
+.s3{background:var(--surface);border:1px solid var(--line);color:var(--ink)}
+.s3 .kicker{color:var(--ink-2)}
+.sched{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:12.5px}
+.sched li{display:flex;gap:10px;align-items:baseline}
+.sched time{font-family:var(--mono);font-size:12px;color:var(--ink-2);min-width:96px}
+.cta-link{align-self:flex-start;font-size:12.5px;font-weight:700;display:inline-flex;align-items:center;gap:4px;border-bottom:1px solid currentColor}
+.dots{display:flex;justify-content:center;gap:6px;margin-top:10px}
+.dots button{width:6px;height:6px;border-radius:3px;border:0;padding:0;background:var(--line);cursor:pointer;transition:width .2s,background .2s}
+.dots button[aria-current="true"]{width:18px;background:var(--ink)}
+
+/* chips */
+.chipbar{display:flex;flex-direction:column;gap:8px}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:0 var(--gut)}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:12.5px;cursor:pointer;color:var(--ink);min-height:32px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip.sort[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,transparent);font-weight:700}
+.chips .lbl{flex:none;align-self:center;font-size:11px;color:var(--ink-2);margin-right:2px}
+
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;padding:0 var(--gut);gap:10px}
+.sec-h h2{margin:0;font-size:16px;font-weight:900}
+.sec-h span{font-size:12px;color:var(--ink-2)}
+
+/* low price rail */
+.rail{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding:0 var(--gut);scroll-snap-type:x proximity}
+.rail::-webkit-scrollbar{display:none}
+.rail .card{flex:0 0 172px;scroll-snap-align:start}
+
+/* grid */
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:0 var(--gut)}
+
+/* lottery card */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow);cursor:pointer;transition:transform .12s}
+.card:active{transform:scale(.985)}
+.art{position:relative;aspect-ratio:4/3;max-width:100%;display:grid;place-items:center;overflow:hidden}
+.art .boxface{width:62%;aspect-ratio:1/1.08;border-radius:6px;position:relative;display:flex;flex-direction:column;justify-content:space-between;padding:8% 9%;color:#fff;box-shadow:6px 6px 0 rgba(0,0,0,.18);transform:perspective(300px) rotateY(-10deg)}
+.art .boxface::before{content:"";position:absolute;left:0;right:0;top:0;height:10%;background:rgba(255,255,255,.18);border-radius:6px 6px 0 0}
+.art .boxface small{font-size:8px;letter-spacing:.14em;opacity:.85;position:relative}
+.art .boxface strong{font-size:11px;line-height:1.3;font-weight:900;position:relative;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.art .boxface em{font-style:normal;font-family:var(--mono);font-size:10px;font-weight:700;align-self:flex-end;background:rgba(0,0,0,.28);padding:1px 5px;border-radius:3px}
+.art .tape{position:absolute;left:-10%;right:-10%;top:47%;height:9px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.55) 0 10px,rgba(255,255,255,.25) 10px 14px);transform:rotate(-8deg)}
+.seal{position:absolute;left:8px;top:8px;display:inline-flex;align-items:center;gap:3px;background:color-mix(in srgb,var(--surface) 92%,transparent);color:var(--trust);font-size:10.5px;font-weight:700;padding:2px 7px 2px 5px;border-radius:999px;box-shadow:var(--shadow)}
+.seal svg{width:12px;height:12px;stroke-width:2.2}
+.art.poke{background:linear-gradient(160deg,#FFF3D1,#F6D58A)}
+.art.poke .boxface{background:linear-gradient(160deg,#E76F51,#C2410C)}
+.art.op{background:linear-gradient(160deg,#DDE8F4,#A9C3DE)}
+.art.op .boxface{background:linear-gradient(160deg,#2F4F7F,#16305A)}
+.art.ygo{background:linear-gradient(160deg,#EFE3EA,#CDB2C3)}
+.art.ygo .boxface{background:linear-gradient(160deg,#6D597A,#3F2F4C)}
+
+.body{padding:10px 11px 12px;display:flex;flex-direction:column;gap:6px;flex:1}
+.title{margin:0;font-size:13px;font-weight:700;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.8em}
+.price{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 6px}
+.price b{font-size:16px;font-weight:900;font-family:var(--mono);letter-spacing:-.01em}
+.price b small{font-family:var(--sans);font-size:11px;font-weight:700}
+.price .ref{font-size:11px;color:var(--ink-2)}
+.guar{font-size:11.5px;color:var(--ink-2)}
+.fill{display:flex;flex-direction:column;gap:3px}
+.track{height:8px;border-radius:4px;background:var(--track);overflow:hidden}
+.track i{display:block;height:100%;background:var(--accent);border-radius:4px}
+.fill .txt{font-size:11.5px;display:flex;justify-content:space-between}
+.fill .txt b{font-family:var(--mono);font-weight:700}
+.meta{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center;font-size:11.5px}
+.meta time{font-family:var(--mono);font-size:11px}
+.ver{display:inline-flex;align-items:center;gap:2px;color:var(--trust);background:var(--trust-soft);border-radius:4px;padding:0 5px;font-size:10.5px;font-weight:700}
+.ver svg{width:11px;height:11px;stroke-width:2.4}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:auto;padding-top:2px}
+.tg{font-size:10.5px;border-radius:4px;padding:1px 6px;border:1px solid var(--line);color:var(--ink-2);white-space:nowrap}
+.tg.self{border-color:transparent;background:var(--ink);color:var(--bg)}
+.tg.few{border-color:transparent;background:var(--warn-soft);color:var(--warn);font-weight:700}
+
+/* skeleton */
+.sk{background:linear-gradient(90deg,var(--skel) 0,var(--skel-hi) 40%,var(--skel) 80%);background-size:300% 100%;animation:sh 1.3s linear infinite;border-radius:6px}
+@keyframes sh{from{background-position:100% 0}to{background-position:-100% 0}}
+.card.skel{cursor:default;box-shadow:none}
+.card.skel .art{background:var(--skel)}
+
+.empty{margin:4px var(--gut);padding:28px 18px;border:1px dashed var(--line);border-radius:12px;text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center;color:var(--ink-2)}
+.empty b{color:var(--ink);font-size:14px}
+.empty button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;font-size:12.5px;cursor:pointer}
+
+.note{padding:6px var(--gut) 0;font-size:11px;color:var(--ink-2);text-align:center}
+
+/* bottom nav */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:color-mix(in srgb,var(--surface) 96%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));z-index:30}
+.nav a{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;color:var(--ink-2);padding:4px 0;min-height:48px;justify-content:center;border-radius:10px}
+.nav a[aria-current="page"]{color:var(--accent);font-weight:700}
+.nav svg.i{width:22px;height:22px}
+
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:12.5px;padding:8px 14px;border-radius:999px;z-index:40;max-width:calc(100% - 32px);text-align:center}
+
+/* ---------- tablet ---------- */
+@media (min-width:768px){
+  :root{--gut:24px}
+  body{background:var(--bg)}
+  .app{max-width:none}
+  .slide{flex-basis:calc((100% - 10px)/2)}
+  .grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+  .chips{flex-wrap:wrap;overflow:visible}
+  .card:hover{box-shadow:0 2px 4px rgba(20,20,40,.06),0 10px 24px rgba(20,20,40,.08);transform:translateY(-2px)}
+  .nav{max-width:none}
+}
+/* ---------- desktop ---------- */
+@media (min-width:1024px){
+  :root{--hdr:65px}
+  .bar{padding-block:12px}
+  .mark b{font-size:21px}
+  .dnav{display:flex;gap:4px;margin-left:28px}
+  .dnav a{padding:8px 14px;border-radius:999px;color:var(--ink-2);font-weight:500}
+  .dnav a:hover{background:var(--track);color:var(--ink)}
+  .dnav a[aria-current="page"]{color:var(--ink);font-weight:700;background:var(--track)}
+  .nav{display:none}
+  .app{padding-bottom:24px}
+  main{gap:22px;padding-block:20px 16px}
+  .slide{flex-basis:calc((100% - 20px)/3);min-height:150px}
+  .dots{display:none}
+  .chipbar{flex-direction:row;justify-content:space-between;align-items:center;flex-wrap:wrap}
+  .chips{padding:0 var(--gut)}
+  .rail{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;overflow:visible}
+  .rail .card{flex:none}
+  .grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .title{font-size:14px}
+  .toast{bottom:24px}
+}
+@media (prefers-reduced-motion: reduce){
+  .sk{animation:none}
+  .card,.dots button{transition:none}
+  .slides{scroll-behavior:auto}
+}
+</style>
+<style>body{margin:0} img{max-width:100%} [hidden]{display:none!important}</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></symbol>
+    <symbol id="i-radio" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8a6 6 0 0 1 0 8.4M7.8 16.2a6 6 0 0 1 0-8.4M19 5a10 10 0 0 1 0 14M5 19A10 10 0 0 1 5 5"/></symbol>
+    <symbol id="i-ticket" viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4Z"/><path d="M13 6v2M13 11v2M13 16v2"/></symbol>
+    <symbol id="i-package" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="M3 8l9 5 9-5M12 13v8M7.5 5.5l9 5"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+  </defs>
+</svg>
+
+<div class="app">
+  <details class="proto" id="proto">
+    <summary>原型 UI-01 首页 · 示例数据 · 点此切换状态</summary>
+    <div class="opts">
+      <div class="row"><span>参考价格（PD2 A/B）</span>
+        <button type="button" id="ab-on" aria-pressed="true">显示</button>
+        <button type="button" id="ab-off" aria-pressed="false">不显示</button>
+      </div>
+      <div class="row"><span>页面状态</span>
+        <button type="button" id="st-normal" aria-pressed="true">正常</button>
+        <button type="button" id="st-loading" aria-pressed="false">加载中</button>
+        <button type="button" id="st-empty" aria-pressed="false">无场次</button>
+      </div>
+    </div>
+  </details>
+
+  <header class="top">
+    <div class="bar wrap">
+      <a class="mark" href="#top" aria-label="BOXラッシュ ホーム"><b><i>BOX</i>ラッシュ</b><small>Box Rush</small></a>
+      <nav class="dnav" aria-label="メイン（デスクトップ）">
+        <a href="#top" aria-current="page">ホーム</a>
+        <a href="#live" data-proto="LIVE">LIVE</a>
+        <a href="#myslots" data-proto="マイ枠">マイ枠</a>
+        <a href="#collection" data-proto="コレクション">コレクション</a>
+      </nav>
+      <span class="sp"></span>
+      <button class="icon-btn" type="button" aria-label="お知らせ（未読あり）" data-proto="お知らせ一覧"><svg class="i"><use href="#i-bell"/></svg><span class="badge"></span></button>
+      <a class="avatar" href="#mypage" aria-label="マイページ" data-proto="マイページ">S</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="carousel wrap" aria-roledescription="carousel" aria-label="お知らせ">
+      <div class="slides" id="slides" tabindex="0">
+        <article class="slide s1" aria-label="1 / 3">
+          <span class="kicker">NEW</span>
+          <div><h3 id="new-title"></h3><p id="new-sub"></p></div>
+          <a class="cta-link" href="#" data-open="L006">詳細を見る</a>
+        </article>
+        <article class="slide s2" aria-label="2 / 3">
+          <span class="kicker">はじめての方へ</span>
+          <div><h3>満員で開封、未達なら全額返金</h3><p>あなたの枠は開封前に決まり、開封は録画でいつでも確認できます。</p></div>
+          <a class="cta-link" href="#" data-proto="しくみ（公正性の説明）">しくみを見る</a>
+        </article>
+        <article class="slide s3" aria-label="3 / 3">
+          <span class="kicker">開封スケジュール</span>
+          <ul class="sched" id="sched"></ul>
+          <a class="cta-link" href="#" data-proto="LIVE / 録画">すべて見る</a>
+        </article>
+      </div>
+      <div class="dots" id="dots" role="tablist" aria-label="スライド"></div>
+    </section>
+
+    <div class="catbar">
+      <div class="tabs wrap" role="tablist" aria-label="カテゴリ" id="cats"></div>
+    </div>
+
+    <div class="chipbar wrap">
+      <div class="chips" id="sorts" role="group" aria-label="並び替え"></div>
+      <div class="chips" id="filters" role="group" aria-label="遊び方で絞り込み"><span class="lbl">遊び方</span></div>
+    </div>
+
+    <section id="low-sec" class="wrap" aria-labelledby="low-h">
+      <div class="sec-h"><h2 id="low-h">はじめてでも参加しやすい</h2><span>パック番号・混合 / ¥1,000以下</span></div>
+      <div style="height:10px"></div>
+      <div class="rail" id="rail"></div>
+    </section>
+
+    <section class="wrap" aria-labelledby="all-h">
+      <div class="sec-h"><h2 id="all-h">販売中の開封会</h2><span id="count" class="num"></span></div>
+      <div style="height:10px"></div>
+      <div class="grid" id="grid"></div>
+      <div id="empty" hidden></div>
+    </section>
+
+    <p class="note">サンプルデータ・画像はイメージです</p>
+  </main>
+
+  <nav class="nav" aria-label="メイン">
+    <a href="#top" aria-current="page"><svg class="i"><use href="#i-home"/></svg>ホーム</a>
+    <a href="#live" data-proto="LIVE"><svg class="i"><use href="#i-radio"/></svg>LIVE</a>
+    <a href="#myslots" data-proto="マイ枠"><svg class="i"><use href="#i-ticket"/></svg>マイ枠</a>
+    <a href="#collection" data-proto="コレクション"><svg class="i"><use href="#i-package"/></svg>コレクション</a>
+    <a href="#mypage" data-proto="マイページ"><svg class="i"><use href="#i-user"/></svg>マイページ</a>
+  </nav>
+  <div class="toast" id="toast" role="status" hidden></div>
+</div>
+
+<script>
+/* Mock data — types follow §9.3. Prices: sum of slot prices ≈ reference retail total × 1.10–1.30 */
+const DETAIL="ui-02-lottery.html"; const HAS_DETAIL=new Set(["L001","L002"]);
+const PT={ENUMERATED:"キャラ枠",POSITIONAL:"パック番号",ATTRIBUTE:"番号レンジ",WHOLE:"BOX丸ごと",DRAFT:"ドラフト"};
+const CATS=["すべて","ポケモン","ワンピース","遊戯王"];
+const ART={"ポケモン":"poke","ワンピース":"op","遊戯王":"ygo"};
+const LOTTERIES=[
+ {id:"L001",category:"ポケモン",series:"テラスタルフェスex",title:"ポケカ『テラスタルフェスex』2BOX キャラ枠",quantity:2,sealedUnit:"BOX",referenceRetailPrice:5400,partitionType:"ENUMERATED",mixed:false,minPrice:700,uniform:false,totalSlots:12,soldSlots:10,openingAt:"2026-09-28T20:00:00+09:00",guaranteeText:"各枠 カード3枚以上",selfOperated:true,status:"ON_SALE",rec:1},
+ {id:"L002",category:"ポケモン",series:"ロケット団の栄光",title:"ポケカ『ロケット団の栄光』1BOX パック番号",quantity:1,sealedUnit:"BOX",referenceRetailPrice:5400,partitionType:"POSITIONAL",mixed:false,minPrice:210,uniform:true,totalSlots:30,soldSlots:21,openingAt:"2026-09-29T21:00:00+09:00",guaranteeText:"各枠 1パック",selfOperated:false,status:"ON_SALE",rec:4},
+ {id:"L003",category:"ワンピース",series:"新たなる皇帝",title:"ワンピースカード『新たなる皇帝』3BOX 混合",quantity:3,sealedUnit:"BOX",referenceRetailPrice:5280,partitionType:"POSITIONAL",mixed:true,minPrice:760,uniform:true,totalSlots:24,soldSlots:23,openingAt:"2026-09-27T20:00:00+09:00",guaranteeText:"各枠 3パック（3BOXから1パックずつ）",selfOperated:true,status:"ON_SALE",rec:2},
+ {id:"L004",category:"遊戯王",series:"QUARTER CENTURY BONANZA",title:"遊戯王OCG『QUARTER CENTURY BONANZA』BOX丸ごと",quantity:1,sealedUnit:"BOX",referenceRetailPrice:6600,partitionType:"WHOLE",mixed:false,minPrice:7480,uniform:true,totalSlots:1,soldSlots:0,openingAt:"2026-10-01T20:00:00+09:00",guaranteeText:"BOX 1箱分すべて",selfOperated:false,status:"ON_SALE",rec:7},
+ {id:"L005",category:"ポケモン",series:"超電ブレイカー",title:"ポケカ『超電ブレイカー』4BOX キャラ枠",quantity:4,sealedUnit:"BOX",referenceRetailPrice:5400,partitionType:"ENUMERATED",mixed:false,minPrice:1200,uniform:false,totalSlots:16,soldSlots:5,openingAt:"2026-10-03T20:00:00+09:00",guaranteeText:"各枠 カード5枚以上",selfOperated:true,status:"ON_SALE",rec:3},
+ {id:"L006",category:"ワンピース",series:"二つの伝説",title:"ワンピースカード『二つの伝説』2BOX キャラ枠",quantity:2,sealedUnit:"BOX",referenceRetailPrice:5280,partitionType:"ENUMERATED",mixed:false,minPrice:650,uniform:false,totalSlots:12,soldSlots:9,openingAt:"2026-09-30T21:00:00+09:00",guaranteeText:"各枠 カード3枚以上",selfOperated:false,status:"ON_SALE",rec:5},
+ {id:"L007",category:"遊戯王",series:"ALLIANCE INSIGHT",title:"遊戯王OCG『ALLIANCE INSIGHT』1BOX 番号レンジ",quantity:1,sealedUnit:"BOX",referenceRetailPrice:4400,partitionType:"ATTRIBUTE",mixed:false,minPrice:620,uniform:true,totalSlots:8,soldSlots:3,openingAt:"2026-10-04T20:00:00+09:00",guaranteeText:"各枠 カード4枚以上",selfOperated:false,status:"ON_SALE",rec:6},
+ {id:"L008",category:"ポケモン",series:"スノーハザード",title:"ポケカ『スノーハザード』1BOX パック番号",quantity:1,sealedUnit:"BOX",referenceRetailPrice:5400,partitionType:"POSITIONAL",mixed:false,minPrice:205,uniform:true,totalSlots:30,soldSlots:12,openingAt:"2026-10-02T20:00:00+09:00",guaranteeText:"各枠 1パック",selfOperated:true,status:"ON_SALE",rec:8},
+ {id:"L009",category:"ポケモン",series:"バトルパートナーズ",title:"ポケカ『バトルパートナーズ』2BOX キャラ枠",openingAt:"2026-09-26T20:00:00+09:00",status:"READY"},
+ {id:"L010",category:"ワンピース",series:"ロイヤルブラッド",title:"ワンピースカード『ロイヤルブラッド』1BOX パック番号",openingAt:"2026-09-26T21:00:00+09:00",status:"LOCKED"}
+];
+
+const state={cat:"すべて",sort:"rec",filters:new Set(),showRef:true,view:"normal"};
+try{const ab=localStorage.getItem("br-ab-ref"); if(ab==="off") state.showRef=false;}catch(e){}
+
+const WD="日月火水木金土";
+function jst(iso){const d=new Date(iso);const t=new Date(d.getTime()+9*3600e3);
+  return `${t.getUTCMonth()+1}/${t.getUTCDate()}(${WD[t.getUTCDay()]}) ${String(t.getUTCHours()).padStart(2,"0")}:${String(t.getUTCMinutes()).padStart(2,"0")}`;}
+const yen=n=>"¥"+n.toLocaleString("ja-JP");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const remaining=l=>l.totalSlots-l.soldSlots;
+const fewLeft=l=>remaining(l)>0 && remaining(l)/l.totalSlots<=0.10;
+
+function cardHTML(l){
+  const rem=remaining(l), pct=Math.round(l.soldSlots/l.totalSlots*100);
+  const ref=state.showRef?`<span class="ref num">参考: ${l.sealedUnit} ${yen(l.referenceRetailPrice)}${l.quantity>1?"×"+l.quantity:""}</span>`:"";
+  const tags=[`<span class="tg">${PT[l.partitionType]}</span>`];
+  if(l.mixed) tags.push(`<span class="tg">混合</span>`);
+  if(l.selfOperated) tags.push(`<span class="tg self">自営</span>`);
+  if(fewLeft(l)) tags.push(`<span class="tg few">残りわずか</span>`);
+  return `<a class="card" href="${HAS_DETAIL.has(l.id)?DETAIL+"#"+l.id:"#lottery-"+l.id}" data-open="${l.id}" aria-label="${esc(l.title)}">
+    <div class="art ${ART[l.category]}">
+      <div class="boxface"><small>${esc(l.category)}</small><strong>${esc(l.series)}</strong><em>${l.sealedUnit}×${l.quantity}</em></div>
+      <span class="tape" aria-hidden="true"></span>
+      <span class="seal"><svg class="i"><use href="#i-lock"/></svg>封印確認済</span>
+    </div>
+    <div class="body">
+      <h3 class="title">${esc(l.title)}</h3>
+      <div class="price"><b class="num">${yen(l.minPrice)}${l.uniform?"":"〜"}<small>/枠</small></b>${ref}</div>
+      <div class="guar">保証: ${esc(l.guaranteeText)}</div>
+      <div class="fill">
+        <div class="track" role="progressbar" aria-valuemin="0" aria-valuemax="${l.totalSlots}" aria-valuenow="${l.soldSlots}" aria-label="販売済み ${l.soldSlots}/${l.totalSlots} 枠"><i style="width:${pct}%"></i></div>
+        <div class="txt"><span>残り <b class="num">${rem}/${l.totalSlots}</b> 枠</span><span class="num" style="color:var(--ink-2)">${pct}%</span></div>
+      </div>
+      <div class="meta"><span>開封 <time datetime="${l.openingAt}">${jst(l.openingAt)}</time></span><span class="ver"><svg class="i"><use href="#i-shield"/></svg>検証可能</span></div>
+      <div class="tags">${tags.join("")}</div>
+    </div>
+  </a>`;
+}
+function skelHTML(){return `<div class="card skel" aria-hidden="true"><div class="art sk" style="border-radius:0"></div><div class="body"><div class="sk" style="height:14px;width:90%"></div><div class="sk" style="height:14px;width:60%"></div><div class="sk" style="height:18px;width:50%"></div><div class="sk" style="height:8px;width:100%"></div><div class="sk" style="height:12px;width:70%"></div></div></div>`;}
+
+function visible(){
+  let list=LOTTERIES.filter(l=>l.status==="ON_SALE");
+  if(state.view==="empty") list=[];
+  if(state.cat!=="すべて") list=list.filter(l=>l.category===state.cat);
+  if(state.filters.size) list=list.filter(l=>[...state.filters].some(f=>f==="MIXED"?l.mixed:l.partitionType===f));
+  const by={rec:(a,b)=>a.rec-b.rec,open:(a,b)=>new Date(a.openingAt)-new Date(b.openingAt),rem:(a,b)=>remaining(a)/a.totalSlots-remaining(b)/b.totalSlots,price:(a,b)=>a.minPrice-b.minPrice};
+  return list.sort(by[state.sort]);
+}
+function render(){
+  const grid=document.getElementById("grid"), rail=document.getElementById("rail"), empty=document.getElementById("empty"), lowSec=document.getElementById("low-sec");
+  if(state.view==="loading"){
+    grid.innerHTML=skelHTML().repeat(4); rail.innerHTML=skelHTML().repeat(2).replaceAll('class="card skel"','class="card skel" style="flex:0 0 172px"');
+    empty.hidden=true; lowSec.hidden=false; document.getElementById("count").textContent="読み込み中…"; return;
+  }
+  const list=visible();
+  const low=list.filter(l=>(l.partitionType==="POSITIONAL"||l.mixed)&&l.minPrice<=1000).sort((a,b)=>a.minPrice-b.minPrice);
+  rail.innerHTML=low.map(cardHTML).join(""); lowSec.hidden=low.length===0;
+  grid.innerHTML=list.map(cardHTML).join("");
+  document.getElementById("count").textContent=list.length?`${list.length}件`:"";
+  empty.hidden=list.length>0;
+  empty.innerHTML=`<div class="empty"><svg class="i" style="width:28px;height:28px"><use href="#i-package"/></svg><b>現在販売中の開封会はありません</b><span>新しい開封会はお知らせでご案内します。</span>${state.filters.size?'<button type="button" id="clear">絞り込みを解除</button>':""}</div>`;
+  const c=document.getElementById("clear"); if(c) c.onclick=()=>{state.filters.clear();syncChips();render();};
+}
+
+/* categories */
+const cats=document.getElementById("cats");
+cats.innerHTML=CATS.map(c=>`<button class="tab" role="tab" type="button" aria-selected="${c===state.cat}" data-cat="${c}">${c}</button>`).join("");
+cats.addEventListener("click",e=>{const b=e.target.closest("[data-cat]");if(!b)return;state.cat=b.dataset.cat;
+  cats.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected",t===b));render();});
+
+/* sort + filter chips */
+const SORTS=[["rec","おすすめ"],["open","開封が近い順"],["rem","残り率"],["price","単価が安い順"]];
+const FILTERS=[["ENUMERATED","キャラ枠"],["POSITIONAL","パック番号"],["ATTRIBUTE","番号レンジ"],["MIXED","混合"],["WHOLE","BOX丸ごと"]];
+document.getElementById("sorts").innerHTML=SORTS.map(([k,v])=>`<button type="button" class="chip sort" data-sort="${k}" aria-pressed="${k===state.sort}">${v}</button>`).join("");
+document.getElementById("filters").insertAdjacentHTML("beforeend",FILTERS.map(([k,v])=>`<button type="button" class="chip" data-f="${k}" aria-pressed="false">${v}</button>`).join(""));
+function syncChips(){
+  document.querySelectorAll("[data-sort]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sort===state.sort));
+  document.querySelectorAll("[data-f]").forEach(b=>b.setAttribute("aria-pressed",state.filters.has(b.dataset.f)));
+}
+document.getElementById("sorts").addEventListener("click",e=>{const b=e.target.closest("[data-sort]");if(!b)return;state.sort=b.dataset.sort;syncChips();render();});
+document.getElementById("filters").addEventListener("click",e=>{const b=e.target.closest("[data-f]");if(!b)return;const f=b.dataset.f;state.filters.has(f)?state.filters.delete(f):state.filters.add(f);syncChips();render();});
+
+/* carousel */
+const nl=LOTTERIES.find(l=>l.id==="L006");
+document.getElementById("new-title").textContent="ワンピースカード『二つの伝説』キャラ枠 販売開始";
+document.getElementById("new-sub").textContent=`2BOX・${nl.totalSlots}枠・${jst(nl.openingAt)} 開封`;
+document.getElementById("sched").innerHTML=LOTTERIES.filter(l=>l.status==="LOCKED"||l.status==="READY")
+  .sort((a,b)=>new Date(a.openingAt)-new Date(b.openingAt)).slice(0,3)
+  .map(l=>`<li><time datetime="${l.openingAt}">${jst(l.openingAt)}</time><span>${esc(l.title)}</span></li>`).join("");
+const slides=document.getElementById("slides"), dots=document.getElementById("dots"), N=slides.children.length;
+dots.innerHTML=Array.from({length:N},(_,i)=>`<button type="button" role="tab" aria-label="スライド ${i+1}" aria-current="${i===0}"></button>`).join("");
+let cur=0, paused=false;
+const reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function go(i){cur=(i+N)%N;slides.scrollTo({left:slides.children[cur].offsetLeft-slides.children[0].offsetLeft,behavior:reduce?"auto":"smooth"});}
+const allVisible=()=>slides.scrollWidth<=slides.clientWidth+2;
+dots.addEventListener("click",e=>{const i=[...dots.children].indexOf(e.target);if(i>=0){go(i);}});
+slides.addEventListener("scroll",()=>{const w=slides.children[0].offsetWidth+10;cur=Math.round(slides.scrollLeft/w);
+  [...dots.children].forEach((d,i)=>d.setAttribute("aria-current",i===cur));},{passive:true});
+["pointerdown","focusin","mouseenter"].forEach(ev=>slides.addEventListener(ev,()=>paused=true));
+["mouseleave","focusout"].forEach(ev=>slides.addEventListener(ev,()=>paused=false));
+if(!reduce) setInterval(()=>{if(!paused&&!document.hidden&&!allVisible()) go(cur+1);},5000);
+
+/* prototype toast for pages not built yet */
+const toast=document.getElementById("toast"); let tt;
+function say(msg){toast.textContent=msg;toast.hidden=false;clearTimeout(tt);tt=setTimeout(()=>toast.hidden=true,2200);}
+document.addEventListener("click",e=>{
+  const o=e.target.closest("[data-open]"); if(o){if(HAS_DETAIL.has(o.dataset.open)&&o.getAttribute("href")!=="#") return; e.preventDefault();const l=LOTTERIES.find(x=>x.id===o.dataset.open);say(`原型：详情页只做了 L001 / L002 两个示例 · ${l?l.series:""}`);return;}
+  const p=e.target.closest("[data-proto]"); if(p){e.preventDefault();say(`原型：「${p.dataset.proto}」尚未生成`);}
+});
+
+/* prototype controls */
+function setAB(on){state.showRef=on;document.getElementById("ab-on").setAttribute("aria-pressed",on);document.getElementById("ab-off").setAttribute("aria-pressed",!on);
+  try{localStorage.setItem("br-ab-ref",on?"on":"off")}catch(e){} render();}
+document.getElementById("ab-on").onclick=()=>setAB(true);
+document.getElementById("ab-off").onclick=()=>setAB(false);
+["normal","loading","empty"].forEach(v=>document.getElementById("st-"+v).onclick=()=>{state.view=v;
+  ["normal","loading","empty"].forEach(x=>document.getElementById("st-"+x).setAttribute("aria-pressed",x===v));render();});
+setAB(state.showRef);
+</script>
+</body>
+</html>
