@@ -1,6 +1,11 @@
 # Box Rush 预览（团队内部）
 
-Box Rush（BOXラッシュ）的产品模块示意图与界面原型，静态 HTML，由 GitHub Pages 提供访问。
+Box Rush（BOXラッシュ）的产品模块示意图与界面原型，静态 HTML。
+
+**访问地址：https://box-rush.github.io/preview/**（GitHub Pages，`main` 分支根目录）
+
+> ⚠️ 本仓库与站点均为**公开**：拿到链接的任何人都能访问。只放模块图与示例数据原型，
+> 不要放财务数据、法务细节或未公开的决策。
 
 | 文件 | 内容 | 原件在哪 |
 |---|---|---|
