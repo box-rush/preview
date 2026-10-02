@@ -82,7 +82,7 @@ footer{font-size:12.5px;color:var(--ink-2);border-top:1px solid var(--line);padd
   <header>
     <div class="mark"><i>BOX</i>ラッシュ<small>预览 · 团队内部</small></div>
     <p class="lede">Box Rush 的产品模块示意图和界面原型汇总。所有页面都是静态 HTML，数据为示例；原型的布局与规则来自设计文档第 9 章的 prompt。</p>
-    <div class="meta"><span>最后更新 2026-09-26</span><span>设计文档 <code>card-lottery-docs / docs/breaking-platform.md</code></span></div>
+    <div class="meta"><span>最后更新 2026-10-02</span><span>设计文档 <code>card-lottery-docs / docs/breaking-platform.md</code></span></div>
   </header>
 
   <section aria-labelledby="h-product">
@@ -112,18 +112,24 @@ footer{font-size:12.5px;color:var(--ink-2);border-top:1px solid var(--line);padd
         <h3>场次详情 + 规则快照</h3>
         <p>封印写真、保底、分位方案、满员进度、种子承诺、开封时刻、规则全文；底部购买栏三种状态。</p>
         <div class="deep">
-          <a href="prototype/ui-02-lottery.html#L001">キャラ枠 · 选位</a>
+          <a href="prototype/ui-02-lottery.html#L001">キャラ枠 · 12 枠</a>
+          <a href="prototype/ui-02-lottery.html#L005">キャラ枠 · 16 枠</a>
           <a href="prototype/ui-02-lottery.html#L002">パック番号 · 随机</a>
           <a href="prototype/ui-02-lottery.html#L009">已结束</a>
         </div>
       </div>
+      <a class="card" href="prototype/ui-03-pick.html#L005">
+        <div class="top"><span class="code">UI-03</span><span class="status">已生成</span></div>
+        <h3>选位</h3>
+        <p>キャラ枠位图（可选 / 手续中 / 已售 / 已选），点位打开底部弹层看包含的卡，多选到上限，进入前说明"10 分钟确保"。可开关实时锁位模拟。</p>
+        <span class="go">打开 →</span>
+      </a>
     </div>
   </section>
 
   <section aria-labelledby="h-todo">
     <div class="sec-h"><h2 id="h-todo">待生成</h2><span>第 9 章已有 prompt，尚未生成原型</span></div>
     <ul class="todo">
-      <li><span class="c">UI-03</span>选位<span class="p">MVP</span></li>
       <li><span class="c">UI-04</span>确认与支付 + 支付结果<span class="p">MVP</span></li>
       <li><span class="c">UI-05</span>マイ枠 + 场次进度<span class="p">MVP</span></li>
       <li><span class="c">UI-06</span>分位公示演出<span class="p">P1</span></li>

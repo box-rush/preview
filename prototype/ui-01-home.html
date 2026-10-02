@@ -340,7 +340,7 @@ main{display:flex;flex-direction:column;gap:18px;padding-block:14px 8px}
 
 <script>
 /* Mock data — types follow §9.3. Prices: sum of slot prices ≈ reference retail total × 1.10–1.30 */
-const DETAIL="ui-02-lottery.html"; const HAS_DETAIL=new Set(["L001","L002"]);
+const DETAIL="ui-02-lottery.html"; const HAS_DETAIL=new Set(["L001","L002","L005"]);
 const PT={ENUMERATED:"キャラ枠",POSITIONAL:"パック番号",ATTRIBUTE:"番号レンジ",WHOLE:"BOX丸ごと",DRAFT:"ドラフト"};
 const CATS=["すべて","ポケモン","ワンピース","遊戯王"];
 const ART={"ポケモン":"poke","ワンピース":"op","遊戯王":"ygo"};
@@ -462,7 +462,7 @@ if(!reduce) setInterval(()=>{if(!paused&&!document.hidden&&!allVisible()) go(cur
 const toast=document.getElementById("toast"); let tt;
 function say(msg){toast.textContent=msg;toast.hidden=false;clearTimeout(tt);tt=setTimeout(()=>toast.hidden=true,2200);}
 document.addEventListener("click",e=>{
-  const o=e.target.closest("[data-open]"); if(o){if(HAS_DETAIL.has(o.dataset.open)&&o.getAttribute("href")!=="#") return; e.preventDefault();const l=LOTTERIES.find(x=>x.id===o.dataset.open);say(`原型：详情页只做了 L001 / L002 两个示例 · ${l?l.series:""}`);return;}
+  const o=e.target.closest("[data-open]"); if(o){if(HAS_DETAIL.has(o.dataset.open)&&o.getAttribute("href")!=="#") return; e.preventDefault();const l=LOTTERIES.find(x=>x.id===o.dataset.open);say(`原型：详情页只做了 L001 / L002 / L005 三个示例 · ${l?l.series:""}`);return;}
   const p=e.target.closest("[data-proto]"); if(p){e.preventDefault();say(`原型：「${p.dataset.proto}」尚未生成`);}
 });
 

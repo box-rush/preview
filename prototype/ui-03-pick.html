@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<!-- Box Rush 原型 UI-03 选位（PICK 模式）。由 docs/breaking-platform.md §9.4 UI-03 prompt 生成；静态单文件，无需构建。
+     #L005（默认，16 枠）/ #L001（12 枠）切换示例场次。 -->
+<title>BOXラッシュ 枠を選ぶ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Tokens: docs/breaking-platform.md §9.2 (same as ui-01 / ui-02) */
+:root{
+  --hdr:61px; --gut:16px; --cta:118px;
+  --ground:#EEEEE8;
+  --bg:#FAFAF7; --surface:#FFFFFF; --ink:#1A1A1A; --ink-2:#6B6B6B; --line:#E6E5DE; --track:#ECEBE4;
+  --accent:#3B3FD8; --accent-ink:#FFFFFF; --accent-soft:#ECEDFC;
+  --trust:#0F9D8A; --trust-soft:#E1F3F0;
+  --warn:#D98A00; --warn-soft:#FBF0DC;
+  --stripe:rgba(217,138,0,.16);
+  --shadow:0 1px 2px rgba(20,20,40,.06),0 4px 14px rgba(20,20,40,.05);
+  --sans:"Noto Sans JP","Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic",Meiryo,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#0A0B0C;
+    --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --ink-2:#A0A0A0; --line:#2A2B2F; --track:#2A2B2F;
+    --accent:#8E91F7; --accent-ink:#111214; --accent-soft:#23244A;
+    --trust:#3CC4B0; --trust-soft:#15302C;
+    --warn:#F0A73A; --warn-soft:#3A2C12; --stripe:rgba(240,167,58,.18);
+    --shadow:0 1px 2px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#0A0B0C;
+  --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --ink-2:#A0A0A0; --line:#2A2B2F; --track:#2A2B2F;
+  --accent:#8E91F7; --accent-ink:#111214; --accent-soft:#23244A;
+  --trust:#3CC4B0; --trust-soft:#15302C;
+  --warn:#F0A73A; --warn-soft:#3A2C12; --stripe:rgba(240,167,58,.18);
+  --shadow:0 1px 2px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--mono)}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+.app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;padding-bottom:calc(var(--cta) + env(safe-area-inset-bottom,0px))}
+.wrap{width:100%;max-width:1200px;margin-inline:auto}
+
+/* prototype strip */
+.proto{background:var(--ink);color:var(--bg);font-size:12px}
+.proto summary{padding:6px 16px;cursor:pointer;list-style:none;display:flex;gap:8px;align-items:center}
+.proto summary::-webkit-details-marker{display:none}
+.proto summary::before{content:"▸";transition:transform .15s}
+.proto[open] summary::before{transform:rotate(90deg)}
+.proto .opts{padding:4px 16px 12px;display:flex;flex-direction:column;gap:8px}
+.proto .row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.proto .row>span{min-width:88px;opacity:.75}
+.proto button{background:transparent;border:1px solid color-mix(in srgb,var(--bg) 40%,transparent);color:var(--bg);border-radius:999px;padding:2px 10px;font-size:12px;cursor:pointer}
+.proto button[aria-pressed="true"]{background:var(--bg);color:var(--ink)}
+
+/* header: title + compact fill bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:6px;padding:8px var(--gut) 10px}
+.back{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;margin-left:-8px;flex:none}
+.back:hover{background:var(--track)}
+.ttl{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.ttl h1{margin:0;font-size:14.5px;font-weight:900;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--ink-2)}
+.mini .track{flex:1;height:5px;border-radius:3px;background:var(--track);overflow:hidden;max-width:220px}
+.mini .track i{display:block;height:100%;background:var(--accent);border-radius:3px;transition:width .4s}
+.mini b{font-family:var(--mono);color:var(--ink)}
+
+main{display:flex;flex-direction:column;gap:12px;padding-block:14px 10px}
+.pad{padding-inline:var(--gut)}
+.info{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:12.5px}
+.limit{font-weight:700}
+.legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11.5px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.sw{width:14px;height:14px;border-radius:4px;border:1px solid var(--line);background:var(--surface);display:inline-block}
+.sw.locked{background:repeating-linear-gradient(135deg,var(--stripe) 0 4px,transparent 4px 8px),var(--surface);border-color:color-mix(in srgb,var(--warn) 45%,transparent)}
+.sw.sold{background:var(--track);border-color:transparent}
+.sw.sel{border:2px solid var(--accent);background:var(--accent-soft)}
+
+/* slot grid */
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tile{position:relative;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 9px 8px;display:flex;flex-direction:column;gap:3px;min-height:92px;cursor:pointer;transition:border-color .15s,background .15s}
+.tile:hover{border-color:var(--ink-2)}
+.tile .no{font-family:var(--mono);font-size:10.5px;color:var(--ink-2)}
+.tile .nm{font-size:12.5px;font-weight:700;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tile .pr{font-family:var(--mono);font-size:13px;font-weight:700;margin-top:auto}
+.tile .st{font-size:10.5px;font-weight:700}
+.tile.locked{cursor:not-allowed;background:repeating-linear-gradient(135deg,var(--stripe) 0 6px,transparent 6px 12px),var(--surface);border-color:color-mix(in srgb,var(--warn) 45%,transparent)}
+.tile.locked .st{color:var(--warn)}
+.tile.sold{cursor:not-allowed;background:var(--track);border-color:transparent;color:var(--ink-2)}
+.tile.sold .nm,.tile.sold .pr{color:var(--ink-2)}
+.tile.selected{border:2px solid var(--accent);background:var(--accent-soft);padding:8px 8px 7px}
+.tile .chk{position:absolute;top:7px;right:7px;width:20px;height:20px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:none;place-items:center}
+.tile .chk svg{width:13px;height:13px;stroke-width:3}
+.tile.selected .chk{display:grid}
+.note{font-size:11.5px;color:var(--ink-2);margin:0}
+
+/* sticky bottom bar */
+.cta{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:480px;background:color-mix(in srgb,var(--surface) 97%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:10px var(--gut) calc(10px + env(safe-area-inset-bottom,0px));z-index:30;display:flex;flex-direction:column;gap:6px}
+.cta-row{display:flex;align-items:center;gap:12px}
+.sum{flex:1;display:flex;flex-direction:column;line-height:1.25;min-width:0}
+.sum small{font-size:11.5px;color:var(--ink-2)}
+.sum b{font-family:var(--mono);font-size:19px}
+.chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:2px}
+.chips span{font-size:10.5px;background:var(--accent-soft);color:var(--accent);border-radius:4px;padding:0 6px;white-space:nowrap}
+.primary{min-height:48px;padding:0 22px;border:0;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-weight:900;font-size:15px;cursor:pointer;flex:none}
+.primary:disabled{background:var(--track);color:var(--ink-2);cursor:not-allowed}
+.cta-note{text-align:center;font-size:11px;color:var(--ink-2)}
+
+/* sheets */
+dialog{border:0;padding:0;color:var(--ink);background:var(--surface)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog.sheet{margin:auto auto 0;width:100%;max-width:480px;max-height:86vh;border-radius:16px 16px 0 0}
+.sh{display:flex;align-items:flex-start;gap:8px;padding:16px 16px 10px;border-bottom:1px solid var(--line)}
+.sh h3{margin:0;font-size:17px;flex:1;line-height:1.35}
+.sh .no{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-2);font-weight:500}
+.x{width:36px;height:36px;border-radius:50%;border:0;background:transparent;display:grid;place-items:center;cursor:pointer;flex:none}
+.x:hover{background:var(--track)}
+.sb{padding:14px 16px;display:flex;flex-direction:column;gap:12px;font-size:13px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0}
+.kv dt{color:var(--ink-2);font-size:12px}
+.kv dd{margin:0}
+.cards{background:var(--bg);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.cards .lab{font-size:11.5px;color:var(--ink-2)}
+.cards ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:4px 12px}
+.cards li{font-family:var(--mono);font-size:12px}
+.sf{padding:12px 16px calc(16px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
+.sf .primary{width:100%}
+.sf .hint{font-size:11.5px;color:var(--ink-2);text-align:center}
+dialog.confirm{width:calc(100% - 32px);max-width:400px;border-radius:16px}
+.confirm .sb p{margin:0}
+.confirm .row{display:flex;gap:8px;padding:0 16px 16px}
+.confirm .row button{flex:1;min-height:46px;border-radius:12px;font-weight:700;cursor:pointer}
+.ghost{border:1px solid var(--line);background:var(--surface)}
+.confirm .row .primary{padding:0}
+
+.toast{position:fixed;left:50%;bottom:calc(var(--cta) + 12px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:12.5px;padding:8px 14px;border-radius:999px;z-index:40;max-width:calc(100% - 32px);text-align:center}
+
+@media (min-width:768px){
+  :root{--gut:24px}
+  body{background:var(--bg)}
+  .app{max-width:none}
+  .grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+  .cta{max-width:none}
+  .cta-row,.cta-note{max-width:1200px;margin-inline:auto;width:100%}
+  dialog.sheet{max-width:560px;margin:auto;border-radius:16px}
+  .tile{min-height:100px}
+}
+@media (min-width:1024px){
+  .grid{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .ttl h1{font-size:16px}
+  main{padding-block:20px 16px}
+}
+@media (prefers-reduced-motion: reduce){ .mini .track i,.tile{transition:none} }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 18 9 12l6-6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  </defs>
+</svg>
+
+<div class="app">
+  <details class="proto">
+    <summary>原型 UI-03 选位 · 示例数据 · 点此切换</summary>
+    <div class="opts">
+      <div class="row"><span>示例场次</span>
+        <button type="button" data-sample="L005" aria-pressed="true">超電ブレイカー（16 枠）</button>
+        <button type="button" data-sample="L001" aria-pressed="false">テラスタルフェスex（12 枠）</button>
+      </div>
+      <div class="row"><span>实时模拟</span>
+        <button type="button" id="sim-on" aria-pressed="true">开（每 10 秒有人锁位）</button>
+        <button type="button" id="sim-off" aria-pressed="false">关</button>
+      </div>
+    </div>
+  </details>
+
+  <header class="top">
+    <div class="bar wrap">
+      <a class="back" id="back" href="ui-02-lottery.html#L005" aria-label="開封会の詳細に戻る"><svg class="i"><use href="#i-back"/></svg></a>
+      <div class="ttl">
+        <h1 id="title"></h1>
+        <div class="mini"><span class="track" role="progressbar" id="fillbar" aria-valuemin="0"><i id="fill"></i></span><span>販売済 <b id="sold" class="num"></b></span></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="pad info">
+      <span class="limit" id="limit"></span>
+      <span class="legend">
+        <span><i class="sw"></i>購入可</span>
+        <span><i class="sw sel"></i>選択中</span>
+        <span><i class="sw locked"></i>手続き中</span>
+        <span><i class="sw sold"></i>販売済</span>
+      </span>
+    </div>
+    <div class="pad"><div class="grid" id="grid" role="list"></div></div>
+    <p class="pad note">「手続き中」は他の方が購入手続きをしている枠です。時間内に購入されなければ、再び選べるようになります。<br>カード番号・枠の構成はサンプルです。</p>
+  </main>
+
+  <div class="cta">
+    <div class="cta-row">
+      <div class="sum"><small id="sum-label">枠を選んでください</small><b class="num" id="sum-total">¥0</b><div class="chips" id="sum-chips"></div></div>
+      <button class="primary" type="button" id="proceed" disabled>購入手続きへ</button>
+    </div>
+    <div class="cta-note">次へ進むと、選んだ枠を 10分間 確保します</div>
+  </div>
+
+  <dialog class="sheet" id="sheet" aria-labelledby="sh-title">
+    <div class="sh"><h3 id="sh-title"></h3><button class="x" type="button" data-close aria-label="閉じる"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="sb" id="sh-body"></div>
+    <div class="sf"><button class="primary" type="button" id="sh-pick"></button><span class="hint" id="sh-hint"></span></div>
+  </dialog>
+
+  <dialog class="confirm" id="confirm" aria-labelledby="cf-title">
+    <div class="sh"><h3 id="cf-title">10分間 枠を確保します</h3><button class="x" type="button" data-close aria-label="閉じる"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="sb">
+      <p>選んだ枠を 10分間 あなたのために確保します。この間に支払いが完了しないと、確保は自動的に解除されます。</p>
+      <p id="cf-list" class="mono" style="font-size:12.5px"></p>
+      <p style="font-size:12px;color:var(--ink-2)">満員にならなければ全額返金・購入後のキャンセルはできません。</p>
+    </div>
+    <div class="row"><button class="ghost" type="button" data-close>戻る</button><button class="primary" type="button" id="cf-go">確保して進む</button></div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+</div>
+
+<script>
+/* Mock data (§9.3 types). Sum of slot prices ≈ reference retail total × 1.10–1.30. Card numbers / slot composition are samples. */
+const LOTS={
+ L005:{id:"L005",title:"ポケカ『超電ブレイカー』4BOX キャラ枠",purchaseLimit:3,guaranteeText:"カード5枚以上",
+   slots:[["ピカチュウ枠",2400,["063/106","094/106","132/106","236/106"]],["ゼクロム枠",2200,["071/106","118/106","230/106"]],["ラティアス枠",2000,["076/106","121/106","233/106"]],
+     ["ミロカロス枠",1800,["031/106","110/106"]],["パーモット枠",1700,["067/106","124/106"]],["マスカーニャ枠",1600,["010/106","104/106"]],
+     ["サーフゴー枠",1500,["086/106","126/106"]],["アローラナッシー枠",1500,["003/106","101/106"]],["ニャオハ枠",1400,["008/106","102/106"]],
+     ["オーロット枠",1400,["014/106","103/106"]],["デンリュウ枠",1300,["065/106","113/106"]],["パチリス枠",1300,["068/106","114/106"]],
+     ["その他ポケモン（ex）枠",1200,["上記以外のポケモン ex 全種"]],["その他ポケモン（草・炎・水）枠",1200,["上記以外の草・炎・水タイプ全種"]],
+     ["その他ポケモン（その他タイプ）枠",1200,["上記以外の全タイプ"]],["トレーナーズ・エネルギー枠",1200,["グッズ・サポート・スタジアム・エネルギー全種"]]],
+   sold:[1,2,4,7,10], locked:[6]},
+ L001:{id:"L001",title:"ポケカ『テラスタルフェスex』2BOX キャラ枠",purchaseLimit:3,guaranteeText:"カード3枚以上",
+   slots:[["ブラッキー枠",1900,["006/187","061/187","183/187","217/187"]],["ニンフィア枠",1600,["029/187","092/187","190/187","212/187"]],["エーフィ枠",1400,["021/187","053/187","186/187"]],
+     ["リーフィア枠",1100,["008/187","112/187","208/187"]],["グレイシア枠",1100,["033/187","117/187","201/187"]],["シャワーズ枠",900,["014/187","077/187","195/187"]],
+     ["サンダース枠",900,["018/187","081/187","197/187"]],["ブースター枠",900,["010/187","072/187","193/187"]],["イーブイ枠",800,["001/187","074/187","180/187"]],
+     ["その他ポケモン（ex）枠",800,["上記以外のポケモン ex 全種"]],["その他ポケモン枠",700,["上記以外のポケモン全種"]],["トレーナーズ・エネルギー枠",700,["グッズ・サポート・スタジアム・エネルギー全種"]]],
+   sold:[1,2,3,4,6,7,8,9,10,11], locked:[]}
+};
+const yen=n=>"¥"+n.toLocaleString("ja-JP");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pad=n=>String(n).padStart(2,"0");
+
+let lot, slots, selected, sim=true, timers=[];
+function load(id){
+  lot=LOTS[id]||LOTS.L005;
+  slots=lot.slots.map(([name,price,cards],i)=>({number:i+1,name,price,cards,
+    state:lot.sold.includes(i+1)?"SOLD":lot.locked.includes(i+1)?"LOCKED":"AVAILABLE",lockAt:lot.locked.includes(i+1)?Date.now():0}));
+  selected=new Set();
+  document.getElementById("title").textContent=lot.title;
+  document.getElementById("back").href="ui-02-lottery.html#"+lot.id;
+  document.getElementById("limit").textContent=`購入上限：1人 ${lot.purchaseLimit} 枠まで`;
+  document.querySelectorAll("[data-sample]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sample===lot.id));
+  render();
+}
+function render(){
+  const total=slots.length, sold=slots.filter(s=>s.state==="SOLD").length;
+  document.getElementById("fill").style.width=Math.round(sold/total*100)+"%";
+  const fb=document.getElementById("fillbar"); fb.setAttribute("aria-valuemax",total); fb.setAttribute("aria-valuenow",sold);
+  document.getElementById("sold").textContent=`${sold}/${total}`;
+  document.getElementById("grid").innerHTML=slots.map(s=>{
+    const sel=selected.has(s.number), cls=sel?"selected":s.state==="LOCKED"?"locked":s.state==="SOLD"?"sold":"";
+    const st=sel?"選択中":s.state==="LOCKED"?"手続き中":s.state==="SOLD"?"販売済":"";
+    const label=`${pad(s.number)} ${s.name} ${yen(s.price)} ${st||"購入可"}`;
+    return `<button type="button" role="listitem" class="tile ${cls}" data-n="${s.number}" aria-label="${esc(label)}" ${s.state!=="AVAILABLE"&&!sel?'aria-disabled="true"':""} ${sel?'aria-pressed="true"':""}>
+      <span class="no">#${pad(s.number)}</span><span class="nm">${esc(s.name)}</span><span class="pr num">${yen(s.price)}</span>
+      <span class="st">${st}</span><span class="chk" aria-hidden="true"><svg class="i"><use href="#i-check"/></svg></span></button>`;}).join("");
+  const sel=slots.filter(s=>selected.has(s.number)), sum=sel.reduce((a,s)=>a+s.price,0);
+  document.getElementById("sum-label").textContent=sel.length?`選択中 ${sel.length} 枠`:"枠を選んでください";
+  document.getElementById("sum-total").textContent=yen(sum);
+  document.getElementById("sum-chips").innerHTML=sel.map(s=>`<span>#${pad(s.number)} ${esc(s.name)}</span>`).join("");
+  document.getElementById("proceed").disabled=sel.length===0;
+}
+
+/* tile → bottom sheet */
+const sheet=document.getElementById("sheet"); let current=null;
+document.getElementById("grid").addEventListener("click",e=>{
+  const t=e.target.closest(".tile"); if(!t) return;
+  const s=slots[+t.dataset.n-1];
+  if(!selected.has(s.number)&&s.state!=="AVAILABLE"){say(s.state==="LOCKED"?"この枠は他の方が手続き中です":"この枠は販売済です");return;}
+  current=s; openSheet();
+});
+function openSheet(){
+  const s=current, sel=selected.has(s.number), full=!sel&&selected.size>=lot.purchaseLimit;
+  document.getElementById("sh-title").innerHTML=`<span class="no">#${pad(s.number)}</span>${esc(s.name)}`;
+  document.getElementById("sh-body").innerHTML=`
+    <dl class="kv"><dt>価格</dt><dd class="mono" style="font-weight:700">${yen(s.price)}</dd><dt>保証</dt><dd>${esc(lot.guaranteeText)}</dd>
+      <dt>定義</dt><dd>開封した全 BOX のうち、下記のカードがすべてこの枠に届きます。</dd></dl>
+    <div class="cards"><span class="lab">この枠に含まれるカード</span><ul>${s.cards.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div>`;
+  const btn=document.getElementById("sh-pick"), hint=document.getElementById("sh-hint");
+  if(sel){btn.textContent="選択を外す";btn.disabled=false;btn.classList.remove("primary");btn.classList.add("ghost");btn.style.minHeight="46px";btn.style.borderRadius="12px";hint.textContent="";}
+  else{btn.textContent="この枠を選ぶ";btn.disabled=full;btn.classList.add("primary");btn.classList.remove("ghost");hint.textContent=full?`購入上限（${lot.purchaseLimit} 枠）に達しています`:"";}
+  sheet.showModal?sheet.showModal():sheet.setAttribute("open","");
+}
+document.getElementById("sh-pick").onclick=()=>{
+  if(selected.has(current.number)) selected.delete(current.number);
+  else if(current.state==="AVAILABLE"&&selected.size<lot.purchaseLimit) selected.add(current.number);
+  sheet.close(); render();
+};
+document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>b.closest("dialog").close());
+document.querySelectorAll("dialog").forEach(d=>d.addEventListener("click",e=>{if(e.target===d) d.close();}));
+
+/* proceed → explain 10-minute hold */
+const confirmD=document.getElementById("confirm");
+document.getElementById("proceed").onclick=()=>{
+  const sel=slots.filter(s=>selected.has(s.number));
+  document.getElementById("cf-list").textContent=sel.map(s=>`#${pad(s.number)} ${s.name} ${yen(s.price)}`).join(" / ")+`　合計 ${yen(sel.reduce((a,s)=>a+s.price,0))}`;
+  confirmD.showModal?confirmD.showModal():confirmD.setAttribute("open","");
+};
+document.getElementById("cf-go").onclick=()=>{confirmD.close();say("原型：确认与支付页（UI-04）尚未生成");};
+
+/* mock real-time: every 10s someone locks an available slot (never one you selected);
+   a lock resolves after 25s — sold, or released back if not paid */
+function tick(){
+  if(!sim||document.hidden) return;
+  const now=Date.now();
+  slots.filter(s=>s.state==="LOCKED"&&now-s.lockAt>25000).forEach(s=>{s.state=Math.random()<.6?"SOLD":"AVAILABLE";s.lockAt=0;});
+  const free=slots.filter(s=>s.state==="AVAILABLE"&&!selected.has(s.number));
+  if(free.length>1){const s=free[Math.floor(Math.random()*free.length)];s.state="LOCKED";s.lockAt=now;}
+  render();
+}
+setInterval(tick,10000);
+
+const toast=document.getElementById("toast"); let tt;
+function say(m){toast.textContent=m;toast.hidden=false;clearTimeout(tt);tt=setTimeout(()=>toast.hidden=true,2200);}
+
+document.querySelectorAll("[data-sample]").forEach(b=>b.onclick=()=>{try{history.replaceState(null,"","#"+b.dataset.sample)}catch(e){} load(b.dataset.sample);});
+function setSim(on){sim=on;document.getElementById("sim-on").setAttribute("aria-pressed",on);document.getElementById("sim-off").setAttribute("aria-pressed",!on);}
+document.getElementById("sim-on").onclick=()=>setSim(true);
+document.getElementById("sim-off").onclick=()=>setSim(false);
+load((location.hash||"#L005").slice(1));
+</script>
+</body>
+</html>

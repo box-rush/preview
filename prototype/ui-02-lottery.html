@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <!-- Box Rush 原型 UI-02 场次详情 + 规则快照。由 docs/breaking-platform.md §9.4 UI-02 prompt 生成；静态单文件，无需构建。
-     用 #L001 / #L002 / #L009 切换示例场次。 -->
+     用 #L001 / #L005 / #L002 / #L009 切换示例场次；「枠を選ぶ」跳转 ui-03-pick.html。 -->
 <title>BOXラッシュ 開封会詳細</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -277,6 +277,7 @@ dialog.sheet::backdrop{background:rgba(0,0,0,.45)}
     <div class="opts">
       <div class="row"><span>示例场次</span>
         <button type="button" data-sample="L001" aria-pressed="true">キャラ枠 · 选位</button>
+        <button type="button" data-sample="L005" aria-pressed="false">キャラ枠 · 16 枠</button>
         <button type="button" data-sample="L002" aria-pressed="false">パック番号 · 随机</button>
         <button type="button" data-sample="L009" aria-pressed="false">已结束</button>
       </div>
@@ -352,6 +353,19 @@ const L={
    photoAt:"2026-09-21T11:08:00+09:00",purchaseLimit:5,status:"ON_SALE",
    seedCommitHash:"9bcc8d33a6495c1e0c51c3a0fd3c982ca10151e1d99d85ad6ffe805b879824f2",
    fallbackRule:"パック番号で分けるため、リスト外のカードも入っていたパックの枠に帰属します。"},
+ L005:{id:"L005",category:"ポケモン",series:"超電ブレイカー",title:"ポケカ『超電ブレイカー』4BOX キャラ枠",quantity:4,sealedUnit:"BOX",referenceRetailPrice:5400,
+   partitionType:"ENUMERATED",selectionMode:"PICK",guaranteeText:"各枠 カード5枚以上",selfOperated:true,merchantName:"BOXラッシュ（自営）",
+   slots:[["ピカチュウ枠",2400,["063/106","094/106","132/106","236/106"]],["ゼクロム枠",2200,["071/106","118/106","230/106"]],["ラティアス枠",2000,["076/106","121/106","233/106"]],
+     ["ミロカロス枠",1800,["031/106","110/106"]],["パーモット枠",1700,["067/106","124/106"]],["マスカーニャ枠",1600,["010/106","104/106"]],
+     ["サーフゴー枠",1500,["086/106","126/106"]],["アローラナッシー枠",1500,["003/106","101/106"]],["ニャオハ枠",1400,["008/106","102/106"]],
+     ["オーロット枠",1400,["014/106","103/106"]],["デンリュウ枠",1300,["065/106","113/106"]],["パチリス枠",1300,["068/106","114/106"]],
+     ["その他ポケモン（ex）枠",1200,["上記以外のポケモン ex 全種"]],["その他ポケモン（草・炎・水）枠",1200,["上記以外の草・炎・水タイプ全種"]],
+     ["その他ポケモン（その他タイプ）枠",1200,["上記以外の全タイプ"]],["トレーナーズ・エネルギー枠",1200,["グッズ・サポート・スタジアム・エネルギー全種"]]]
+     .map(([name,price,cards],i)=>({number:i+1,name,price,cardNumbers:cards,guaranteeText:"カード5枚以上",state:[1,2,4,7,10].includes(i+1)?"SOLD":"AVAILABLE"})),
+   saleEndsAt:"2026-10-02T23:59:00+09:00",openingAt:"2026-10-03T20:00:00+09:00",seedCommittedAt:"2026-09-24T12:00:00+09:00",saleStartsAt:"2026-09-24T12:05:00+09:00",snapshotAt:"2026-09-24T12:00:00+09:00",
+   photoAt:"2026-09-23T16:45:00+09:00",purchaseLimit:3,status:"ON_SALE",
+   seedCommitHash:"b2619087eb1dd4a2c3977476e60836d169b4a32c881fc87352af7257074c23ff",
+   fallbackRule:"リストにないカード（エラー品・封入外カード等）は、開封順に 1 番枠から順番に振り分けます。"},
  L009:{id:"L009",category:"ポケモン",series:"バトルパートナーズ",title:"ポケカ『バトルパートナーズ』2BOX キャラ枠",quantity:2,sealedUnit:"BOX",referenceRetailPrice:5400,
    partitionType:"ENUMERATED",selectionMode:"PICK",slots:ENUM.map(s=>({...s,state:"SOLD"})),guaranteeText:"各枠 カード3枚以上",selfOperated:true,merchantName:"BOXラッシュ（自営）",
    saleEndsAt:"2026-09-25T23:59:00+09:00",openingAt:"2026-09-26T20:00:00+09:00",seedCommittedAt:"2026-09-18T12:00:00+09:00",saleStartsAt:"2026-09-18T12:05:00+09:00",snapshotAt:"2026-09-18T12:00:00+09:00",
@@ -474,7 +488,7 @@ function bind(l,limit){
     setTimeout(()=>b.textContent="コピー",1600);};
   document.getElementById("snap-open").onclick=()=>openSheet(l);
   const buy=document.getElementById("buy");
-  if(buy) buy.onclick=()=>say(l.selectionMode==="PICK"?"原型：选位页（UI-03）尚未生成":`原型：确认与支付页（UI-04）尚未生成 · ${state.qty}枠`);
+  if(buy) buy.onclick=()=>{ if(l.selectionMode==="PICK"){ location.href="ui-03-pick.html#"+l.id; return; } say(`原型：确认与支付页（UI-04）尚未生成 · ${state.qty}枠`); };
   const dec=document.getElementById("dec"),inc=document.getElementById("inc");
   if(dec) dec.onclick=()=>{state.qty=Math.max(1,state.qty-1);render();};
   if(inc) inc.onclick=()=>{state.qty=Math.min(limit,state.qty+1);render();};
