@@ -38,7 +38,7 @@ GROUPS = [("用户端", ["UI-01", "UI-02", "UI-03", "UI-04", "UI-05", "UI-07", "
           ("商家端", ["UI-13"]), ("运营端", ["UI-14", "UI-15", "UI-16", "UI-17"])]
 
 doc = DOC.read_text(encoding="utf-8")
-ch9 = doc[doc.index("## 第 9 章"):doc.index("## 附录 A")]
+ch9 = doc[doc.index("## 第 9 章"):doc.index("## 第 10 章")]
 
 
 def section(start, end):
