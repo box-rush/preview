@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<!-- Box Rush 原型 UI-08 开盒结果。由 docs/breaking-platform.md §9.4 UI-08 prompt 生成；静态单文件，无需构建。
+     #L011。卡片数据与 ui-07-recording.html 用同一种子生成，两页一致。原型时钟 2026-09-26 18:00 JST。 -->
+<title>BOXラッシュ 開封結果</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Tokens: docs/breaking-platform.md §9.2 */
+:root{
+  --gut:16px;
+  --ground:#EEEEE8;
+  --bg:#FAFAF7; --surface:#FFFFFF; --ink:#1A1A1A; --ink-2:#6B6B6B; --line:#E6E5DE; --track:#ECEBE4;
+  --accent:#3B3FD8; --accent-ink:#FFFFFF; --accent-soft:#ECEDFC;
+  --trust:#0F9D8A; --trust-soft:#E1F3F0;
+  --warn:#B77400; --warn-soft:#FBF0DC;
+  --gold:#C9A227; --gold-soft:#F6EFD6;
+  --shadow:0 1px 2px rgba(20,20,40,.06),0 4px 14px rgba(20,20,40,.05);
+  --sans:"Noto Sans JP","Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic",Meiryo,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#0A0B0C;
+    --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --ink-2:#A0A0A0; --line:#2A2B2F; --track:#2A2B2F;
+    --accent:#8E91F7; --accent-ink:#111214; --accent-soft:#23244A;
+    --trust:#3CC4B0; --trust-soft:#15302C;
+    --warn:#F0A73A; --warn-soft:#3A2C12;
+    --gold:#E0BD4A; --gold-soft:#3A3014;
+    --shadow:0 1px 2px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#0A0B0C;
+  --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --ink-2:#A0A0A0; --line:#2A2B2F; --track:#2A2B2F;
+  --accent:#8E91F7; --accent-ink:#111214; --accent-soft:#23244A;
+  --trust:#3CC4B0; --trust-soft:#15302C;
+  --warn:#F0A73A; --warn-soft:#3A2C12;
+  --gold:#E0BD4A; --gold-soft:#3A3014;
+  --shadow:0 1px 2px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--mono)}
+.small{font-size:12px}
+.muted{color:var(--ink-2)}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);padding-bottom:28px}
+.wrap{width:100%;max-width:1160px;margin-inline:auto}
+.proto{background:var(--ink);color:var(--bg);font-size:12px}
+.proto summary{padding:6px 16px;cursor:pointer;list-style:none}
+.proto summary::-webkit-details-marker{display:none}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:8px;padding:10px var(--gut)}
+.back{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;margin-left:-8px;flex:none}
+.back:hover{background:var(--track)}
+.bar h1{margin:0;font-size:16px;font-weight:900;flex:1}
+
+.page{display:flex;flex-direction:column;gap:14px;padding:14px var(--gut) 0}
+.blk{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.blk h2{margin:0;font-size:15px;font-weight:900;display:flex;align-items:center;gap:8px}
+.blk h2 .n{font-family:var(--mono);font-size:12px;color:var(--ink-2);font-weight:500}
+.sum{display:flex;gap:12px;align-items:flex-start}
+.thumb{width:48px;height:52px;border-radius:6px;flex:none;background:linear-gradient(160deg,#E76F51,#C2410C);position:relative;overflow:hidden}
+.sum h3{margin:0;font-size:15px;font-weight:900;line-height:1.4}
+.st{display:inline-flex;font-size:11px;font-weight:700;border-radius:4px;padding:0 6px;background:var(--trust-soft);color:var(--trust);margin-right:6px}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:0 14px;min-height:42px;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.btn:hover{border-color:var(--ink-2)}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.btn svg{width:16px;height:16px}
+
+.mygrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ct{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface);display:flex;flex-direction:column}
+.ct .face{aspect-ratio:63/88;max-height:180px;background:linear-gradient(160deg,#f2f2ee,#cfcfc8);position:relative;display:flex;flex-direction:column;justify-content:space-between;padding:10px;color:#1a1a1a}
+.ct .face.gold{background:linear-gradient(160deg,#f3e3a2,#c9a227)}
+.ct .face strong{font-size:13px;font-weight:900;line-height:1.3}
+.ct .face span{font-family:var(--mono);font-size:11px;align-self:flex-end}
+.ct .meta{padding:8px 10px 10px;display:flex;flex-direction:column;gap:4px;font-size:12px}
+.ct .row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.r{font-family:var(--mono);font-size:10.5px;font-weight:700;border-radius:4px;padding:0 6px;background:var(--track)}
+.r.hi{background:var(--gold-soft);color:var(--gold)}
+.ab{font-size:10.5px;font-weight:700;border-radius:4px;padding:0 6px;border:1px solid var(--line);color:var(--ink-2)}
+.ab.man{border-color:color-mix(in srgb,var(--warn) 50%,transparent);color:var(--warn)}
+.vid{color:var(--accent);font-weight:700;font-size:12px;display:inline-flex;align-items:center;gap:4px}
+.vid:hover{text-decoration:underline}
+.vid svg{width:14px;height:14px}
+
+details.all summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;font-weight:900;font-size:15px}
+details.all summary::-webkit-details-marker{display:none}
+details.all summary::before{content:"▸";transition:transform .15s}
+details.all[open] summary::before{transform:rotate(90deg)}
+.tblwrap{overflow-x:auto;margin-top:10px}
+table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:620px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:11.5px;color:var(--ink-2);font-weight:700;position:sticky;top:0;background:var(--surface)}
+td.mono{font-size:11.5px}
+tr.me td{background:var(--accent-soft)}
+.filters{display:flex;gap:4px;flex-wrap:wrap;margin-top:10px}
+.filters button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 10px;font-size:12px;cursor:pointer;min-height:30px}
+.filters button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+.next{display:flex;align-items:center;gap:12px;background:var(--accent-soft);border-color:transparent}
+.next .t{flex:1}
+.next b{display:block}
+.dispute{font-size:13px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+
+dialog{border:0;padding:0;color:var(--ink);background:var(--surface);width:calc(100% - 32px);max-width:460px;border-radius:16px}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+.dh{padding:16px 18px 6px}
+.dh h3{margin:0;font-size:17px}
+.db{padding:6px 18px 10px;display:flex;flex-direction:column;gap:10px}
+.f{display:flex;flex-direction:column;gap:4px}
+.f label{font-size:12px;color:var(--ink-2)}
+.f input,.f textarea,.f select{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 11px;min-height:42px}
+.f input[readonly]{color:var(--ink-2)}
+.df{display:flex;gap:8px;padding:6px 18px 18px}
+.df .btn{flex:1;justify-content:center}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:12.5px;padding:8px 14px;border-radius:999px;z-index:40;max-width:calc(100% - 32px);text-align:center}
+
+@media (min-width:768px){
+  :root{--gut:24px}
+  body{background:var(--bg)}
+  .app{max-width:none}
+  .page{max-width:880px;margin-inline:auto}
+  .mygrid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media (min-width:1024px){
+  .page{max-width:1160px;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start;padding-top:20px}
+  .page>.span{grid-column:1/-1}
+  .side{display:flex;flex-direction:column;gap:14px;position:sticky;top:80px}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 18 9 12l6-6"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3"/></symbol>
+    <symbol id="i-package" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="M3 8l9 5 9-5M12 13v8"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4h11l-2 4 2 4H5"/></symbol>
+  </defs>
+</svg>
+
+<div class="app">
+  <details class="proto"><summary>原型 UI-08 开盒结果 · 示例数据（卡片与 UI-07 录像一致）· 原型时钟 2026-09-26 18:00 JST</summary></details>
+  <header class="top"><div class="bar wrap">
+    <a class="back" href="ui-05-my-slots.html#p-L011" aria-label="進捗に戻る"><svg class="i"><use href="#i-back"/></svg></a><h1>開封結果</h1>
+  </div></header>
+
+  <div class="page wrap">
+    <section class="blk span">
+      <div class="sum"><span class="thumb" aria-hidden="true"></span><div>
+        <h3>ポケカ『シャイニートレジャーex』2BOX キャラ枠</h3>
+        <span class="st">確定</span><span class="small muted">開封 9/21(月) 20:00 · 確定 9/21(月) 21:40 · 全 200 枚</span>
+      </div></div>
+      <div class="btns">
+        <a class="btn pri" href="ui-09-verify.html#L011"><svg class="i"><use href="#i-shield"/></svg>検証する</a>
+        <a class="btn" href="ui-07-recording.html#L011"><svg class="i"><use href="#i-video"/></svg>開封録画を見る</a>
+      </div>
+    </section>
+
+    <div class="col" style="display:flex;flex-direction:column;gap:14px;min-width:0">
+      <section class="blk">
+        <h2>あなたのカード <span class="n" id="my-count"></span></h2>
+        <p class="small muted" style="margin:0">あなたの枠：<b style="color:var(--ink)">テラパゴス枠 (#03)</b>。カードごとに、開封映像のその瞬間を確認できます。</p>
+        <div class="mygrid" id="mine"></div>
+      </section>
+
+      <section class="blk">
+        <details class="all" id="all">
+          <summary>全カードの振り分け <span class="small muted" style="font-weight:500">200 枚</span></summary>
+          <div class="filters" role="group" aria-label="絞り込み">
+            <button type="button" data-f="all" aria-pressed="true">すべて</button>
+            <button type="button" data-f="hi" aria-pressed="false">R以上</button>
+            <button type="button" data-f="man" aria-pressed="false">手動判定</button>
+          </div>
+          <div class="tblwrap"><table>
+            <thead><tr><th>時刻</th><th>カード</th><th>レア</th><th>枠</th><th>保有者</th><th>判定</th></tr></thead>
+            <tbody id="rows"></tbody>
+          </table></div>
+          <p class="small muted" style="margin:8px 0 0">保有者 ID は匿名化しています。リスト外のカード（エラー品・封入外）はこの開封会ではありませんでした。</p>
+        </details>
+      </section>
+    </div>
+
+    <div class="side">
+      <section class="blk next">
+        <svg class="i"><use href="#i-package"/></svg>
+        <div class="t"><b>カードは倉庫で保管中です</b><span class="small muted">まとめて発送を依頼できます</span></div>
+        <a class="btn" href="ui-10-collection.html#stored">コレクション</a>
+      </section>
+      <section class="blk">
+        <div class="dispute"><span><b>振り分けに疑問がある場合</b><br><span class="small muted">映像の時刻を添えて申し立てできます。審査は開封記録に基づいて行います。</span></span>
+          <button class="btn" type="button" id="open-dispute"><svg class="i"><use href="#i-flag"/></svg>申し立てる</button></div>
+      </section>
+    </div>
+  </div>
+
+  <dialog id="dispute" aria-labelledby="dp-t">
+    <form method="dialog" id="dp-form">
+      <div class="dh"><h3 id="dp-t">振り分けへの申し立て</h3></div>
+      <div class="db">
+        <div class="f"><label for="dp-lot">開封会 ID</label><input id="dp-lot" value="L011" readonly></div>
+        <div class="f"><label for="dp-card">対象カード</label><select id="dp-card"></select></div>
+        <div class="f"><label for="dp-msg">内容</label><textarea id="dp-msg" rows="4" placeholder="例：このカードは〇〇枠のリストに含まれていると思います"></textarea></div>
+        <p class="small muted" style="margin:0">申し立て中は、対象カードの発送を一時停止します。</p>
+      </div>
+      <div class="df"><button class="btn" type="button" id="dp-cancel">キャンセル</button><button class="btn pri" type="submit">送信する</button></div>
+    </form>
+  </dialog>
+  <div class="toast" id="toast" role="status" hidden></div>
+</div>
+
+<script>
+/* ---------- mock recording data (deterministic) ---------- */
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const R=rng(20260921);
+const DUR=1440, SEAL_END=90, DRAW_END=150, PACK_LEN=60, PACKS=20, CARDS_PER=10;
+const SLOTS=["ピカチュウ枠","リザードン枠","テラパゴス枠","ミュウ枠","ミライドン枠","コライドン枠","ルカリオ枠","ゲンガー枠","ニンフィア枠","その他ポケモン（ex）枠","その他ポケモン枠","トレーナーズ・エネルギー枠"];
+const MY_SLOT=3;
+const CHAR=[["ピカチュウ",1],["リザードン",2],["テラパゴス",3],["ミュウ",4],["ミライドン",5],["コライドン",6],["ルカリオ",7],["ゲンガー",8],["ニンフィア",9]];
+const OTHERS=["ヤドン","ポッチャマ","モクロー","カイリュー","サーナイト","ヘラクロス","ミミッキュ","パモ","ホゲータ","ニャオハ","クワッス","ドラパルト"];
+const TRAINERS=["ネストボール","ハイパーボール","ナンジャモ","ボスの指令","ペパー","ふしぎなアメ","基本雷エネルギー","基本炎エネルギー","ポケモンいれかえ","ジャッジマン"];
+const RAR=[["C",.48],["U",.24],["R",.11],["RR",.08],["AR",.05],["SR",.025],["SAR",.015]];
+function rar(){let x=R(),a=0;for(const [r,p] of RAR){a+=p;if(x<a)return r;}return "C";}
+const CARDS=[];
+for(let p=1;p<=PACKS;p++){
+  const start=DRAW_END+(p-1)*PACK_LEN;
+  for(let i=0;i<CARDS_PER;i++){
+    const t=start+12+i*4.5; let name,slot,rr;
+    if(i>=7){rr=rar();} else {rr=R()<.7?"C":"U";}
+    const kind=R();
+    if(kind<.24){name=TRAINERS[Math.floor(R()*TRAINERS.length)];slot=12;if(rr==="RR"||rr==="AR")rr="U";}
+    else if(kind<.62){const c=CHAR[Math.floor(R()*CHAR.length)];const ex=(rr==="RR"||rr==="SR"||rr==="SAR")&&R()<.8;name=c[0]+(ex?"ex":"");slot=c[1];}
+    else{const o=OTHERS[Math.floor(R()*OTHERS.length)];const ex=(rr==="RR"||rr==="SR"||rr==="SAR")&&R()<.8;name=o+(ex?"ex":"");slot=ex?10:11;}
+    const no=String(1+Math.floor(R()*(rr==="SR"||rr==="SAR"||rr==="AR"?140:190))).padStart(3,"0")+"/190";
+    CARDS.push({t,pack:p,name,no:(rr==="SR"||rr==="SAR"||rr==="AR")?String(191+Math.floor(R()*90))+"/190":no,r:rr,slot});
+  }
+}
+
+const HI=new Set(["R","RR","AR","SR","SAR"]), GOLD=new Set(["SR","SAR"]);
+const USERS=["8f2a","19c0","a7e3","3d51","c04b","72fe","0b9d","e615","5a2c","d3f8","4e07","b18a"];
+const mmss=s=>`${String(Math.floor(s/60)).padStart(2,"0")}:${String(Math.floor(s%60)).padStart(2,"0")}`;
+const pad=n=>String(n).padStart(2,"0");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+/* attribution method: name-list match = 自動; a few edge cards needed a human check (2-person review) */
+CARDS.forEach((c,i)=>{c.id=i;c.method=(i%37===11)?"手動":"自動";});
+const vlink=c=>`ui-07-recording.html#L011-t${Math.max(0,Math.floor(c.t-2))}`;
+
+const mine=CARDS.filter(c=>c.slot===MY_SLOT);
+document.getElementById("my-count").textContent=`${mine.length} 枚`;
+document.getElementById("mine").innerHTML=mine.map(c=>`<article class="ct">
+  <div class="face ${GOLD.has(c.r)?"gold":""}"><strong>${esc(c.name)}</strong><span>${c.no}</span></div>
+  <div class="meta"><div class="row"><span class="r ${GOLD.has(c.r)?"hi":""}">${c.r}</span><span class="ab ${c.method==="手動"?"man":""}">${c.method}</span></div>
+    <span class="mono small">${c.no}</span><span class="small muted">テラパゴス枠 (#03)</span>
+    <a class="vid" href="${vlink(c)}"><svg class="i"><use href="#i-video"/></svg>映像で確認 ${mmss(c.t)}</a></div></article>`).join("");
+
+let f="all";
+function rows(){
+  const list=CARDS.filter(c=>f==="all"||(f==="hi"&&HI.has(c.r))||(f==="man"&&c.method==="手動"));
+  document.getElementById("rows").innerHTML=list.map(c=>`<tr class="${c.slot===MY_SLOT?"me":""}">
+    <td class="mono"><a class="vid" href="${vlink(c)}">${mmss(c.t)}</a></td><td>${esc(c.name)} <span class="mono muted">${c.no}</span></td>
+    <td><span class="r ${GOLD.has(c.r)?"hi":""}">${c.r}</span></td><td>${esc(SLOTS[c.slot-1])} <span class="mono muted">#${pad(c.slot)}</span></td>
+    <td class="mono">${c.slot===MY_SLOT?"あなた":"user_"+USERS[c.slot-1]+"…"}</td><td><span class="ab ${c.method==="手動"?"man":""}">${c.method}</span></td></tr>`).join("");
+}
+document.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{f=b.dataset.f;document.querySelectorAll("[data-f]").forEach(x=>x.setAttribute("aria-pressed",x===b));rows();});
+rows();
+
+const dlg=document.getElementById("dispute");
+document.getElementById("dp-card").innerHTML=mine.map(c=>`<option value="${c.id}">${esc(c.name)} ${c.no}（${mmss(c.t)}）</option>`).join("")+`<option value="other">あなたの枠以外のカード</option>`;
+document.getElementById("open-dispute").onclick=()=>dlg.showModal?dlg.showModal():dlg.setAttribute("open","");
+document.getElementById("dp-cancel").onclick=()=>dlg.close();
+document.getElementById("dp-form").addEventListener("submit",e=>{e.preventDefault();dlg.close();say("申し立てを受け付けました（原型：送信はしていません）");});
+const toast=document.getElementById("toast"); let tt;
+function say(m){toast.textContent=m;toast.hidden=false;clearTimeout(tt);tt=setTimeout(()=>toast.hidden=true,2600);}
+</script>
+</body>
+</html>

@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<!-- Box Rush 原型 UI-10 仓库 + 发货申请。由 docs/breaking-platform.md §9.4 UI-10 prompt 生成；静态单文件，无需构建。
+     #stored / #shipping / #received；L011 的卡片与 ui-07 / ui-08 同一种子生成。原型时钟 2026-09-26 18:00 JST。
+     免费保管期（入库后 30 天）、运费金额为示例值。 -->
+<title>BOXラッシュ コレクション</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Tokens: docs/breaking-platform.md §9.2 */
+:root{
+  --gut:16px;
+  --ground:#EEEEE8;
+  --bg:#FAFAF7; --surface:#FFFFFF; --ink:#1A1A1A; --ink-2:#6B6B6B; --line:#E6E5DE; --track:#ECEBE4;
+  --accent:#3B3FD8; --accent-ink:#FFFFFF; --accent-soft:#ECEDFC;
+  --trust:#0F9D8A; --trust-soft:#E1F3F0;
+  --warn:#B77400; --warn-soft:#FBF0DC;
+  --gold:#C9A227; --gold-soft:#F6EFD6;
+  --shadow:0 1px 2px rgba(20,20,40,.06),0 4px 14px rgba(20,20,40,.05);
+  --sans:"Noto Sans JP","Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic",Meiryo,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#0A0B0C;
+    --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --ink-2:#A0A0A0; --line:#2A2B2F; --track:#2A2B2F;
+    --accent:#8E91F7; --accent-ink:#111214; --accent-soft:#23244A;
+    --trust:#3CC4B0; --trust-soft:#15302C;
+    --warn:#F0A73A; --warn-soft:#3A2C12;
+    --gold:#E0BD4A; --gold-soft:#3A3014;
+    --shadow:0 1px 2px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#0A0B0C;
+  --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --ink-2:#A0A0A0; --line:#2A2B2F; --track:#2A2B2F;
+  --accent:#8E91F7; --accent-ink:#111214; --accent-soft:#23244A;
+  --trust:#3CC4B0; --trust-soft:#15302C;
+  --warn:#F0A73A; --warn-soft:#3A2C12;
+  --gold:#E0BD4A; --gold-soft:#3A3014;
+  --shadow:0 1px 2px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--mono)}
+.small{font-size:12px}
+.muted{color:var(--ink-2)}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);padding-bottom:calc(140px + env(safe-area-inset-bottom,0px))}
+.wrap{width:100%;max-width:1200px;margin-inline:auto}
+.proto{background:var(--ink);color:var(--bg);font-size:12px}
+.proto summary{padding:6px 16px;cursor:pointer;list-style:none}
+.proto summary::-webkit-details-marker{display:none}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:8px;padding:10px var(--gut)}
+.back{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;margin-left:-8px;flex:none}
+.back:hover{background:var(--track)}
+.bar h1{margin:0;font-size:16px;font-weight:900;flex:1}
+.mark b{font-weight:900;font-size:19px;display:flex;align-items:center;gap:1px}
+.mark b i{font-style:normal;background:var(--accent);color:var(--accent-ink);padding:0 5px;border-radius:5px;margin-right:2px;font-family:var(--mono);font-size:16px;line-height:1.35}
+.dnav{display:none}
+.sp{flex:1}
+.link{color:var(--accent);font-weight:700;font-size:13px;cursor:pointer;border:0;background:transparent;padding:6px 4px}
+
+.seg{display:flex;gap:4px;margin:12px var(--gut) 4px;background:var(--track);border-radius:12px;padding:4px;max-width:560px}
+.seg button{flex:1;border:0;background:transparent;border-radius:9px;padding:8px 4px;font-size:13px;color:var(--ink-2);cursor:pointer;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.seg button b{font-family:var(--mono);font-size:11px}
+.seg button[aria-selected="true"]{background:var(--surface);color:var(--ink);font-weight:700;box-shadow:var(--shadow)}
+.banner{margin:10px var(--gut) 0;background:var(--warn-soft);border-radius:10px;padding:10px 12px;display:flex;gap:10px;align-items:center;font-size:13px}
+.banner svg{color:var(--warn)}
+.banner b{font-family:var(--mono)}
+.tools{display:flex;justify-content:space-between;align-items:center;margin:10px var(--gut) 0;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:0 14px;min-height:42px;font-size:13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer}
+.btn:hover{border-color:var(--ink-2)}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:10px var(--gut)}
+.tile{position:relative;border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden;cursor:pointer;text-align:left;padding:0;display:flex;flex-direction:column}
+.tile .face{aspect-ratio:63/88;background:linear-gradient(160deg,#f2f2ee,#cfcfc8);padding:6px;display:flex;flex-direction:column;justify-content:space-between;color:#1a1a1a}
+.tile .face.gold{background:linear-gradient(160deg,#f3e3a2,#c9a227)}
+.tile .face strong{font-size:11px;font-weight:900;line-height:1.25}
+.tile .face span{font-family:var(--mono);font-size:9.5px;align-self:flex-end}
+.tile .meta{padding:5px 6px 6px;display:flex;flex-direction:column;gap:2px;font-size:10.5px}
+.tile .src{color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r{font-family:var(--mono);font-size:10px;font-weight:700;border-radius:4px;padding:0 5px;background:var(--track);align-self:flex-start}
+.r.hi{background:var(--gold-soft);color:var(--gold)}
+.tile .chk{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;border:2px solid #fff;background:rgba(0,0,0,.25);display:grid;place-items:center;color:#fff}
+.tile .chk svg{width:13px;height:13px;stroke-width:3;opacity:0}
+.tile.sel{outline:2px solid var(--accent);outline-offset:-2px}
+.tile.sel .chk{background:var(--accent);border-color:var(--accent)}
+.tile.sel .chk svg{opacity:1}
+.selmode .tile .chk{display:grid}
+.tile .chk{display:none}
+.ship-list{display:flex;flex-direction:column;gap:8px;padding:10px var(--gut)}
+.shipcard{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:12px 14px;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.shipcard .row{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.shipcard .tr{font-family:var(--mono)}
+.empty{margin:16px var(--gut);padding:30px 16px;text-align:center;color:var(--ink-2);border:1px dashed var(--line);border-radius:12px}
+
+.cta{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(64px + env(safe-area-inset-bottom,0px));width:100%;max-width:480px;padding:10px var(--gut);background:color-mix(in srgb,var(--surface) 97%,transparent);border-top:1px solid var(--line);display:flex;gap:10px;align-items:center;z-index:25}
+.cta .t{flex:1;font-size:13px}
+.cta .t b{font-family:var(--mono);font-size:16px}
+
+/* ship view */
+.page{display:flex;flex-direction:column;gap:14px;padding:14px var(--gut)}
+.blk{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.blk h2{margin:0;font-size:15px;font-weight:900}
+.lines{list-style:none;margin:0;padding:0}
+.lines li{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px}
+.lines li:last-child{border-bottom:0}
+.addr label{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer}
+.addr label+label{margin-top:8px}
+.addr input{margin-top:4px;accent-color:var(--accent)}
+.opt{display:flex;gap:10px;align-items:center;cursor:pointer;min-height:44px}
+.opt input{width:20px;height:20px;accent-color:var(--accent)}
+.info{background:var(--trust-soft);border-radius:8px;padding:9px 11px;font-size:12.5px}
+.fees{display:flex;flex-direction:column;gap:4px;font-size:13px}
+.fees div{display:flex;justify-content:space-between}
+.fees .tot{border-top:2px solid var(--ink);padding-top:8px;margin-top:4px;font-weight:900;font-size:15px}
+.done{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:24px 16px}
+.done .badge{width:60px;height:60px;border-radius:50%;background:var(--trust-soft);color:var(--trust);display:grid;place-items:center}
+.done .badge svg{width:30px;height:30px;stroke-width:2.4}
+.done h2{margin:0;font-size:19px}
+
+dialog{border:0;padding:0;color:var(--ink);background:var(--surface);width:100%;max-width:480px;max-height:88vh;border-radius:16px 16px 0 0;margin:auto auto 0}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+.dh{display:flex;gap:12px;padding:16px;border-bottom:1px solid var(--line)}
+.dh .face{width:84px;flex:none;aspect-ratio:63/88;border-radius:6px;background:linear-gradient(160deg,#f2f2ee,#cfcfc8);padding:6px;display:flex;flex-direction:column;justify-content:space-between;color:#1a1a1a}
+.dh .face.gold{background:linear-gradient(160deg,#f3e3a2,#c9a227)}
+.dh .face strong{font-size:11px;font-weight:900}
+.dh h3{margin:0 0 4px;font-size:16px}
+.db{padding:12px 16px;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13px}
+.db dt{color:var(--ink-2);font-size:12px}
+.db dd{margin:0}
+.df{display:flex;gap:8px;padding:8px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.df .btn{flex:1}
+
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:color-mix(in srgb,var(--surface) 96%,transparent);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));z-index:30}
+.nav a{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;color:var(--ink-2);padding:4px 0;min-height:48px;justify-content:center}
+.nav a[aria-current="page"]{color:var(--accent);font-weight:700}
+.nav svg.i{width:22px;height:22px}
+.toast{position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:12.5px;padding:8px 14px;border-radius:999px;z-index:40;max-width:calc(100% - 32px);text-align:center}
+
+@media (min-width:768px){
+  :root{--gut:24px}
+  body{background:var(--bg)}
+  .app{max-width:none}
+  .grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+  .nav,.cta{max-width:none}
+  .page{max-width:720px;margin-inline:auto}
+  dialog{margin:auto;border-radius:16px}
+}
+@media (min-width:1024px){
+  .bar{padding-block:12px}
+  .dnav{display:flex;gap:4px;margin-left:28px}
+  .dnav a{padding:8px 14px;border-radius:999px;color:var(--ink-2)}
+  .dnav a:hover{background:var(--track)}
+  .dnav a[aria-current="page"]{color:var(--ink);font-weight:700;background:var(--track)}
+  .nav{display:none}
+  .app{padding-bottom:90px}
+  .cta{bottom:0}
+  .grid{grid-template-columns:repeat(7,minmax(0,1fr))}
+  .toast{bottom:90px}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></symbol>
+    <symbol id="i-radio" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8a6 6 0 0 1 0 8.4M7.8 16.2a6 6 0 0 1 0-8.4M19 5a10 10 0 0 1 0 14M5 19A10 10 0 0 1 5 5"/></symbol>
+    <symbol id="i-ticket" viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4Z"/><path d="M13 6v2M13 11v2M13 16v2"/></symbol>
+    <symbol id="i-package" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="M3 8l9 5 9-5M12 13v8M7.5 5.5l9 5"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 18 9 12l6-6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3"/></symbol>
+  </defs>
+</svg>
+<div class="app">
+  <details class="proto"><summary>原型 UI-10 仓库 + 发货申请 · 示例数据（免费保管 30 天、运费为示例值）· 原型时钟 2026-09-26 18:00 JST</summary></details>
+  <header class="top"><div class="bar wrap" id="bar"></div></header>
+  <main class="wrap" id="main"></main>
+  <div class="cta" id="cta" hidden></div>
+  <nav class="nav" id="nav" aria-label="メイン">
+    <a href="ui-01-home.html"><svg class="i"><use href="#i-home"/></svg>ホーム</a>
+    <a href="#live" data-proto="LIVE"><svg class="i"><use href="#i-radio"/></svg>LIVE</a>
+    <a href="ui-05-my-slots.html#wait"><svg class="i"><use href="#i-ticket"/></svg>マイ枠</a>
+    <a href="#stored" aria-current="page"><svg class="i"><use href="#i-package"/></svg>コレクション</a>
+    <a href="#mypage" data-proto="マイページ"><svg class="i"><use href="#i-user"/></svg>マイページ</a>
+  </nav>
+  <dialog id="detail" aria-labelledby="dt-t"></dialog>
+  <div class="toast" id="toast" role="status" hidden></div>
+</div>
+
+<script>
+/* ---------- mock recording data (deterministic) ---------- */
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const R=rng(20260921);
+const DUR=1440, SEAL_END=90, DRAW_END=150, PACK_LEN=60, PACKS=20, CARDS_PER=10;
+const SLOTS=["ピカチュウ枠","リザードン枠","テラパゴス枠","ミュウ枠","ミライドン枠","コライドン枠","ルカリオ枠","ゲンガー枠","ニンフィア枠","その他ポケモン（ex）枠","その他ポケモン枠","トレーナーズ・エネルギー枠"];
+const MY_SLOT=3;
+const CHAR=[["ピカチュウ",1],["リザードン",2],["テラパゴス",3],["ミュウ",4],["ミライドン",5],["コライドン",6],["ルカリオ",7],["ゲンガー",8],["ニンフィア",9]];
+const OTHERS=["ヤドン","ポッチャマ","モクロー","カイリュー","サーナイト","ヘラクロス","ミミッキュ","パモ","ホゲータ","ニャオハ","クワッス","ドラパルト"];
+const TRAINERS=["ネストボール","ハイパーボール","ナンジャモ","ボスの指令","ペパー","ふしぎなアメ","基本雷エネルギー","基本炎エネルギー","ポケモンいれかえ","ジャッジマン"];
+const RAR=[["C",.48],["U",.24],["R",.11],["RR",.08],["AR",.05],["SR",.025],["SAR",.015]];
+function rar(){let x=R(),a=0;for(const [r,p] of RAR){a+=p;if(x<a)return r;}return "C";}
+const CARDS=[];
+for(let p=1;p<=PACKS;p++){
+  const start=DRAW_END+(p-1)*PACK_LEN;
+  for(let i=0;i<CARDS_PER;i++){
+    const t=start+12+i*4.5; let name,slot,rr;
+    if(i>=7){rr=rar();} else {rr=R()<.7?"C":"U";}
+    const kind=R();
+    if(kind<.24){name=TRAINERS[Math.floor(R()*TRAINERS.length)];slot=12;if(rr==="RR"||rr==="AR")rr="U";}
+    else if(kind<.62){const c=CHAR[Math.floor(R()*CHAR.length)];const ex=(rr==="RR"||rr==="SR"||rr==="SAR")&&R()<.8;name=c[0]+(ex?"ex":"");slot=c[1];}
+    else{const o=OTHERS[Math.floor(R()*OTHERS.length)];const ex=(rr==="RR"||rr==="SR"||rr==="SAR")&&R()<.8;name=o+(ex?"ex":"");slot=ex?10:11;}
+    const no=String(1+Math.floor(R()*(rr==="SR"||rr==="SAR"||rr==="AR"?140:190))).padStart(3,"0")+"/190";
+    CARDS.push({t,pack:p,name,no:(rr==="SR"||rr==="SAR"||rr==="AR")?String(191+Math.floor(R()*90))+"/190":no,r:rr,slot});
+  }
+}
+
+const GOLD=new Set(["SR","SAR"]);
+const NOW=new Date("2026-09-26T18:00:00+09:00").getTime(), DAY=86400e3, FREE_DAYS=30;
+const WD="日月火水木金土";
+function jday(ms){const t=new Date(ms+9*3600e3);return `${t.getUTCMonth()+1}/${t.getUTCDate()}(${WD[t.getUTCDay()]})`;}
+const T=iso=>new Date(iso).getTime();
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const yen=n=>"¥"+n.toLocaleString("ja-JP");
+const mmss=s=>`${String(Math.floor(s/60)).padStart(2,"0")}:${String(Math.floor(s%60)).padStart(2,"0")}`;
+const REF={C:20,U:30,R:80,RR:250,AR:900,SR:3500,SAR:12000};
+let n=0; const ITEMS=[];
+CARDS.filter(c=>c.slot===MY_SLOT).forEach(c=>ITEMS.push({id:++n,name:c.name,no:c.no,r:c.r,lot:"L011",lotTitle:"シャイニートレジャーex 2BOX キャラ枠",state:"STORED",storedAt:"2026-09-22T11:00:00+09:00",t:c.t}));
+[["ルギアV","202/172","SAR"],["ポッチャマ","045/172","C"],["リーリエの全力","210/172","SR"]].forEach(([nm,no,r])=>ITEMS.push({id:++n,name:nm,no,r,lot:"L016",lotTitle:"Vスターユニバース 1BOX パック番号",state:"STORED",storedAt:"2026-09-01T11:00:00+09:00"}));
+[["ミライドンex","244/190","SAR"],["ナンジャモ","096/190","U"]].forEach(([nm,no,r])=>ITEMS.push({id:++n,name:nm,no,r,lot:"L017",lotTitle:"クリムゾンヘイズ 2BOX キャラ枠",state:"SHIPPING",shippedAt:"2026-09-24T15:00:00+09:00",tracking:"4421-0098-7713"}));
+[["リザードンex","201/165","SAR"],["ピカチュウ","025/165","C"],["フシギダネ","001/165","C"]].forEach(([nm,no,r])=>ITEMS.push({id:++n,name:nm,no,r,lot:"L018",lotTitle:"ポケモンカード151 1BOX キャラ枠",state:"RECEIVED",receivedAt:"2026-09-10T14:00:00+09:00"}));
+const freeUntil=it=>T(it.storedAt)+FREE_DAYS*DAY;
+const TABS=[["stored","保管中","STORED"],["shipping","発送中","SHIPPING"],["received","受取済","RECEIVED"]];
+let tab="stored", selMode=false, sel=new Set(), view="list";
+
+function face(it,cls=""){return `<div class="face ${GOLD.has(it.r)?"gold":""} ${cls}"><strong>${esc(it.name)}</strong><span>${it.no}</span></div>`;}
+function headerList(){document.getElementById("bar").innerHTML=`<a class="mark" href="ui-01-home.html" aria-label="ホーム"><b><i>BOX</i>ラッシュ</b></a>
+  <nav class="dnav" aria-label="メイン（デスクトップ）"><a href="ui-01-home.html">ホーム</a><a href="#live" data-proto="LIVE">LIVE</a><a href="ui-05-my-slots.html#wait">マイ枠</a><a href="#stored" aria-current="page">コレクション</a></nav><span class="sp"></span>`;}
+function renderList(){
+  headerList(); document.getElementById("nav").hidden=false;
+  const st=TABS.find(x=>x[0]===tab)[2], list=ITEMS.filter(i=>i.state===st);
+  const counts=TABS.map(([k,,s])=>ITEMS.filter(i=>i.state===s).length);
+  const stored=ITEMS.filter(i=>i.state==="STORED"), first=stored.length?Math.min(...stored.map(freeUntil)):0, firstN=stored.filter(i=>freeUntil(i)===first).length;
+  let body="";
+  if(st==="SHIPPING"||st==="RECEIVED"){
+    const groups={}; list.forEach(i=>{(groups[i.lot]=groups[i.lot]||[]).push(i);});
+    body=`<div class="ship-list">${Object.values(groups).map(g=>`<div class="shipcard"><div class="row"><b>${esc(g[0].lotTitle)}</b><span class="small muted">${g.length} 点</span></div>
+      <div class="row small"><span>${st==="SHIPPING"?`発送 ${jday(T(g[0].shippedAt))} · 追跡番号 <span class="tr">${g[0].tracking}</span>`:`受取 ${jday(T(g[0].receivedAt))}`}</span>
+      ${st==="SHIPPING"?`<a class="link" href="#track" data-proto="配送状況">配送状況</a>`:""}</div></div>`).join("")}</div>
+      <div class="grid">${list.map(tile).join("")}</div>`;
+  }else body=`<div class="grid">${list.map(tile).join("")}</div>`;
+  document.getElementById("main").innerHTML=`
+    <div class="seg" role="tablist">${TABS.map(([k,v],i)=>`<button type="button" role="tab" data-tab="${k}" aria-selected="${k===tab}">${v}<b>${counts[i]}</b></button>`).join("")}</div>
+    ${st==="STORED"&&stored.length?`<div class="banner"><svg class="i"><use href="#i-clock"/></svg><span>無料保管期限 <b>${jday(first)}</b> まで（${firstN} 点）。期限後の扱いはルールをご確認ください。</span></div>
+      <div class="tools"><span class="small muted">${list.length} 点を保管中</span><button class="btn" type="button" id="selmode">${selMode?"選択をやめる":"選択して発送"}</button></div>`:""}
+    <div class="${selMode?"selmode":""}" id="area">${list.length?body:`<div class="empty">該当するカードはありません</div>`}</div>`;
+  const sm=document.getElementById("selmode"); if(sm) sm.onclick=()=>{selMode=!selMode; if(!selMode) sel.clear(); renderList();};
+  renderCta();
+}
+function tile(it){return `<button type="button" class="tile ${sel.has(it.id)?"sel":""}" data-id="${it.id}" aria-pressed="${sel.has(it.id)}" aria-label="${esc(it.name)} ${it.no}">
+  ${face(it)}<span class="chk" aria-hidden="true"><svg class="i"><use href="#i-check"/></svg></span>
+  <span class="meta"><span class="r ${GOLD.has(it.r)?"hi":""}">${it.r}</span><span class="src">${esc(it.lotTitle)}</span></span></button>`;}
+function renderCta(){
+  const c=document.getElementById("cta");
+  if(view!=="list"||tab!=="stored"||!selMode){c.hidden=true;return;}
+  c.hidden=false;
+  c.innerHTML=`<span class="t"><b>${sel.size}</b> 点を選択中</span><button class="btn pri" type="button" id="toship" ${sel.size?"":"disabled"}>まとめて発送</button>`;
+  document.getElementById("toship").onclick=()=>{location.hash="ship";};
+}
+
+/* detail sheet */
+const dlg=document.getElementById("detail");
+function openDetail(it){
+  const st={STORED:"倉庫で保管中",SHIPPING:"発送中",RECEIVED:"受取済"}[it.state];
+  dlg.innerHTML=`<div class="dh">${face(it)}<div><h3>${esc(it.name)}</h3><span class="mono small">${it.no}</span> <span class="r ${GOLD.has(it.r)?"hi":""}">${it.r}</span><br><span class="small muted">${st}</span></div></div>
+    <dl class="db"><dt>開封会</dt><dd>${it.lot==="L011"?`<a class="link" style="padding:0" href="ui-05-my-slots.html#p-L011">${esc(it.lotTitle)}</a>`:esc(it.lotTitle)}</dd>
+      <dt>映像</dt><dd>${it.t!=null?`<a class="link" style="padding:0" href="ui-07-recording.html#L011-t${Math.max(0,Math.floor(it.t-2))}">映像で確認（${mmss(it.t)}）</a>`:`<a class="link" style="padding:0" href="#video" data-proto="開封映像（${it.lot}）">映像で確認</a>`}</dd>
+      <dt>参考価格</dt><dd>${yen(REF[it.r])} <span class="small muted">（参考・このカード 1 枚の相場目安）</span></dd>
+      ${it.state==="STORED"?`<dt>入庫日</dt><dd>${jday(T(it.storedAt))}</dd><dt>無料保管</dt><dd>${jday(freeUntil(it))} まで</dd>`:""}</dl>
+    <div class="df"><button class="btn" type="button" data-close>閉じる</button></div>`;
+  dlg.querySelector("[data-close]").onclick=()=>dlg.close();
+  dlg.showModal?dlg.showModal():dlg.setAttribute("open","");
+}
+dlg.addEventListener("click",e=>{if(e.target===dlg) dlg.close();});
+
+/* ship view */
+let insured=false, done=false;
+function renderShip(){
+  document.getElementById("nav").hidden=true; renderCta();
+  document.getElementById("bar").innerHTML=`<a class="back" href="#stored" aria-label="コレクションに戻る"><svg class="i"><use href="#i-back"/></svg></a><h1>発送の依頼</h1>`;
+  const items=ITEMS.filter(i=>sel.has(i.id));
+  if(!items.length){document.getElementById("main").innerHTML=`<div class="empty">発送するカードを選んでください<br><a class="link" href="#stored">コレクションに戻る</a></div>`;return;}
+  if(done){document.getElementById("main").innerHTML=`<div class="page"><section class="blk"><div class="done"><span class="badge"><svg class="i"><use href="#i-check"/></svg></span>
+      <h2>発送を依頼しました</h2><p class="muted" style="margin:0">${items.length} 点を 1 つにまとめて、<b style="color:var(--ink)">${jday(NOW+3*DAY)} までに発送</b>します（2 営業日以内）。</p></div>
+      <a class="btn pri" href="#shipping" id="after">発送中を見る</a></section></div>`;
+    document.getElementById("after").onclick=()=>{items.forEach(i=>{i.state="SHIPPING";i.shippedAt=new Date(NOW).toISOString();i.tracking="（発送後に表示）";});sel.clear();selMode=false;done=false;};return;}
+  const hi=items.some(i=>REF[i.r]>=3000), base=390, ins=680, fee=insured?ins:base;
+  document.getElementById("main").innerHTML=`<div class="page">
+    <section class="blk"><h2>発送するカード（${items.length} 点）</h2><ul class="lines">${items.map(i=>`<li><span>${esc(i.name)} <span class="mono muted">${i.no}</span></span><span class="r ${GOLD.has(i.r)?"hi":""}">${i.r}</span></li>`).join("")}</ul></section>
+    <section class="blk addr"><h2>お届け先</h2>
+      <label><input type="radio" name="addr" checked><span><b>山田 花子</b><br><span class="small muted">〒166-0001 東京都杉並区阿佐谷北 1-2-3 サンプルハイツ 201（示例）</span></span></label>
+      <label><input type="radio" name="addr"><span><b>山田 花子（勤務先）</b><br><span class="small muted">〒100-0005 東京都千代田区丸の内 4-5-6 サンプルビル 8F（示例）</span></span></label>
+      <a class="link" href="#addr" data-proto="住所の管理" style="align-self:flex-start;padding:0">住所を管理</a></section>
+    <section class="blk"><h2>配送方法</h2>
+      <label class="opt"><input type="checkbox" id="ins" ${insured?"checked":""}><span><b>補償付き配送</b><br><span class="small muted">追跡・対面受け取り・補償あり</span></span></label>
+      ${hi?`<p class="small" style="margin:0">参考価格の高いカードが含まれています。補償付き配送を選べます。</p>`:""}
+      <div class="info">まとめて発送すると送料を抑えられます。</div></section>
+    <section class="blk"><h2>送料</h2><div class="fees"><div><span>${insured?"補償付き配送":"通常配送（追跡あり）"}</span><span class="mono">${yen(fee)}</span></div>
+      <div class="tot"><span>お支払い</span><span class="mono">${yen(fee)}</span></div></div>
+      <p class="small muted" style="margin:0">送料は登録済みのお支払い方法で決済します。金額は示例です。</p>
+      <button class="btn pri" type="button" id="confirm" style="min-height:50px;font-size:15px">発送を依頼する</button></section>
+  </div>`;
+  document.getElementById("ins").onchange=e=>{insured=e.target.checked;renderShip();};
+  document.getElementById("confirm").onclick=()=>{done=true;renderShip();scrollTo(0,0);};
+}
+
+document.addEventListener("click",e=>{
+  const p=e.target.closest("[data-proto]"); if(p){e.preventDefault();say(`原型：「${p.dataset.proto}」尚未生成`);return;}
+  const tb=e.target.closest("[data-tab]"); if(tb){location.hash=tb.dataset.tab;return;}
+  const tl=e.target.closest(".tile"); if(tl){const it=ITEMS.find(i=>i.id===+tl.dataset.id);
+    if(selMode&&it.state==="STORED"){sel.has(it.id)?sel.delete(it.id):sel.add(it.id);renderList();} else openDetail(it);}
+});
+const toast=document.getElementById("toast"); let tt;
+function say(m){toast.textContent=m;toast.hidden=false;clearTimeout(tt);tt=setTimeout(()=>toast.hidden=true,2400);}
+function route(){const h=(location.hash||"#stored").slice(1);
+  if(h==="ship"){view="ship";renderShip();} else {view="list";tab=TABS.some(x=>x[0]===h)?h:"stored";if(tab!=="stored"){selMode=false;} renderList();} scrollTo(0,0);}
+window.addEventListener("hashchange",route); route();
+</script>
+</body>
+</html>

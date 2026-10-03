@@ -235,8 +235,8 @@ details.sums[open] summary::before{transform:rotate(90deg)}
       </section>
 
       <div class="links">
-        <a class="btn" href="#result" data-proto="開封結果（UI-08）">開封結果を見る</a>
-        <a class="btn" href="#verify" data-proto="検証ページ（UI-09）"><svg class="i" style="width:16px;height:16px"><use href="#i-shield"/></svg>割り当てを検証</a>
+        <a class="btn" href="ui-08-result.html#L011">開封結果を見る</a>
+        <a class="btn" href="ui-09-verify.html#L011"><svg class="i" style="width:16px;height:16px"><use href="#i-shield"/></svg>割り当てを検証</a>
       </div>
     </div>
 
@@ -283,7 +283,7 @@ for(let p=1;p<=PACKS;p++){
     CARDS.push({t,pack:p,name,no:(rr==="SR"||rr==="SAR"||rr==="AR")?String(191+Math.floor(R()*90))+"/190":no,r:rr,slot});
   }
 }
-const HI=new Set(["R","RR","AR","SR","SAR"]), GOLD=new Set(["AR","SR","SAR"]);
+const HI=new Set(["R","RR","AR","SR","SAR"]), GOLD=new Set(["SR","SAR"]);
 const CH=[{t:0,label:"封印確認",key:1},{t:SEAL_END,label:"抽選結果の表示",key:1}].concat(Array.from({length:PACKS},(_,i)=>({t:DRAW_END+i*PACK_LEN,label:`パック${i+1}`})),[{t:DRAW_END+PACKS*PACK_LEN,label:"開封終了"}]);
 function hex(n){let s="";for(let i=0;i<n;i++)s+="0123456789abcdef"[Math.floor(R()*16)];return s;}
 const SEGS=Array.from({length:DUR/120},(_,i)=>({a:i*120,b:(i+1)*120,h:hex(64)}));

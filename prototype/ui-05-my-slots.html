@@ -217,7 +217,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stro
     <a href="ui-01-home.html"><svg class="i"><use href="#i-home"/></svg>ホーム</a>
     <a href="#live" data-proto="LIVE"><svg class="i"><use href="#i-radio"/></svg>LIVE</a>
     <a href="#wait" aria-current="page"><svg class="i"><use href="#i-ticket"/></svg>マイ枠</a>
-    <a href="#collection" data-proto="コレクション（UI-10）"><svg class="i"><use href="#i-package"/></svg>コレクション</a>
+    <a href="ui-10-collection.html#stored"><svg class="i"><use href="#i-package"/></svg>コレクション</a>
     <a href="#mypage" data-proto="マイページ"><svg class="i"><use href="#i-user"/></svg>マイページ</a>
   </nav>
   <div class="toast" id="toast" role="status" hidden></div>
@@ -288,10 +288,10 @@ function card(h){
     body=`<div class="mine">${h.status==="LOCKED"?`満員になりました。<b>抽選結果を準備中</b>です（外部の公開値の確定待ち）。`:mineHTML(h)}</div>
       <div class="row"><span>開封まで <span class="count num">${until(h.openAt)}</span></span><span>${jst(h.openAt)}</span></div>
       <div class="acts"><a class="btn" href="${gcal(h)}" target="_blank" rel="noopener" data-stop><svg class="i"><use href="#i-cal"/></svg>カレンダーに追加</a>
-        ${h.status==="READY"?`<a class="btn" href="#verify" data-proto="割り当ての検証（UI-09）" data-stop><svg class="i"><use href="#i-shield"/></svg>割り当てを検証</a>`:""}</div>`;}
+        ${h.status==="READY"?`<a class="btn" href="ui-09-verify.html#${h.id}" data-stop><svg class="i"><use href="#i-shield"/></svg>割り当てを検証</a>`:""}</div>`;}
   else if(h.status==="ATTRIBUTED"){
     body=`<div class="mine">${mineHTML(h)}</div><div class="row"><span>開封 ${jst(h.openAt)}</span><span>カード <b>${h.cards}</b> 枚・倉庫で保管中</span></div>
-      <div class="acts"><a class="btn pri" href="#result" data-proto="開封結果（UI-08）" data-stop>結果を見る</a><a class="btn" href="ui-07-recording.html#${h.id}" data-stop>録画を見る</a></div>`;}
+      <div class="acts"><a class="btn pri" href="ui-08-result.html#${h.id}" data-stop>結果を見る</a><a class="btn" href="ui-07-recording.html#${h.id}" data-stop>録画を見る</a></div>`;}
   else{
     body=`<div class="mine">${mineHTML(h)}</div><div class="refund">${h.status==="FAILED"?"不成立・返金済":"中止・返金済"}（返金日 ${jday(h.refundAt)}・元のお支払い方法へ）</div>`;}
   return `<article class="hc" data-go="${h.id}" tabindex="0" aria-label="${esc(h.title)} の進捗">
@@ -300,7 +300,7 @@ function card(h){
 
 function renderList(tab){
   document.getElementById("bar").innerHTML=`<a class="mark" href="ui-01-home.html" aria-label="BOXラッシュ ホーム"><b><i>BOX</i>ラッシュ</b><small>Box Rush</small></a>
-    <nav class="dnav" aria-label="メイン（デスクトップ）"><a href="ui-01-home.html">ホーム</a><a href="#live" data-proto="LIVE">LIVE</a><a href="#wait" aria-current="page">マイ枠</a><a href="#collection" data-proto="コレクション（UI-10）">コレクション</a></nav>
+    <nav class="dnav" aria-label="メイン（デスクトップ）"><a href="ui-01-home.html">ホーム</a><a href="#live" data-proto="LIVE">LIVE</a><a href="#wait" aria-current="page">マイ枠</a><a href="ui-10-collection.html#stored">コレクション</a></nav>
     <span class="sp"></span><a class="avatar" href="#mypage" data-proto="マイページ" aria-label="マイページ">S</a>`;
   const counts=Object.fromEntries(TABS.map(([k])=>[k,H.filter(h=>TAB[h.status]===k).length]));
   const items=H.filter(h=>TAB[h.status]===tab).sort((a,b)=>T(a.openAt||a.saleEndsAt)-T(b.openAt||b.saleEndsAt));
@@ -342,9 +342,9 @@ function renderProgress(id){
   else if(h.status!=="FAILED"){
     const rows=h.mine[0].random?[{no:7,name:"パック 7"},{no:18,name:"パック 18"}]:h.mine;
     assign=`<section class="blk"><h2>割り当て（${jst(h.drawAt)} 公開）</h2><ul class="assign">${rows.map(m=>`<li><span><span class="no">#${pad(m.no)}</span> <b>${esc(m.name)}</b></span><span class="small muted">あなた</span></li>`).join("")}</ul>
-      <a class="link" href="#verify" data-proto="割り当ての検証（UI-09）"><svg class="i" style="width:16px;height:16px"><use href="#i-shield"/></svg>割り当てを検証<svg class="i" style="width:14px;height:14px"><use href="#i-chev"/></svg></a></section>`;}
+      <a class="link" href="ui-09-verify.html#${h.id}"><svg class="i" style="width:16px;height:16px"><use href="#i-shield"/></svg>割り当てを検証<svg class="i" style="width:14px;height:14px"><use href="#i-chev"/></svg></a></section>`;}
   const extra=h.status==="READY"?`<a class="btn" href="${gcal(h)}" target="_blank" rel="noopener"><svg class="i"><use href="#i-cal"/></svg>カレンダーに追加</a>`:
-    h.status==="ATTRIBUTED"?`<a class="btn pri" href="#result" data-proto="開封結果（UI-08）">結果を見る</a><a class="btn" href="ui-07-recording.html#${h.id}">録画を見る</a><a class="btn" href="#collection" data-proto="コレクション（UI-10）">コレクションを見る</a>`:"";
+    h.status==="ATTRIBUTED"?`<a class="btn pri" href="ui-08-result.html#${h.id}">結果を見る</a><a class="btn" href="ui-07-recording.html#${h.id}">録画を見る</a><a class="btn" href="ui-10-collection.html#stored">コレクションを見る</a>`:"";
   document.getElementById("main").innerHTML=`<div class="pg">
     ${abort}
     <section class="blk full"><div class="hc-top"><span class="thumb ${h.cat}" aria-hidden="true"></span><div><h3 style="margin:0;font-size:15px">${esc(h.title)}</h3><span class="st ${cls}">${lab}</span></div></div>

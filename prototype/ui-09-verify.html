@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta property="og:title" content="BOXラッシュ 開封会の検証">
+<meta property="og:description" content="抽選の入力と結果を公開しています。誰でもブラウザで再計算できます。">
+<!-- Box Rush 原型 UI-09 验证页 + 公开验证站。由 docs/breaking-platform.md §9.4 UI-09 prompt 生成；静态单文件，无需构建。
+     浏览器内用 Web Crypto 真实计算 SHA-256 与洗牌，结果与离线公开值比对。#L015（随机）/ #L009 / #L011（选位）；无 # 时为公开验证入口。 -->
+<title>BOXラッシュ 検証</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Tokens: docs/breaking-platform.md §9.2 */
+:root{
+  --gut:16px;
+  --ground:#EEEEE8;
+  --bg:#FAFAF7; --surface:#FFFFFF; --ink:#1A1A1A; --ink-2:#6B6B6B; --line:#E6E5DE; --track:#ECEBE4;
+  --accent:#3B3FD8; --accent-ink:#FFFFFF; --accent-soft:#ECEDFC;
+  --trust:#0F9D8A; --trust-soft:#E1F3F0;
+  --error:#C93C3C; --error-soft:#FBE7E7;
+  --code:#F3F2EC;
+  --sans:"Noto Sans JP","Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic",Meiryo,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#0A0B0C;
+    --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --ink-2:#A0A0A0; --line:#2A2B2F; --track:#2A2B2F;
+    --accent:#8E91F7; --accent-ink:#111214; --accent-soft:#23244A;
+    --trust:#3CC4B0; --trust-soft:#15302C;
+    --error:#EF6B6B; --error-soft:#3A1C1C;
+    --code:#141518;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#0A0B0C;
+  --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --ink-2:#A0A0A0; --line:#2A2B2F; --track:#2A2B2F;
+  --accent:#8E91F7; --accent-ink:#111214; --accent-soft:#23244A;
+  --trust:#3CC4B0; --trust-soft:#15302C;
+  --error:#EF6B6B; --error-soft:#3A1C1C;
+  --code:#141518;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.mono{font-family:var(--mono)}
+.small{font-size:12px}
+.muted{color:var(--ink-2)}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);padding-bottom:32px}
+.proto{background:var(--ink);color:var(--bg);font-size:12px}
+.proto summary{padding:6px 16px;cursor:pointer;list-style:none}
+.proto summary::-webkit-details-marker{display:none}
+/* public header: no tab bar */
+.top{border-bottom:1px solid var(--line);background:var(--surface)}
+.bar{display:flex;align-items:center;gap:10px;padding:12px var(--gut);max-width:980px;margin:0 auto}
+.mark b{font-weight:900;font-size:18px;display:flex;align-items:center;gap:1px}
+.mark b i{font-style:normal;background:var(--accent);color:var(--accent-ink);padding:0 5px;border-radius:5px;margin-right:2px;font-family:var(--mono);font-size:15px;line-height:1.35}
+.bar .pub{margin-left:auto;font-size:11.5px;color:var(--ink-2);display:flex;align-items:center;gap:4px}
+.bar .pub svg{width:14px;height:14px;color:var(--trust)}
+
+.page{display:flex;flex-direction:column;gap:14px;padding:16px var(--gut) 0;max-width:980px;margin:0 auto}
+.blk{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.blk h2{margin:0;font-size:15px;font-weight:900}
+h1{margin:0;font-size:19px;font-weight:900;line-height:1.4}
+.meta{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--ink-2)}
+.mode{display:inline-flex;font-size:11px;font-weight:700;border-radius:4px;padding:0 6px;background:var(--accent-soft);color:var(--accent)}
+
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr;gap:8px}
+.steps li{display:flex;gap:10px;align-items:flex-start;background:var(--bg);border-radius:10px;padding:10px 12px;font-size:13px}
+.steps .n{width:24px;height:24px;border-radius:50%;background:var(--trust);color:#fff;display:grid;place-items:center;font-weight:900;font-size:12px;flex:none}
+
+.kv{display:flex;flex-direction:column;gap:8px}
+.kv .item{display:flex;flex-direction:column;gap:3px}
+.kv .k{font-size:11.5px;color:var(--ink-2);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.kv .v{font-family:var(--mono);font-size:12px;background:var(--code);border-radius:6px;padding:7px 9px;overflow-wrap:anywhere;white-space:pre-wrap}
+.copy{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:0 8px;font-size:11px;cursor:pointer;min-height:26px}
+
+.run{display:flex;flex-direction:column;gap:10px}
+.primary{min-height:48px;border:0;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-weight:900;font-size:15px;cursor:pointer;width:100%}
+.primary:disabled{background:var(--track);color:var(--ink-2)}
+.res{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.res li{display:grid;grid-template-columns:24px 1fr;gap:8px;align-items:start;border-radius:8px;padding:8px 10px;background:var(--bg);font-size:13px}
+.res li .ic{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:900;font-size:12px;background:var(--line)}
+.res li.ok{background:var(--trust-soft)} .res li.ok .ic{background:var(--trust)}
+.res li.ng{background:var(--error-soft)} .res li.ng .ic{background:var(--error)}
+.res .d{font-family:var(--mono);font-size:11px;color:var(--ink-2);overflow-wrap:anywhere;display:block;margin-top:2px}
+.verdict{border-radius:10px;padding:12px 14px;font-weight:900;font-size:15px;display:flex;gap:8px;align-items:center}
+.verdict.ok{background:var(--trust);color:#fff}
+.verdict.ng{background:var(--error);color:#fff}
+
+.tblwrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:11.5px;color:var(--ink-2)}
+td.mono{font-size:12px}
+tr.me td{background:var(--accent-soft)}
+.links{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:0 14px;min-height:42px;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.btn:hover{border-color:var(--ink-2)}
+details.script summary{cursor:pointer;font-weight:900;list-style:none}
+details.script summary::-webkit-details-marker{display:none}
+pre{margin:8px 0 0;background:var(--code);border-radius:8px;padding:10px 12px;font-family:var(--mono);font-size:11.5px;overflow-x:auto;line-height:1.5}
+
+/* public verifier */
+.entry{display:flex;flex-direction:column;gap:12px;align-items:stretch;max-width:520px;margin:28px auto 0;width:100%}
+.entry h1{text-align:center}
+.entry p{text-align:center;margin:0}
+.entry form{display:flex;gap:8px}
+.entry input{flex:1;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:0 12px;min-height:48px;font-family:var(--mono)}
+.entry .primary{width:auto;padding:0 20px}
+.examples{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.examples a{font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:12.5px;padding:8px 14px;border-radius:999px;z-index:40;max-width:calc(100% - 32px);text-align:center}
+
+@media (min-width:768px){
+  :root{--gut:24px}
+  body{background:var(--bg)}
+  .app{max-width:none}
+  .steps{grid-template-columns:repeat(3,1fr)}
+}
+@media (min-width:1024px){
+  .grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></symbol>
+    <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z"/><path d="M14 3v6h6"/></symbol>
+  </defs>
+</svg>
+<div class="app">
+  <details class="proto"><summary>原型 UI-09 验证页 + 公开验证站 · 计算在浏览器内真实执行（Web Crypto）· 示例数据 · 原型时钟 2026-09-26 18:00 JST</summary></details>
+  <header class="top"><div class="bar"><a class="mark" href="#" aria-label="検証トップ"><b><i>BOX</i>ラッシュ</b></a><span class="small muted">公開検証</span>
+    <span class="pub"><svg class="i"><use href="#i-shield"/></svg>ログイン不要・誰でも確認できます</span></div></header>
+  <main id="main"></main>
+  <div class="toast" id="toast" role="status" hidden></div>
+</div>
+
+<script>
+const DATA={"L011": {"serverSeed": "boxrush-mock-L011", "commit": "15defc6641e50ab99bd8963cec029a547bfbbc9a65581b533feb66d34e914fdc", "participantsText": "01:user_8f2a\n02:user_19c0\n03:user_a7e3\n04:user_3d51\n05:user_c04b\n06:user_72fe\n07:user_0b9d\n08:user_e615\n09:user_5a2c\n10:user_d3f8\n11:user_4e07\n12:user_b18a", "participantsHash": "0f5e440eed0dd287b4f758156a00ee07c8a0f6f168cd4a0a77889c08bbee6b8c"}, "L009": {"serverSeed": "boxrush-mock-L009", "commit": "c6ebe0ed90a7cfd3421ca665ce0b0bc00313714b0c9ee9e1f2989fa7a81a0781", "participantsText": "01:user_61d0\n02:user_a7e3\n03:user_f2c8\n04:user_0e47\n05:user_9b13\n06:user_4ad6\n07:user_c7f0\n08:user_2e95\n09:user_88b1\n10:user_d04c\n11:user_5f6a\n12:user_37e2", "participantsHash": "84fad77d9481e002706c730993aac51be3239cd4ef949f6384253f9e655efea5"}, "L015": {"serverSeed": "boxrush-mock-L015", "commit": "f85043a1f8f4be5eb78fce701466d80e775610680b45dffa232e07fc71560715", "participantsText": "user_a7e3#01\nuser_a7e3#02\nuser_5c19#03\nuser_5c19#04\nuser_5c19#05\nuser_e0b4#06\nuser_17fa#07\nuser_17fa#08\nuser_17fa#09\nuser_17fa#10\nuser_9d22#11\nuser_9d22#12\nuser_c3e8#13\nuser_c3e8#14\nuser_c3e8#15\nuser_c3e8#16\nuser_c3e8#17\nuser_6b40#18\nuser_f81d#19\nuser_f81d#20\nuser_f81d#21\nuser_2a97#22\nuser_2a97#23\nuser_d6c5#24\nuser_d6c5#25\nuser_d6c5#26\nuser_d6c5#27\nuser_40ee#28\nuser_40ee#29\nuser_40ee#30", "participantsHash": "b2cbec1d038bd347a42183993d4828e06b0ec0522f66de7ab26c8ef2915d630c", "beacon": "7f3e9a0c5d1b2e84f6a9c3d07b5e1f28a4c6d9e0b3f7a2c5e8d1b4f6a9c0e3d7", "final": "27961ec6a9981ea13988e33d34636843681aba57ee67bd19398d4d03e533283f", "assignment": ["user_17fa#10", "user_5c19#04", "user_a7e3#01", "user_c3e8#13", "user_c3e8#14", "user_e0b4#06", "user_6b40#18", "user_17fa#08", "user_17fa#07", "user_d6c5#27", "user_c3e8#15", "user_a7e3#02", "user_9d22#11", "user_5c19#03", "user_2a97#23", "user_40ee#28", "user_f81d#21", "user_f81d#19", "user_d6c5#26", "user_d6c5#24", "user_17fa#09", "user_c3e8#16", "user_5c19#05", "user_c3e8#17", "user_2a97#22", "user_d6c5#25", "user_9d22#12", "user_40ee#29", "user_f81d#20", "user_40ee#30"]}};
+const META={
+ L015:{title:"ポケカ『ナイトワンダラー』1BOX パック番号",mode:"RANDOM",commitAt:"9/17(木) 10:00",fullAt:"9/23(水) 21:12",drawAt:"9/23(水) 21:14",openAt:"9/24(木) 20:00",
+   beacon:{source:"drand mainnet（示例値）",round:"4,812,330",fetchedAt:"9/23(水) 21:13:30"},algo:"bx-shuffle-v1",me:"user_a7e3",video:false},
+ L009:{title:"ポケカ『バトルパートナーズ』2BOX キャラ枠",mode:"PICK",commitAt:"9/18(金) 12:00",fullAt:"9/25(金) 21:40",drawAt:"9/25(金) 21:41",openAt:"9/26(土) 20:00（予定）",algo:"bx-pick-v1",me:"user_a7e3",video:false},
+ L011:{title:"ポケカ『シャイニートレジャーex』2BOX キャラ枠",mode:"PICK",commitAt:"9/12(土) 12:00",fullAt:"9/19(土) 22:10",drawAt:"9/19(土) 22:11",openAt:"9/21(月) 20:00",algo:"bx-pick-v1",me:"user_a7e3",video:true}
+};
+const SLOTN={L009:["ブラッキー枠","ニンフィア枠","エーフィ枠","リーフィア枠","グレイシア枠","シャワーズ枠","サンダース枠","ブースター枠","イーブイ枠","その他ポケモン（ex）枠","その他ポケモン枠","トレーナーズ・エネルギー枠"],
+ L011:["ピカチュウ枠","リザードン枠","テラパゴス枠","ミュウ枠","ミライドン枠","コライドン枠","ルカリオ枠","ゲンガー枠","ニンフィア枠","その他ポケモン（ex）枠","その他ポケモン枠","トレーナーズ・エネルギー枠"]};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+async function sha256(s){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");}
+
+const PY=`import hashlib
+H = lambda s: hashlib.sha256(s.encode()).hexdigest()
+
+def verify(server_seed, commit, participants_text, participants_hash, beacon, assignment):
+    assert H(server_seed) == commit                    # ① コミットと一致
+    assert H(participants_text) == participants_hash   # ② 参加者リストと一致
+    units = participants_text.split("\\n")
+    final = H(server_seed + "|" + participants_hash + "|" + beacon)
+    arr = list(range(len(units)))
+    for i in range(len(units) - 1, 0, -1):             # ③ Fisher–Yates
+        j = int(H(final + ":" + str(i))[:8], 16) % (i + 1)
+        arr[i], arr[j] = arr[j], arr[i]
+    assert [units[k] for k in arr] == assignment       # ④ 割り当てと一致
+    return True`;
+
+function entryView(){
+  document.getElementById("main").innerHTML=`<div class="page"><section class="entry">
+    <h1>開封会の公正性を検証する</h1>
+    <p class="muted">開封会 ID を入力すると、抽選の入力と結果を表示し、あなたのブラウザで再計算できます。</p>
+    <form id="go"><input id="lid" placeholder="開封会IDを入力（例：L015）" aria-label="開封会ID" autocomplete="off"><button class="primary" type="submit">検証</button></form>
+    <div class="examples"><span class="small muted">例：</span><a href="#L015">L015（ランダム）</a><a href="#L011">L011（枠を選択）</a><a href="#L009">L009（枠を選択）</a></div>
+  </section></div>`;
+  document.getElementById("go").addEventListener("submit",e=>{e.preventDefault();const v=document.getElementById("lid").value.trim().toUpperCase();
+    if(DATA[v]) location.hash=v; else say("該当する開封会が見つかりません（原型では L015 / L011 / L009）");});
+}
+
+function item(k,v){return `<div class="item"><span class="k">${k}<button class="copy" type="button" data-copy="${esc(v)}">コピー</button></span><span class="v">${esc(v)}</span></div>`;}
+function lotView(id){
+  const d=DATA[id], m=META[id], rnd=m.mode==="RANDOM";
+  const inputs=[item("シードのハッシュ（コミット・"+m.commitAt+" 公開）",d.commit),item("サーバーシード（"+m.drawAt+" に公開）",d.serverSeed),
+    item("参加者リスト"+(rnd?"（購入順・1行1枠）":"（枠番号:保有者）"),d.participantsText),item("参加者リストのハッシュ",d.participantsHash)];
+  if(rnd) inputs.push(item("外部ビーコン（"+m.beacon.source+"・ラウンド "+m.beacon.round+"・"+m.beacon.fetchedAt+" 取得）",d.beacon));
+  inputs.push(`<div class="item"><span class="k">アルゴリズム</span><span class="v">${m.algo}${rnd?"：final = SHA-256(seed|participantsHash|beacon)、Fisher–Yates（j = SHA-256(final:i) 先頭 8 桁 mod (i+1)）":"：枠は購入時に選択。抽選は行わず、シードは記録の改ざん防止に使用"}</span></div>`);
+  const assignRows=rnd?d.assignment.map((u,k)=>`<tr class="${u.startsWith(m.me)?"me":""}"><td class="mono">パック ${String(k+1).padStart(2,"0")}</td><td class="mono">${esc(u.replace(/#\d+$/,""))}…${u.startsWith(m.me)?" （あなた）":""}</td></tr>`).join("")
+    :d.participantsText.split("\n").map(l=>{const [n,u]=l.split(":");return `<tr class="${u===m.me?"me":""}"><td class="mono">#${n} ${esc(SLOTN[id][+n-1])}</td><td class="mono">${esc(u)}…${u===m.me?" （あなた）":""}</td></tr>`;}).join("");
+  document.getElementById("main").innerHTML=`<div class="page">
+    <section class="blk">
+      <span class="mode">${rnd?"ランダム割り当て":"枠を選んで購入"}</span>
+      <h1>${esc(m.title)}</h1>
+      <div class="meta"><span>開封会 ID <b class="mono">${id}</b></span><span>満員 ${m.fullAt}</span><span>開封 ${m.openAt}</span></div>
+      <div class="links"><button class="btn" type="button" id="share"><svg class="i"><use href="#i-share"/></svg>この検証ページを共有</button>
+        ${m.video?`<a class="btn" href="ui-07-recording.html#${id}"><svg class="i"><use href="#i-video"/></svg>開封映像を見る</a>`:`<a class="btn" href="#video" data-proto="開封映像（${id}）"><svg class="i"><use href="#i-video"/></svg>開封映像を見る</a>`}
+        <a class="btn" href="#spec" data-proto="アルゴリズム仕様"><svg class="i"><use href="#i-doc"/></svg>アルゴリズム仕様</a></div>
+    </section>
+    <section class="blk"><h2>しくみ</h2><ol class="steps">
+      <li><span class="n">1</span><span>販売開始前にシードのハッシュを公開</span></li>
+      <li><span class="n">2</span><span>満員後に参加者と外部ビーコンを合成</span></li>
+      <li><span class="n">3</span><span>公開アルゴリズムで割り当てを計算 → 誰でも再計算できます</span></li></ol>
+      ${rnd?"":`<p class="small muted" style="margin:0">この開封会は枠を選んで購入する方式のため、ステップ 2〜3 の抽選はありません。シードと参加者リストのハッシュで、記録が後から変えられていないことを確認します。</p>`}</section>
+    <div class="grid2">
+      <section class="blk"><h2>入力（すべて公開）</h2><div class="kv">${inputs.join("")}</div></section>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <section class="blk run"><h2>ブラウザで再計算する</h2>
+          <button class="primary" type="button" id="run">ブラウザで再計算する</button>
+          <ul class="res" id="res" aria-live="polite"></ul><div id="verdict"></div>
+          <label class="small muted" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="tamper">原型：改ざんされた値で試す（シードを 1 文字変更）</label></section>
+        <section class="blk"><h2>割り当て（${m.drawAt} 公開）</h2><div class="tblwrap"><table><thead><tr><th>${rnd?"パック番号":"枠"}</th><th>保有者（匿名化）</th></tr></thead><tbody>${assignRows}</tbody></table></div></section>
+      </div>
+    </div>
+    <section class="blk"><details class="script"><summary>検証スクリプト（Python）</summary>
+      <p class="small muted" style="margin:6px 0 0">上の入力をそのまま渡すと、このページと同じ計算を手元で再現できます。</p>
+      <pre id="py"></pre><button class="btn" type="button" id="copy-py" style="margin-top:8px">スクリプトをコピー</button></details></section>
+  </div>`;
+  document.getElementById("py").textContent=PY;
+  document.getElementById("run").onclick=()=>run(id);
+  document.getElementById("share").onclick=()=>copy(location.href,"ページの URL をコピーしました");
+  document.getElementById("copy-py").onclick=()=>copy(PY,"スクリプトをコピーしました");
+}
+
+async function run(id){
+  const d=DATA[id], rnd=META[id].mode==="RANDOM", tamper=document.getElementById("tamper").checked;
+  const res=document.getElementById("res"), btn=document.getElementById("run"); btn.disabled=true; res.innerHTML=""; document.getElementById("verdict").innerHTML="";
+  const seed=tamper?d.serverSeed.slice(0,-1)+"X":d.serverSeed; let allOk=true;
+  const add=(ok,label,detail)=>{allOk=allOk&&ok;res.insertAdjacentHTML("beforeend",`<li class="${ok?"ok":"ng"}"><span class="ic">${ok?"✓":"✕"}</span><span>${label}<span class="d">${detail}</span></span></li>`);};
+  const h1=await sha256(seed); add(h1===d.commit,"ハッシュ一致（シード → コミット）",`SHA-256(seed) = ${h1}`);
+  const h2=await sha256(d.participantsText); add(h2===d.participantsHash,"参加者リスト一致",`SHA-256(list) = ${h2}`);
+  if(rnd){
+    const units=d.participantsText.split("\n"), fin=await sha256(seed+"|"+h2+"|"+d.beacon), arr=units.map((_,i)=>i);
+    for(let i=units.length-1;i>0;i--){const j=parseInt((await sha256(fin+":"+i)).slice(0,8),16)%(i+1);[arr[i],arr[j]]=[arr[j],arr[i]];}
+    const got=arr.map(k=>units[k]), diff=got.findIndex((u,k)=>u!==d.assignment[k]);
+    add(diff<0,"割り当て一致",diff<0?`final = ${fin}`:`パック ${diff+1}：計算 ${got[diff]} / 公開 ${d.assignment[diff]}`);
+  }
+  document.getElementById("verdict").innerHTML=allOk?`<div class="verdict ok">✓ 公開された結果と一致しました</div>`:`<div class="verdict ng">✕ 一致しない項目があります（詳細は上記）</div>`;
+  btn.disabled=false;
+}
+
+async function copy(text,msg){try{await navigator.clipboard.writeText(text);say(msg);}catch(e){say("コピーできませんでした。手動で選択してください");}}
+document.addEventListener("click",e=>{const c=e.target.closest("[data-copy]");if(c){copy(c.dataset.copy,"コピーしました");return;}
+  const p=e.target.closest("[data-proto]");if(p){e.preventDefault();say(`原型：「${p.dataset.proto}」尚未生成`);}});
+const toast=document.getElementById("toast"); let tt;
+function say(m){toast.textContent=m;toast.hidden=false;clearTimeout(tt);tt=setTimeout(()=>toast.hidden=true,2600);}
+function route(){const h=(location.hash||"").slice(1).toUpperCase(); if(DATA[h]) lotView(h); else entryView(); scrollTo(0,0);}
+window.addEventListener("hashchange",route); route();
+</script>
+</body>
+</html>

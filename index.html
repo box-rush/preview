@@ -150,16 +150,34 @@ footer{font-size:12.5px;color:var(--ink-2);border-top:1px solid var(--line);padd
         <p>Canvas 模拟的 24 分钟开盒录像：章节时间轴、「元映像のみ表示」原始画面开关、区段哈希、随播放高亮的卡片归属列表（可筛选"あなたの枠"）、画中画。</p>
         <span class="go">打开 →</span>
       </a>
+      <a class="card" href="prototype/ui-08-result.html#L011">
+        <div class="top"><span class="code">UI-08</span><span class="status">已生成</span></div>
+        <h3>开盒结果</h3>
+        <p>我的卡（每张可跳到录像时刻）、全部 200 张的归属表（自动 / 手动判定）、申诉入口；不显示总价值或排名。</p>
+        <span class="go">打开 →</span>
+      </a>
+      <div class="card" style="cursor:default">
+        <div class="top"><span class="code">UI-09</span><span class="status">已生成</span></div>
+        <h3>验证页 + 公开验证站</h3>
+        <p>浏览器内真实计算 SHA-256 与洗牌，和公开结果比对；可切换"篡改值"看不一致；附 Python 验证脚本。免登录。</p>
+        <div class="deep">
+          <a href="prototype/ui-09-verify.html">公开入口</a>
+          <a href="prototype/ui-09-verify.html#L015">随机场次</a>
+          <a href="prototype/ui-09-verify.html#L011">选位场次</a>
+        </div>
+      </div>
+      <a class="card" href="prototype/ui-10-collection.html#stored">
+        <div class="top"><span class="code">UI-10</span><span class="status">已生成</span></div>
+        <h3>仓库 + 发货申请</h3>
+        <p>保管中 / 发货中 / 已签收、免费保管期限提醒、多选合单发货、补偿付き配送；卡片详情可跳录像；没有任何卖出或兑换操作。</p>
+        <span class="go">打开 →</span>
+      </a>
     </div>
   </section>
 
   <section aria-labelledby="h-todo">
-    <div class="sec-h"><h2 id="h-todo">待生成</h2><span>第 9 章已有 prompt，尚未生成原型</span></div>
+    <div class="sec-h"><h2 id="h-todo">待生成</h2><span>第 9 章已有 prompt，尚未生成原型（UI-06 分位公示动画为 P1，本轮不做）</span></div>
     <ul class="todo">
-      <li><span class="c">UI-06</span>分位公示演出<span class="p">P1</span></li>
-      <li><span class="c">UI-08</span>开盒结果<span class="p">MVP</span></li>
-      <li><span class="c">UI-09</span>验证页 + 公开验证站<span class="p">MVP</span></li>
-      <li><span class="c">UI-10</span>仓库 + 发货申请<span class="p">MVP</span></li>
       <li><span class="c">UI-11</span>首次引导<span class="p">MVP</span></li>
       <li><span class="c">UI-12</span>消费保护设置<span class="p">MVP</span></li>
       <li><span class="c">UI-13</span>场次创建向导 + 分位编辑器（商家）<span class="p">MVP</span></li>
