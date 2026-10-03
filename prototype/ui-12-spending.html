@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<!-- Box Rush 原型 UI-12 消费保护设置。由 docs/breaking-platform.md §9.4 UI-12 prompt 生成；静态单文件，无需构建。
+     数字与 ui-04 一致（今月 ¥12,000 / 上限 ¥50,000）；深夜确认按 PD10。原型时钟 2026-09-26 18:00 JST。 -->
+<title>BOXラッシュ ご利用の管理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+:root{
+  --ground:#EEEEE8; --bg:#FAFAF7; --surface:#FFFFFF; --ink:#1A1A1A; --ink-2:#6B6B6B; --line:#E6E5DE; --track:#ECEBE4;
+  --accent:#3B3FD8; --accent-ink:#FFFFFF; --accent-soft:#ECEDFC; --trust:#0F9D8A; --trust-soft:#E1F3F0; --warn:#B77400; --warn-soft:#FBF0DC;
+  --sans:"Noto Sans JP","Hiragino Kaku Gothic ProN","Hiragino Sans",Meiryo,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){color-scheme:dark;
+  --ground:#0A0B0C; --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --ink-2:#A0A0A0; --line:#2A2B2F; --track:#2A2B2F;
+  --accent:#8E91F7; --accent-ink:#111214; --accent-soft:#23244A; --trust:#3CC4B0; --trust-soft:#15302C; --warn:#F0A73A; --warn-soft:#3A2C12;}}
+:root[data-theme="dark"]{color-scheme:dark;
+  --ground:#0A0B0C; --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --ink-2:#A0A0A0; --line:#2A2B2F; --track:#2A2B2F;
+  --accent:#8E91F7; --accent-ink:#111214; --accent-soft:#23244A; --trust:#3CC4B0; --trust-soft:#15302C; --warn:#F0A73A; --warn-soft:#3A2C12;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.6}
+button,input,select{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.mono{font-family:var(--mono)} .muted{color:var(--ink-2)} .small{font-size:12px}
+.proto{background:var(--ink);color:var(--bg);font-size:12px}
+.proto summary{padding:6px 16px;cursor:pointer;list-style:none}
+.proto summary::-webkit-details-marker{display:none}
+.app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);padding-bottom:28px}
+.top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:8px;padding:10px 16px;max-width:720px;margin:0 auto}
+.back{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;margin-left:-8px}
+.back:hover{background:var(--track)}
+.bar h1{margin:0;font-size:16px;font-weight:900}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.page{display:flex;flex-direction:column;gap:14px;padding:14px 16px;max-width:720px;margin:0 auto}
+.lede{margin:0;color:var(--ink-2);font-size:13px}
+.blk{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.blk h2{margin:0;font-size:15px;font-weight:900}
+.usage b{font-family:var(--mono);font-size:26px}
+.lt{height:10px;border-radius:5px;background:var(--track);overflow:hidden}
+.lt i{display:block;height:100%;background:var(--accent);border-radius:5px}
+.row{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--ink-2);flex-wrap:wrap}
+.row b{font-family:var(--mono);color:var(--ink)}
+.f{display:flex;flex-direction:column;gap:6px}
+.f label{font-size:12.5px;font-weight:700}
+.presets{display:flex;gap:6px;flex-wrap:wrap}
+.presets button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-family:var(--mono);font-size:13px;cursor:pointer;min-height:36px}
+.presets button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.pending{background:var(--warn-soft);border-radius:8px;padding:8px 10px;font-size:12.5px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.pending button{border:0;background:transparent;color:var(--accent);font-weight:700;cursor:pointer;font-size:12.5px}
+.ok{background:var(--trust-soft);border-radius:8px;padding:8px 10px;font-size:12.5px}
+.sw{display:flex;align-items:flex-start;gap:12px;cursor:pointer}
+.sw input{appearance:none;width:44px;height:26px;border-radius:13px;background:var(--track);position:relative;flex:none;cursor:pointer;margin:2px 0 0;transition:background .15s}
+.sw input::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:left .15s}
+.sw input:checked{background:var(--accent)}
+.sw input:checked::after{left:21px}
+.sw b{display:block}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:0 14px;min-height:44px;font-weight:700;cursor:pointer}
+.btn:hover{border-color:var(--ink-2)}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.excl{display:flex;gap:8px;flex-wrap:wrap}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:7px 4px;border-bottom:1px solid var(--line)}
+th{font-size:12px;color:var(--ink-2)}
+td.num{font-family:var(--mono);text-align:right}
+th.num{text-align:right}
+dialog{border:0;padding:0;color:var(--ink);background:var(--surface);width:calc(100% - 32px);max-width:420px;border-radius:16px}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+.dh{padding:18px 18px 6px}.dh h3{margin:0;font-size:17px}
+.db{padding:6px 18px 10px;font-size:13.5px}
+.df{display:flex;gap:8px;padding:6px 18px 18px}.df .btn{flex:1}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:12.5px;padding:8px 14px;border-radius:999px;z-index:40}
+@media (min-width:768px){ body{background:var(--bg)} .app{max-width:none} }
+@media (prefers-reduced-motion: reduce){ .sw input,.sw input::after{transition:none} }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="i-back" viewBox="0 0 24 24"><path d="M15 18 9 12l6-6"/></symbol></defs></svg>
+<div class="app">
+  <details class="proto"><summary>原型 UI-12 消费保护设置 · 示例数据（与 UI-04 一致）· 原型时钟 2026-09-26 18:00 JST</summary></details>
+  <header class="top"><div class="bar"><a class="back" href="#mypage" data-proto="マイページ" aria-label="マイページに戻る"><svg class="i"><use href="#i-back"/></svg></a><h1>ご利用の管理</h1></div></header>
+  <main class="page">
+    <p class="lede">使いすぎを防ぐための設定です。上限を下げる・停止するはすぐに反映され、上限を上げるときだけ時間をおいて反映します。</p>
+    <section class="blk usage" aria-labelledby="h-u"><h2 id="h-u">今月のご利用</h2>
+      <b id="used">¥12,000</b><div class="lt" role="progressbar" aria-valuemin="0" id="ubar"><i id="ufill"></i></div>
+      <div class="row"><span>上限 <b id="cap-t"></b></span><span>残り <b id="left"></b></span></div></section>
+    <section class="blk" aria-labelledby="h-l"><h2 id="h-l">上限</h2>
+      <div class="f"><label>1 か月の上限</label><div class="presets" data-k="month"></div></div>
+      <div class="f"><label>1 回のご注文の上限</label><div class="presets" data-k="order"></div></div>
+      <div id="lnote"></div></section>
+    <section class="blk" aria-labelledby="h-n"><h2 id="h-n">深夜の確認</h2>
+      <label class="sw"><input type="checkbox" id="night" checked><span><b>深夜（0〜6時）に購入するとき、支払い前に確認する</b>
+        <span class="small muted">ただし、今夜（0〜6時）の利用額がこのご注文で <b class="mono" style="display:inline">¥10,000</b> に達する場合は、この設定に関係なく必ず確認します。</span></span></label></section>
+    <section class="blk" aria-labelledby="h-x"><h2 id="h-x">一定期間 購入を停止する</h2>
+      <span class="small muted">期間中は新しい枠を購入できません。期間中の解除はできません。すでに購入した枠や、倉庫のカードの発送はそのまま使えます。</span>
+      <div id="xstate"></div>
+      <div class="excl" id="excl"><button class="btn" type="button" data-days="7">7 日間</button><button class="btn" type="button" data-days="30">30 日間</button><button class="btn" type="button" data-days="90">90 日間</button></div></section>
+    <section class="blk" aria-labelledby="h-s"><h2 id="h-s">月ごとのご利用</h2>
+      <table><thead><tr><th>月</th><th class="num">ご利用額</th><th class="num">参加した開封会</th></tr></thead>
+        <tbody><tr><td>2026年9月</td><td class="num">¥12,000</td><td class="num">4</td></tr><tr><td>2026年8月</td><td class="num">¥18,600</td><td class="num">6</td></tr><tr><td>2026年7月</td><td class="num">¥9,400</td><td class="num">3</td></tr></tbody></table>
+      <span class="small muted">お支払いの合計のみを表示しています。</span></section>
+  </main>
+  <dialog id="xd" aria-labelledby="xd-t"><div class="dh"><h3 id="xd-t"></h3></div>
+    <div class="db"><p style="margin:0">停止期間中は解除できません。よろしいですか？</p></div>
+    <div class="df"><button class="btn" type="button" id="xd-no">やめる</button><button class="btn pri" type="button" id="xd-yes">停止する</button></div></dialog>
+  <div class="toast" id="toast" role="status" hidden></div>
+</div>
+<script>
+const NOW=new Date("2026-09-26T18:00:00+09:00").getTime(), H=3600e3, WD="日月火水木金土";
+const jst=ms=>{const t=new Date(ms+9*H);return `${t.getUTCMonth()+1}/${t.getUTCDate()}(${WD[t.getUTCDay()]}) ${String(t.getUTCHours()).padStart(2,"0")}:${String(t.getUTCMinutes()).padStart(2,"0")}`;};
+const yen=n=>"¥"+n.toLocaleString("ja-JP");
+const USED=12000;
+const st={month:50000,order:10000,pending:null,until:null};
+const PRE={month:[20000,30000,50000,100000],order:[5000,10000,20000]};
+function render(){
+  document.getElementById("cap-t").textContent=yen(st.month); document.getElementById("left").textContent=yen(Math.max(0,st.month-USED));
+  document.getElementById("ufill").style.width=Math.min(100,USED/st.month*100)+"%";
+  const ub=document.getElementById("ubar"); ub.setAttribute("aria-valuemax",st.month); ub.setAttribute("aria-valuenow",USED);
+  document.querySelectorAll(".presets").forEach(p=>{const k=p.dataset.k;p.innerHTML=PRE[k].map(v=>`<button type="button" data-v="${v}" aria-pressed="${st[k]===v}">${yen(v)}</button>`).join("");});
+  document.getElementById("lnote").innerHTML=st.pending?`<div class="pending"><span>${st.pending.k==="month"?"1 か月":"1 回"}の上限を ${yen(st.pending.v)} に引き上げ：<b class="mono">${jst(st.pending.at)}</b> に反映（72 時間後）</span><button type="button" id="cancel">取り消す</button></div>`:"";
+  const c=document.getElementById("cancel"); if(c) c.onclick=()=>{st.pending=null;render();say("引き上げを取り消しました");};
+  document.getElementById("xstate").innerHTML=st.until?`<div class="ok">購入を停止しています：<b class="mono">${jst(st.until)}</b> まで</div>`:"";
+  document.getElementById("excl").hidden=!!st.until;
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest(".presets button"); if(b){const k=b.parentElement.dataset.k, v=+b.dataset.v;
+    if(v<st[k]){st[k]=v; if(st.pending&&st.pending.k===k) st.pending=null; render(); say("上限を下げました（すぐに反映）");}
+    else if(v>st[k]){st.pending={k,v,at:NOW+72*H}; render(); say("引き上げは 72 時間後に反映されます");}
+    return;}
+  const p=e.target.closest("[data-proto]"); if(p){e.preventDefault();say(`原型：「${p.dataset.proto}」尚未生成`);}
+});
+let days=0; const xd=document.getElementById("xd");
+document.querySelectorAll("[data-days]").forEach(b=>b.onclick=()=>{days=+b.dataset.days;document.getElementById("xd-t").textContent=`${days} 日間 購入を停止します`;xd.showModal?xd.showModal():xd.setAttribute("open","");});
+document.getElementById("xd-no").onclick=()=>xd.close();
+document.getElementById("xd-yes").onclick=()=>{st.until=NOW+days*24*H;xd.close();render();};
+document.getElementById("night").onchange=e=>say(e.target.checked?"深夜の確認をオンにしました":"深夜の確認をオフにしました（今夜 ¥10,000 に達する場合は必ず確認します）");
+const toast=document.getElementById("toast"); let tt;
+function say(m){toast.textContent=m;toast.hidden=false;clearTimeout(tt);tt=setTimeout(()=>toast.hidden=true,2600);}
+render();
+</script>
+</body>
+</html>
