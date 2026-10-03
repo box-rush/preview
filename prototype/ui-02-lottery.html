@@ -488,7 +488,7 @@ function bind(l,limit){
     setTimeout(()=>b.textContent="コピー",1600);};
   document.getElementById("snap-open").onclick=()=>openSheet(l);
   const buy=document.getElementById("buy");
-  if(buy) buy.onclick=()=>{ if(l.selectionMode==="PICK"){ location.href="ui-03-pick.html#"+l.id; return; } say(`原型：确认与支付页（UI-04）尚未生成 · ${state.qty}枠`); };
+  if(buy) buy.onclick=()=>{ if(l.selectionMode==="PICK"){ location.href="ui-03-pick.html#"+l.id; return; } location.href="ui-04-checkout.html#"+l.id+"-r"+state.qty; };
   const dec=document.getElementById("dec"),inc=document.getElementById("inc");
   if(dec) dec.onclick=()=>{state.qty=Math.max(1,state.qty-1);render();};
   if(inc) inc.onclick=()=>{state.qty=Math.min(limit,state.qty+1);render();};

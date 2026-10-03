@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<!-- Box Rush 原型 UI-04 确认与支付 + 支付结果。由 docs/breaking-platform.md §9.4 UI-04 prompt 生成；静态单文件，无需构建。
+     支付区为 Stripe Payment Element 的本地模拟（不加载 Stripe.js、不发送任何数据）。不提供コンビニ払い（PD9）。
+     深夜确认：JST 0–6 时当夜累计（含本单）达 ¥10,000 时弹出（PD10）。
+     #L005-3-5（默认：L005 的 3 号、5 号枠）/ #L002-r2（L002 随机 2 枠）。 -->
+<title>BOXラッシュ ご購入手続き</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Tokens: docs/breaking-platform.md §9.2 (same as ui-01..03) */
+:root{
+  --gut:16px; --cta:96px;
+  --ground:#EEEEE8;
+  --bg:#FAFAF7; --surface:#FFFFFF; --ink:#1A1A1A; --ink-2:#6B6B6B; --line:#E6E5DE; --track:#ECEBE4;
+  --accent:#3B3FD8; --accent-ink:#FFFFFF; --accent-soft:#ECEDFC;
+  --trust:#0F9D8A; --trust-soft:#E1F3F0;
+  --warn:#B77400; --warn-soft:#FBF0DC; --error:#C93C3C; --error-soft:#FBE7E7;
+  --field:#FFFFFF;
+  --shadow:0 1px 2px rgba(20,20,40,.06),0 4px 14px rgba(20,20,40,.05);
+  --sans:"Noto Sans JP","Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic",Meiryo,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#0A0B0C;
+    --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --ink-2:#A0A0A0; --line:#2A2B2F; --track:#2A2B2F;
+    --accent:#8E91F7; --accent-ink:#111214; --accent-soft:#23244A;
+    --trust:#3CC4B0; --trust-soft:#15302C;
+    --warn:#F0A73A; --warn-soft:#3A2C12; --error:#EF6B6B; --error-soft:#3A1C1C;
+    --field:#141518;
+    --shadow:0 1px 2px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#0A0B0C;
+  --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --ink-2:#A0A0A0; --line:#2A2B2F; --track:#2A2B2F;
+  --accent:#8E91F7; --accent-ink:#111214; --accent-soft:#23244A;
+  --trust:#3CC4B0; --trust-soft:#15302C;
+  --warn:#F0A73A; --warn-soft:#3A2C12; --error:#EF6B6B; --error-soft:#3A1C1C;
+  --field:#141518;
+  --shadow:0 1px 2px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--mono)}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.small{font-size:12px}
+.muted{color:var(--ink-2)}
+
+.app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);padding-bottom:calc(var(--cta) + env(safe-area-inset-bottom,0px))}
+.wrap{width:100%;max-width:1080px;margin-inline:auto}
+
+/* prototype strip */
+.proto{background:var(--ink);color:var(--bg);font-size:12px}
+.proto summary{padding:6px 16px;cursor:pointer;list-style:none;display:flex;gap:8px;align-items:center}
+.proto summary::-webkit-details-marker{display:none}
+.proto summary::before{content:"▸";transition:transform .15s}
+.proto[open] summary::before{transform:rotate(90deg)}
+.proto .opts{padding:4px 16px 12px;display:flex;flex-direction:column;gap:8px}
+.proto .row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.proto .row>span{min-width:96px;opacity:.75}
+.proto button{background:transparent;border:1px solid color-mix(in srgb,var(--bg) 40%,transparent);color:var(--bg);border-radius:999px;padding:2px 10px;font-size:12px;cursor:pointer}
+.proto button[aria-pressed="true"]{background:var(--bg);color:var(--ink)}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:8px;padding:10px var(--gut)}
+.back{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;margin-left:-8px;flex:none;color:var(--ink);text-decoration:none}
+.back:hover{background:var(--track)}
+.bar h1{margin:0;font-size:16px;font-weight:900;flex:1}
+.hold{font-size:12.5px;display:flex;align-items:center;gap:6px;color:var(--ink-2)}
+.hold b{font-family:var(--mono);color:var(--ink);font-size:14px}
+.hold.ended b{color:var(--error)}
+
+/* layout */
+.page{display:flex;flex-direction:column;gap:14px;padding:14px var(--gut) 18px}
+.col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.blk{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.blk h2{margin:0;font-size:15px;font-weight:900}
+
+/* order summary */
+.lot{font-weight:700;line-height:1.45}
+.lines{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.lines li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.lines li:last-child{border-bottom:0}
+.lines .no{font-family:var(--mono);font-size:11px;color:var(--ink-2);margin-right:6px}
+.lines .p{font-family:var(--mono);font-weight:700;white-space:nowrap}
+.total{display:flex;justify-content:space-between;align-items:baseline;border-top:2px solid var(--ink);padding-top:10px}
+.total b{font-family:var(--mono);font-size:22px}
+.fee{font-size:12px;color:var(--ink-2)}
+
+/* rules recap */
+.rules{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px;font-size:13px}
+.rules li{display:flex;gap:8px;align-items:flex-start}
+.rules li svg{width:16px;height:16px;margin-top:3px;color:var(--trust)}
+.agree{display:flex;gap:10px;align-items:center;border-top:1px solid var(--line);padding-top:10px;font-weight:700;cursor:pointer;min-height:44px}
+.agree input{width:20px;height:20px;accent-color:var(--accent);flex:none}
+
+/* limit */
+.limit .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13px}
+.limit .row b{font-family:var(--mono)}
+.ltrack{height:6px;border-radius:3px;background:var(--track);overflow:hidden;position:relative}
+.ltrack i{position:absolute;left:0;top:0;bottom:0;background:var(--ink-2);border-radius:3px}
+.ltrack em{position:absolute;top:0;bottom:0;background:var(--accent);opacity:.65}
+.limit a,.link{color:var(--accent);font-weight:700;font-size:12.5px;text-decoration:none}
+.limit a:hover,.link:hover{text-decoration:underline}
+.block{background:var(--error-soft);color:var(--ink);border-radius:8px;padding:10px 12px;font-size:12.5px;display:flex;gap:8px}
+.block svg{color:var(--error);margin-top:1px}
+
+/* payment element mock */
+.pe{display:flex;flex-direction:column;gap:8px}
+.pm{border:1px solid var(--line);border-radius:10px;background:var(--field);overflow:hidden}
+.pm>label{display:flex;align-items:center;gap:10px;padding:12px 12px;cursor:pointer;min-height:48px}
+.pm>label input{accent-color:var(--accent);width:18px;height:18px;flex:none}
+.pm .nm{flex:1;font-weight:700;font-size:14px}
+.pm .logo{font-family:var(--mono);font-size:10.5px;color:var(--ink-2);border:1px solid var(--line);border-radius:4px;padding:0 5px}
+.pm.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.pm.off{opacity:.55}
+.pm.off>label{cursor:not-allowed}
+.pm .soon{font-size:11px;background:var(--track);border-radius:4px;padding:0 6px;color:var(--ink-2)}
+.pm .body{padding:0 12px 12px;display:flex;flex-direction:column;gap:8px}
+.f{display:flex;flex-direction:column;gap:4px}
+.f label{font-size:12px;color:var(--ink-2)}
+.f input{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:10px 12px;min-height:44px}
+.f input:focus{outline:2px solid var(--accent);outline-offset:0;border-color:transparent}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.note{font-size:12px;color:var(--ink-2);margin:0}
+.warnbox{background:var(--warn-soft);border-radius:8px;padding:9px 11px;font-size:12.5px;display:flex;gap:8px}
+.warnbox svg{color:var(--warn);margin-top:1px}
+.secure{display:flex;gap:6px;align-items:center;font-size:11.5px;color:var(--ink-2)}
+.secure svg{width:14px;height:14px}
+
+/* pay bar */
+.cta{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:480px;background:color-mix(in srgb,var(--surface) 97%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:10px var(--gut) calc(10px + env(safe-area-inset-bottom,0px));z-index:30;display:flex;flex-direction:column;gap:5px}
+.primary{width:100%;min-height:50px;border:0;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-weight:900;font-size:16px;cursor:pointer}
+.primary:disabled{background:var(--track);color:var(--ink-2);cursor:not-allowed}
+.why{font-size:11.5px;color:var(--ink-2);text-align:center;min-height:1.4em}
+.ghost{width:100%;min-height:46px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-weight:700;cursor:pointer}
+
+/* dialogs */
+dialog{border:0;padding:0;color:var(--ink);background:var(--surface);width:calc(100% - 32px);max-width:420px;border-radius:16px}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+.dh{padding:18px 18px 6px;display:flex;flex-direction:column;gap:6px}
+.dh h3{margin:0;font-size:17px;font-weight:900}
+.db{padding:6px 18px 12px;display:flex;flex-direction:column;gap:10px;font-size:13.5px}
+.db p{margin:0}
+.df{display:flex;gap:8px;padding:6px 18px 18px}
+.df button{flex:1}
+.df .primary{font-size:15px;min-height:46px}
+.tds{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
+.tds .bank{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.otp{font-family:var(--mono);letter-spacing:.3em;text-align:center;font-size:18px}
+.spin{width:22px;height:22px;border-radius:50%;border:3px solid var(--track);border-top-color:var(--accent);animation:sp 0.9s linear infinite;margin:6px auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* result */
+.result{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:28px 18px}
+.result .badge{width:64px;height:64px;border-radius:50%;display:grid;place-items:center}
+.result .badge svg{width:34px;height:34px;stroke-width:2.4}
+.ok .badge{background:var(--trust-soft);color:var(--trust)}
+.ng .badge{background:var(--error-soft);color:var(--error)}
+.wait .badge{background:var(--warn-soft);color:var(--warn)}
+.result h2{margin:0;font-size:20px;font-weight:900}
+.result p{margin:0;max-width:46ch}
+.voucher{width:100%;border:1px dashed var(--line);border-radius:12px;padding:14px;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;text-align:left;font-size:13px}
+.voucher dt{color:var(--ink-2);font-size:12px}
+.voucher dd{margin:0}
+.voucher .code{font-family:var(--mono);font-size:17px;font-weight:700;letter-spacing:.06em}
+.nextbox{width:100%;text-align:left;background:var(--accent-soft);border-radius:10px;padding:12px 14px;font-size:13px}
+
+.toast{position:fixed;left:50%;bottom:calc(var(--cta) + 12px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:12.5px;padding:8px 14px;border-radius:999px;z-index:60;max-width:calc(100% - 32px);text-align:center}
+
+@media (min-width:768px){
+  :root{--gut:24px}
+  body{background:var(--bg)}
+  .app{max-width:none}
+  .cta{max-width:none}
+  .cta>*{max-width:560px;margin-inline:auto;width:100%}
+  .page{max-width:640px;margin-inline:auto}
+}
+@media (min-width:1024px){
+  .app{padding-bottom:24px}
+  .page{max-width:1080px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,420px);gap:24px;align-items:start;padding-top:24px}
+  .col.pay{position:sticky;top:84px}
+  .cta{position:static;transform:none;width:auto;max-width:none;border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--surface)}
+  .cta>*{max-width:none}
+  .toast{bottom:24px}
+}
+@media (prefers-reduced-motion: reduce){ .spin{animation:none;border-top-color:var(--track)} }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 18 9 12l6-6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2 20h20Z"/><path d="M12 10v4M12 17h.01"/></symbol>
+    <symbol id="i-store" viewBox="0 0 24 24"><path d="M3 9 5 4h14l2 5"/><path d="M4 9v11h16V9"/><path d="M3 9h18M10 20v-6h4v6"/></symbol>
+  </defs>
+</svg>
+
+<div class="app">
+  <details class="proto">
+    <summary>原型 UI-04 确认与支付 · 本地模拟 Stripe Payment Element，不发送任何数据 · 点此切换</summary>
+    <div class="opts">
+      <div class="row"><span>订单</span>
+        <button type="button" data-order="L005-3-5" aria-pressed="true">L005 选 2 枠</button>
+        <button type="button" data-order="L002-r2" aria-pressed="false">L002 随机 2 枠</button>
+      </div>
+      <div class="row"><span>支付结果</span>
+        <button type="button" data-res="ok" aria-pressed="true">成功</button>
+        <button type="button" data-res="declined" aria-pressed="false">卡被拒</button>
+        <button type="button" data-res="auth" aria-pressed="false">本人认证失败</button>
+      </div>
+      <div class="row"><span>本月已用</span>
+        <button type="button" data-used="12000" aria-pressed="true">¥12,000</button>
+        <button type="button" data-used="48000" aria-pressed="false">¥48,000（本单超限）</button>
+      </div>
+      <div class="row"><span>深夜确认（PD10）</span>
+        <button type="button" data-night="0" aria-pressed="true">白天</button>
+        <button type="button" data-night="2000" aria-pressed="false">深夜 2:00 · 今晚已用 ¥2,000</button>
+        <button type="button" data-night="8000" aria-pressed="false">深夜 2:00 · 今晚已用 ¥8,000</button>
+      </div>
+      <div class="row"><span>确保时间</span>
+        <button type="button" id="hold-end">立即到期</button>
+      </div>
+    </div>
+  </details>
+
+  <header class="top">
+    <div class="bar wrap">
+      <a class="back" id="back" href="ui-03-pick.html#L005" aria-label="枠の選択に戻る"><svg class="i"><use href="#i-back"/></svg></a>
+      <h1 id="hdr">ご購入手続き</h1>
+      <span class="hold" id="hold" role="timer" aria-live="off"></span>
+    </div>
+  </header>
+
+  <!-- checkout view -->
+  <div class="page" id="v-checkout">
+    <div class="col">
+      <section class="blk" aria-labelledby="h-sum">
+        <h2 id="h-sum">ご注文内容</h2>
+        <div class="lot" id="lot"></div>
+        <ul class="lines" id="lines"></ul>
+        <div class="total"><span>合計（税込）</span><b class="num" id="total"></b></div>
+        <span class="fee">決済手数料はかかりません。カードは倉庫で保管され、送料は発送を依頼するときに表示します。</span>
+      </section>
+
+      <section class="blk" aria-labelledby="h-rules">
+        <h2 id="h-rules">ご確認ください</h2>
+        <ul class="rules" id="rules"></ul>
+        <label class="agree"><input type="checkbox" id="agree">上記を確認しました</label>
+      </section>
+
+      <section class="blk limit" aria-labelledby="h-limit">
+        <h2 id="h-limit">今月のご利用</h2>
+        <div class="row"><span>今月の利用額 <b class="num" id="used"></b> / 上限 <b class="num" id="cap"></b></span><a href="#settings" data-proto="消费保护设置（UI-12）">設定</a></div>
+        <div class="ltrack" aria-hidden="true"><i id="used-bar"></i><em id="this-bar"></em></div>
+        <span class="small muted" id="after"></span>
+        <div class="block" id="over" hidden><svg class="i"><use href="#i-alert"/></svg><span>このご注文で今月の上限を超えるため、購入できません。上限は<a class="link" href="#settings" data-proto="消费保护设置（UI-12）">設定</a>から変更できます（引き上げは 72 時間後に反映）。</span></div>
+      </section>
+    </div>
+
+    <div class="col pay">
+      <section class="blk" aria-labelledby="h-pay">
+        <h2 id="h-pay">お支払い方法</h2>
+        <div class="pe" id="pe" role="radiogroup" aria-labelledby="h-pay">
+          <div class="pm on" data-pm="card">
+            <label><input type="radio" name="pm" value="card" checked><span class="nm">クレジットカード</span><span class="logo">VISA</span><span class="logo">MC</span><span class="logo">JCB</span><span class="logo">AMEX</span></label>
+            <div class="body">
+              <div class="f"><label for="cc">カード番号</label><input id="cc" inputmode="numeric" autocomplete="cc-number" value="4242 4242 4242 4242"></div>
+              <div class="f2">
+                <div class="f"><label for="exp">有効期限</label><input id="exp" inputmode="numeric" autocomplete="cc-exp" value="12 / 29"></div>
+                <div class="f"><label for="cvc">セキュリティコード</label><input id="cvc" inputmode="numeric" autocomplete="cc-csc" value="123"></div>
+              </div>
+              <p class="note">カード会社の本人認証（3Dセキュア）画面が表示される場合があります。（原型：テスト用カード番号を入力済み）</p>
+            </div>
+          </div>
+          <div class="pm" data-pm="apple">
+            <label><input type="radio" name="pm" value="apple"><span class="nm">Apple Pay</span></label>
+          </div>
+          <div class="pm" data-pm="google">
+            <label><input type="radio" name="pm" value="google"><span class="nm">Google Pay</span></label>
+          </div>
+          <div class="pm off" data-pm="paypay">
+            <label><input type="radio" name="pm" value="paypay" disabled><span class="nm">PayPay</span><span class="soon">準備中</span></label>
+          </div>
+        </div>
+        <span class="secure"><svg class="i"><use href="#i-lock"/></svg>決済は Stripe が処理します。カード情報は当社のサーバーに保存されません。</span>
+      </section>
+
+      <div class="cta">
+        <button class="primary" type="button" id="pay" disabled></button>
+        <span class="why" id="why"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- result view -->
+  <div class="page" id="v-result" hidden>
+    <div class="col" id="result-col"></div>
+  </div>
+
+  <!-- late-night confirm -->
+  <dialog id="night" aria-labelledby="night-t">
+    <div class="dh"><h3 id="night-t">深夜の高額購入です。内容をご確認ください</h3></div>
+    <div class="db"><p id="night-b"></p><p class="small muted">上限や深夜の確認は「設定 › ご利用の管理」で確認できます。</p></div>
+    <div class="df"><button class="ghost" type="button" data-close>見直す</button><button class="primary" type="button" id="night-go">購入を続ける</button></div>
+  </dialog>
+
+  <!-- 3DS mock -->
+  <dialog id="tds" aria-labelledby="tds-t">
+    <div class="dh"><h3 id="tds-t">カード会社の本人認証</h3><span class="small muted">EMV 3-Dセキュア（原型のモック画面です）</span></div>
+    <div class="db">
+      <div class="tds">
+        <span class="bank">○○カード 本人認証サービス</span>
+        <p>ご利用金額 <b class="mono" id="tds-amt"></b></p>
+        <p class="small">SMS に届いたワンタイムパスワードを入力してください。</p>
+        <input class="otp" id="otp" inputmode="numeric" maxlength="6" value="123456" aria-label="ワンタイムパスワード">
+      </div>
+    </div>
+    <div class="df"><button class="ghost" type="button" data-close id="tds-cancel">キャンセル</button><button class="primary" type="button" id="tds-go">認証する</button></div>
+  </dialog>
+
+  <!-- wallet / processing -->
+  <dialog id="proc" aria-labelledby="proc-t">
+    <div class="dh"><h3 id="proc-t">処理しています</h3></div>
+    <div class="db"><div class="spin" aria-hidden="true"></div><p class="small muted" id="proc-b" style="text-align:center">画面を閉じずにお待ちください。</p></div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+</div>
+
+<script>
+/* Mock data — same lotteries as ui-02 / ui-03. Prices: sum of slots ≈ reference retail × 1.10–1.30. */
+const WD="日月火水木金土";
+function jst(iso){const t=new Date(new Date(iso).getTime()+9*3600e3);
+  return `${t.getUTCMonth()+1}/${t.getUTCDate()}(${WD[t.getUTCDay()]}) ${String(t.getUTCHours()).padStart(2,"0")}:${String(t.getUTCMinutes()).padStart(2,"0")}`;}
+const yen=n=>"¥"+n.toLocaleString("ja-JP");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pad=n=>String(n).padStart(2,"0");
+const LOTS={
+ L005:{id:"L005",title:"ポケカ『超電ブレイカー』4BOX キャラ枠",mode:"PICK",openingAt:"2026-10-03T20:00:00+09:00",saleEndsAt:"2026-10-02T23:59:00+09:00",
+   slots:["ピカチュウ枠",2400,"ゼクロム枠",2200,"ラティアス枠",2000,"ミロカロス枠",1800,"パーモット枠",1700,"マスカーニャ枠",1600,"サーフゴー枠",1500,"アローラナッシー枠",1500,
+     "ニャオハ枠",1400,"オーロット枠",1400,"デンリュウ枠",1300,"パチリス枠",1300,"その他ポケモン（ex）枠",1200,"その他ポケモン（草・炎・水）枠",1200,"その他ポケモン（その他タイプ）枠",1200,"トレーナーズ・エネルギー枠",1200]},
+ L002:{id:"L002",title:"ポケカ『ロケット団の栄光』1BOX パック番号",mode:"RANDOM",unit:210,openingAt:"2026-09-29T21:00:00+09:00",saleEndsAt:"2026-09-29T18:00:00+09:00"}
+};
+const CAP=50000, HOLD_SEC=600;
+const NIGHT_LIMIT=10000;
+let st={order:"L005-3-5",res:"ok",used:12000,night:false,nightSpent:0,pm:"card",holdLeft:HOLD_SEC,lines:[],total:0,lot:null};
+
+function parseOrder(tok){
+  const [id,...rest]=tok.split("-"); const lot=LOTS[id]||LOTS.L005; let lines=[];
+  if(lot.mode==="RANDOM"){const n=Math.max(1,parseInt((rest[0]||"r1").replace("r",""))||1); lines=[{label:`パック番号 ランダム × ${n} 枠`,sub:"番号は満員後の抽選で決まり、開封前に公開します",price:lot.unit*n}];}
+  else{const ns=(rest.length?rest:["3","5"]).map(Number).filter(n=>n>=1&&n<=lot.slots.length/2);
+    lines=ns.map(n=>({no:n,label:lot.slots[(n-1)*2],price:lot.slots[(n-1)*2+1]}));}
+  st.lot=lot; st.lines=lines; st.total=lines.reduce((a,l)=>a+l.price,0);
+  document.getElementById("back").href=lot.mode==="PICK"?"ui-03-pick.html#"+lot.id:"ui-02-lottery.html#"+lot.id;
+}
+
+function renderCheckout(){
+  const l=st.lot;
+  document.getElementById("lot").textContent=l.title;
+  document.getElementById("lines").innerHTML=st.lines.map(x=>`<li><span>${x.no?`<span class="no">#${pad(x.no)}</span>`:""}${esc(x.label)}${x.sub?`<br><span class="small muted">${esc(x.sub)}</span>`:""}</span><span class="p num">${yen(x.price)}</span></li>`).join("");
+  document.getElementById("total").textContent=yen(st.total);
+  document.getElementById("rules").innerHTML=[
+    "満員にならなければ全額返金",
+    "購入後のキャンセルはできません（不成立・中止の場合は全額返金）",
+    `開封予定 ${jst(l.openingAt)}`,
+    "当選カードは原則として倉庫で保管、まとめて発送できます",
+    "カードの初期不良（印刷ズレ等）は現状のままお渡しします"
+  ].map(t=>`<li><svg class="i"><use href="#i-check"/></svg><span>${t}</span></li>`).join("");
+  /* limit */
+  const after=st.used+st.total, over=after>CAP;
+  document.getElementById("used").textContent=yen(st.used);
+  document.getElementById("cap").textContent=yen(CAP);
+  document.getElementById("used-bar").style.width=Math.min(100,st.used/CAP*100)+"%";
+  const tb=document.getElementById("this-bar"); tb.style.left=Math.min(100,st.used/CAP*100)+"%"; tb.style.width=Math.max(0,Math.min(100,after/CAP*100)-st.used/CAP*100)+"%";
+  document.getElementById("after").textContent=over?"":`このご注文後 ${yen(after)}（残り ${yen(CAP-after)}）`;
+  document.getElementById("over").hidden=!over;
+  updatePay();
+}
+
+function updatePay(){
+  const agree=document.getElementById("agree").checked, over=st.used+st.total>CAP, ended=st.holdLeft<=0;
+  const pay=document.getElementById("pay"), why=document.getElementById("why");
+  const label=st.pm==="apple"?`Apple Pay で支払う ${yen(st.total)}`:st.pm==="google"?`Google Pay で支払う ${yen(st.total)}`:`支払う ${yen(st.total)}`;
+  pay.textContent=label;
+  pay.disabled=!agree||over||ended;
+  why.textContent=ended?"確保時間が終了しました。枠を選び直してください。":over?"今月の上限を超えるため購入できません":!agree?"「上記を確認しました」にチェックしてください":"満員にならなければ全額返金・購入後のキャンセル不可";
+}
+
+/* payment element mock */
+document.getElementById("pe").addEventListener("change",e=>{
+  if(e.target.name!=="pm") return; st.pm=e.target.value;
+  document.querySelectorAll(".pm").forEach(p=>{const on=p.dataset.pm===st.pm;p.classList.toggle("on",on);const b=p.querySelector(".body");if(b) b.hidden=!on;});
+  updatePay();
+});
+document.getElementById("agree").onchange=updatePay;
+
+/* hold countdown (plain text) */
+function renderHold(){
+  const h=document.getElementById("hold");
+  if(st.holdLeft<=0){h.classList.add("ended");h.innerHTML=`<svg class="i" style="width:16px;height:16px"><use href="#i-clock"/></svg><b>確保終了</b>`;return;}
+  h.classList.remove("ended");
+  h.innerHTML=`<svg class="i" style="width:16px;height:16px"><use href="#i-clock"/></svg>確保時間 残り <b class="num">${pad(Math.floor(st.holdLeft/60))}:${pad(st.holdLeft%60)}</b>`;
+}
+const holdTimer=setInterval(()=>{if(document.getElementById("v-checkout").hidden) return; if(st.holdLeft>0){st.holdLeft--;renderHold();if(st.holdLeft===0) updatePay();}},1000);
+document.getElementById("hold-end").onclick=()=>{st.holdLeft=0;renderHold();updatePay();};
+
+/* pay flow */
+const dlg=id=>document.getElementById(id);
+function open(d){d.showModal?d.showModal():d.setAttribute("open","");}
+document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>b.closest("dialog").close()));
+document.getElementById("pay").onclick=()=>{
+  /* PD10: between 0:00 and 6:00 JST, confirm when tonight's total incl. this order reaches ¥10,000.
+     Prototype: "night" and tonight's spend come from the prototype controls instead of the clock. */
+  const tonight=st.nightSpent+st.total;
+  if(st.night&&tonight>=NIGHT_LIMIT){dlg("night-b").textContent=`今夜（0〜6時）のご利用がこのご注文で ${yen(tonight)} になります（このご注文 ${yen(st.total)}）。内容をもう一度ご確認ください。`;open(dlg("night"));return;}
+  startPayment();
+};
+document.getElementById("night-go").onclick=()=>{dlg("night").close();startPayment();};
+function startPayment(){
+  if(st.pm==="card"){dlg("tds-amt").textContent=yen(st.total);open(dlg("tds"));return;}
+  processing("ウォレットで認証しています",()=>showResult(st.res==="declined"?"declined":"ok"));
+}
+document.getElementById("tds-go").onclick=()=>{dlg("tds").close();processing("決済しています",()=>showResult(st.res));};
+document.getElementById("tds-cancel").addEventListener("click",()=>showResult("auth"));
+function processing(msg,done){dlg("proc-b").textContent=msg+"。画面を閉じずにお待ちください。";open(dlg("proc"));setTimeout(()=>{dlg("proc").close();done();},1200);}
+
+/* result view */
+function showResult(kind){
+  const c=document.getElementById("result-col"), lines=st.lines.map(x=>`<li><span>${x.no?`<span class="no">#${pad(x.no)}</span>`:""}${esc(x.label)}</span><span class="p num">${yen(x.price)}</span></li>`).join("");
+  let html="";
+  if(kind==="ok"){
+    html=`<section class="blk"><div class="result ok"><span class="badge"><svg class="i"><use href="#i-check"/></svg></span>
+      <h2>購入が完了しました</h2><p class="small muted">${esc(st.lot.title)}</p></div>
+      <ul class="lines">${lines}</ul><div class="total"><span>お支払い済み</span><b class="num">${yen(st.total)}</b></div>
+      <div class="nextbox">満員になると抽選結果（あなたの枠）をお知らせします。<br><span class="small muted">満員にならなかった場合は、お支払いに使った方法へ全額返金します。</span></div>
+      <button class="primary" type="button" data-proto="マイ枠（UI-05）">マイ枠で確認</button></section>`;
+  }else{
+    const reason=kind==="auth"?"カード会社の本人認証が完了しませんでした。":"カード会社によりお支払いが承認されませんでした。別のカードまたはお支払い方法をお試しください。";
+    html=`<section class="blk"><div class="result ng"><span class="badge"><svg class="i"><use href="#i-x"/></svg></span>
+      <h2>お支払いが完了しませんでした</h2><p>${reason}</p><p class="small muted">料金は請求されていません。枠の確保は残り時間まで続きます。</p></div>
+      <button class="primary" type="button" id="retry">もう一度試す</button></section>`;
+  }
+  c.innerHTML=html;
+  document.getElementById("v-checkout").hidden=true; document.getElementById("v-result").hidden=false;
+  document.getElementById("hdr").textContent=kind==="ok"?"購入完了":"お支払いエラー";
+  document.getElementById("hold").hidden=kind==="ok";
+  const r=document.getElementById("retry"); if(r) r.onclick=backToCheckout;
+  scrollTo(0,0);
+}
+function backToCheckout(){document.getElementById("v-result").hidden=true;document.getElementById("v-checkout").hidden=false;document.getElementById("hdr").textContent="ご購入手続き";document.getElementById("hold").hidden=false;scrollTo(0,0);}
+
+const toast=document.getElementById("toast"); let tt;
+function say(m){toast.textContent=m;toast.hidden=false;clearTimeout(tt);tt=setTimeout(()=>toast.hidden=true,2200);}
+document.addEventListener("click",e=>{const p=e.target.closest("[data-proto]");if(p){e.preventDefault();say(`原型：「${p.dataset.proto}」尚未生成`);}});
+
+/* prototype controls */
+function group(attr,fn){document.querySelectorAll(`[${attr}]`).forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(`[${attr}]`).forEach(x=>x.setAttribute("aria-pressed",x===b));fn(b.getAttribute(attr));}));}
+group("data-order",v=>{st.order=v;try{history.replaceState(null,"","#"+v)}catch(e){} parseOrder(v);backToCheckout();renderCheckout();});
+group("data-res",v=>st.res=v);
+group("data-used",v=>{st.used=+v;renderCheckout();});
+group("data-night",v=>{st.nightSpent=+v;st.night=v!=="0";});
+
+const h=(location.hash||"").slice(1); if(h){st.order=h;document.querySelectorAll("[data-order]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.order===h));}
+parseOrder(st.order); renderCheckout(); renderHold();
+</script>
+</body>
+</html>

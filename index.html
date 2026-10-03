@@ -82,7 +82,7 @@ footer{font-size:12.5px;color:var(--ink-2);border-top:1px solid var(--line);padd
   <header>
     <div class="mark"><i>BOX</i>ラッシュ<small>预览 · 团队内部</small></div>
     <p class="lede">Box Rush 的产品模块示意图和界面原型汇总。所有页面都是静态 HTML，数据为示例；原型的布局与规则来自设计文档第 9 章的 prompt。</p>
-    <div class="meta"><span>最后更新 2026-10-02</span><span>设计文档 <code>card-lottery-docs / docs/breaking-platform.md</code></span></div>
+    <div class="meta"><span>最后更新 2026-10-03</span><span>设计文档 <code>card-lottery-docs / docs/breaking-platform.md</code></span></div>
   </header>
 
   <section aria-labelledby="h-product">
@@ -124,13 +124,21 @@ footer{font-size:12.5px;color:var(--ink-2);border-top:1px solid var(--line);padd
         <p>キャラ枠位图（可选 / 手续中 / 已售 / 已选），点位打开底部弹层看包含的卡，多选到上限，进入前说明"10 分钟确保"。可开关实时锁位模拟。</p>
         <span class="go">打开 →</span>
       </a>
+      <div class="card" style="cursor:default">
+        <div class="top"><span class="code">UI-04</span><span class="status">已生成</span></div>
+        <h3>确认与支付 + 结果</h3>
+        <p>订单与规则确认、月度上限、模拟 Stripe 支付（信用卡 + 3D Secure / Apple Pay / Google Pay），深夜累计确认，以及成功、失败两种结果。</p>
+        <div class="deep">
+          <a href="prototype/ui-04-checkout.html#L005-3-5">选位订单</a>
+          <a href="prototype/ui-04-checkout.html#L002-r2">随机订单</a>
+        </div>
+      </div>
     </div>
   </section>
 
   <section aria-labelledby="h-todo">
     <div class="sec-h"><h2 id="h-todo">待生成</h2><span>第 9 章已有 prompt，尚未生成原型</span></div>
     <ul class="todo">
-      <li><span class="c">UI-04</span>确认与支付 + 支付结果<span class="p">MVP</span></li>
       <li><span class="c">UI-05</span>マイ枠 + 场次进度<span class="p">MVP</span></li>
       <li><span class="c">UI-06</span>分位公示演出<span class="p">P1</span></li>
       <li><span class="c">UI-07</span>录像回放<span class="p">MVP</span></li>

@@ -333,7 +333,7 @@ document.getElementById("proceed").onclick=()=>{
   document.getElementById("cf-list").textContent=sel.map(s=>`#${pad(s.number)} ${s.name} ${yen(s.price)}`).join(" / ")+`　合計 ${yen(sel.reduce((a,s)=>a+s.price,0))}`;
   confirmD.showModal?confirmD.showModal():confirmD.setAttribute("open","");
 };
-document.getElementById("cf-go").onclick=()=>{confirmD.close();say("原型：确认与支付页（UI-04）尚未生成");};
+document.getElementById("cf-go").onclick=()=>{confirmD.close();location.href="ui-04-checkout.html#"+lot.id+"-"+[...selected].sort((a,b)=>a-b).join("-");};
 
 /* mock real-time: every 10s someone locks an available slot (never one you selected);
    a lock resolves after 25s — sold, or released back if not paid */
