@@ -12,6 +12,8 @@ Box Rush（BOXラッシュ）的产品模块示意图与界面原型，静态 HT
 | `index.html` | 导航页 | 本仓库 |
 | `modules.html` | 产品模块示意图（25 模块 / 153 功能点） | **本仓库**（与 `card-lottery-docs` 第 8 章同步） |
 | `prototype/ui-*.html` | 界面原型 | **`card-lottery-docs/prototype/`**，这里是副本 |
+| `pages.html` | 原型截图 + 页面 prompt + 生成过程 | 由 `tools/build_gallery.py` 从 `card-lottery-docs` 第 9 章生成，**不要手改** |
+| `shots/*.jpg` | 原型截图 | 由 `tools/shoot.mjs`（Playwright）生成 |
 
 ## 更新方式
 
@@ -20,6 +22,9 @@ Box Rush（BOXラッシュ）的产品模块示意图与界面原型，静态 HT
 - **模块示意图**：直接改 `modules.html`；改之前先与 `card-lottery-docs` 的 `docs/breaking-platform.md` 第 8 章
   逐模块比对功能点数量与优先级。
 - **新增原型**：放进 `prototype/`，并在 `index.html` 的"界面原型"区加卡片、从"待生成"里移除。
+- **截图与汇总页**：原型或第 9 章变更后，在仓库根目录依次运行
+  `node tools/shoot.mjs`（需 `npm i -D playwright && npx playwright install chromium`，不要提交 `node_modules`）
+  与 `python3 tools/build_gallery.py`。新增页面要在两个脚本的页面表里各加一行。
 
 ## claude.ai 私有预览（可选）
 

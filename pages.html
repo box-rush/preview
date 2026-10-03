@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<!-- 由 tools/build_gallery.py 从设计文档第 9 章生成，不要手改。 -->
+<title>原型截图与 Prompt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Sans+JP:wght@700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+:root{
+  --bg:#FAFAF7; --surface:#FFFFFF; --ink:#1A1A1A; --ink-2:#6B6B6B; --line:#E6E5DE; --track:#ECEBE4;
+  --accent:#3B3FD8; --accent-ink:#FFFFFF; --accent-soft:#ECEDFC; --trust:#0F9D8A; --trust-soft:#E1F3F0;
+  --sans:"Noto Sans SC","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  --jp:"Noto Sans JP","Hiragino Sans",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){color-scheme:dark;
+  --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --ink-2:#A0A0A0; --line:#2A2B2F; --track:#2A2B2F;
+  --accent:#8E91F7; --accent-ink:#111214; --accent-soft:#23244A; --trust:#3CC4B0; --trust-soft:#15302C;}}
+:root[data-theme="dark"]{color-scheme:dark;
+  --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --ink-2:#A0A0A0; --line:#2A2B2F; --track:#2A2B2F;
+  --accent:#8E91F7; --accent-ink:#111214; --accent-soft:#23244A; --trust:#3CC4B0; --trust-soft:#15302C;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.65;padding:40px 16px 64px}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:8px}
+.wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{margin:0;text-wrap:balance}
+header{display:flex;flex-direction:column;gap:10px}
+.back{font-size:13px;color:var(--ink-2);text-decoration:none}
+h1{font-size:26px;font-weight:900}
+.lede{margin:0;color:var(--ink-2);max-width:68ch}
+.toc{font-family:var(--mono);font-size:12.5px;color:var(--ink-2);line-height:2}
+.toc a{text-decoration:none} .toc a:hover{color:var(--accent)}
+section{display:flex;flex-direction:column;gap:18px}
+.sec-h{display:flex;align-items:baseline;gap:12px;border-bottom:1px solid var(--line);padding-bottom:8px}
+.sec-h h2{font-size:18px;font-weight:900} .sec-h span{font-size:12.5px;color:var(--ink-2)}
+h4{margin:6px 0 0;font-size:15px}
+p{margin:0} section > p{max-width:72ch}
+code{font-family:var(--mono);font-size:.88em;background:var(--track);padding:0 4px;border-radius:4px}
+pre{margin:0;font-family:var(--mono);font-size:12.5px;line-height:1.6;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;overflow-x:auto;white-space:pre}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--line)}
+th{font-size:12.5px;color:var(--ink-2);font-weight:700;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+details{border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+details > summary{cursor:pointer;padding:10px 14px;font-size:13.5px;font-weight:700}
+details > pre{border:0;border-top:1px solid var(--line);border-radius:0 0 12px 12px}
+.page{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
+.page details{background:var(--bg)}
+.ph{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px}
+.ph h3{font-size:17px;font-weight:900}
+.code{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);background:var(--accent-soft);padding:1px 7px;border-radius:5px}
+.open{margin-left:auto;font-size:13px;font-weight:700;color:var(--accent);text-decoration:none}
+.shots{display:flex;gap:12px;overflow-x:auto;padding-bottom:4px;align-items:flex-start}
+figure{margin:0;flex:none;display:flex;flex-direction:column;gap:6px}
+figure a{display:block;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--track)}
+figure img{display:block;object-fit:cover;object-position:top}
+.f-m img{width:180px;height:390px}
+.f-d img{width:min(560px,78vw);aspect-ratio:1440/900}
+.f-t img{width:min(500px,78vw);aspect-ratio:1024/768}
+figcaption{font-size:12px;color:var(--ink-2)}
+.proc{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0;font-size:13.5px}
+.proc dt{color:var(--ink-2);font-size:12.5px;white-space:nowrap;padding-top:1px}
+.proc dd{margin:0}
+.note{font-size:13px;color:var(--ink-2)}
+footer{font-size:12.5px;color:var(--ink-2);border-top:1px solid var(--line);padding-top:16px;display:flex;flex-direction:column;gap:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="back" href="./">← 预览站首页</a>
+    <h1>原型截图与 Prompt 过程</h1>
+    <p class="lede">16 页原型的截图、生成它们的页面 prompt，以及每页生成中暴露的问题和回写位置。先看「方法」了解 prompt 的三层结构和页面模板，再按页浏览。内容取自设计文档第 9 章（§9.2–§9.9）。</p>
+    <div class="toc"><a href="#UI-01">UI-01</a> · <a href="#UI-02">UI-02</a> · <a href="#UI-03">UI-03</a> · <a href="#UI-04">UI-04</a> · <a href="#UI-05">UI-05</a> · <a href="#UI-07">UI-07</a> · <a href="#UI-08">UI-08</a> · <a href="#UI-09">UI-09</a> · <a href="#UI-10">UI-10</a> · <a href="#UI-11">UI-11</a> · <a href="#UI-12">UI-12</a> · <a href="#UI-13">UI-13</a> · <a href="#UI-14">UI-14</a> · <a href="#UI-15">UI-15</a> · <a href="#UI-16">UI-16</a> · <a href="#UI-17">UI-17</a></div>
+  </header>
+
+  <section>
+    <div class="sec-h"><h2>方法</h2><span>§9.8 Prompt 抽象</span></div>
+    <h4>三层结构与回写闭环</h4>
+    <div class="tw"><table><thead><tr><th>层</th><th>放什么</th><th>稳定性</th><th>本章位置</th></tr></thead><tbody><tr><td><b>项目层</b></td><td>品牌、产品原则、布局断点、token、格式、硬规则 UR1–UR9、无障碍</td><td>极少变；改动须回溯第 6 / 8 章</td><td>§9.2</td></tr><tr><td><b>数据层</b></td><td>类型、状态文案、mock 规则（价格自洽、统一时钟、共享种子）</td><td>随对象模型变</td><td>§9.3</td></tr><tr><td><b>页面层</b></td><td>单页任务、区块、交互与状态、本页规则投影、跨页一致、演示状态</td><td>每页一份，按模板写</td><td>§9.4–§9.6</td></tr><tr><td><b>校验层</b></td><td>生成后逐条核对；不通过改结果、不改规则</td><td>随缺陷回写增长</td><td>§9.7</td></tr></tbody></table></div>
+    <p><b>回写闭环</b>：生成 → §9.7 核对 → 缺陷分类（§9.8.3）→ 若是 prompt 漏写，补进该页 prompt；若多页共性，上提到 §9.2 / §9.3；若暴露了未决产品问题，进 PD（附录 A.2）先决策再生成。</p>
+    <h4>页面 prompt 模板</h4>
+    <pre>Build &lt;page name&gt; at "&lt;route&gt;" (&lt;audience: user | merchant | ops&gt;; &lt;device: mobile-first | desktop 1280 | tablet 1024×768&gt;).
+
+## Job
+&lt;One sentence: what the person must understand or decide on this page.&gt;
+
+## Data
+- Types: &lt;types from §9.3&gt;. Lotteries: &lt;ids and statuses used&gt;.
+- Time: compute everything against PROTO_NOW (2026-09-26 18:00 JST).
+- Shared facts: &lt;numbers that must match other pages, e.g. k = 3.4, monthly usage ¥12,000, my slot #02&gt;.
+- Generated data: &lt;seeded generator if cards are listed — never hand-write card lists&gt;.
+
+## Layout (top to bottom; mobile → ≥768 → ≥1024)
+1. &lt;section&gt;: &lt;content, Japanese copy in 「」&gt;
+2. ...
+
+## Interactions &amp; states
+- &lt;interaction&gt; → &lt;result&gt;. Deep links: &lt;#hash forms&gt;.
+- States: normal / loading / empty / error / &lt;page-specific&gt;.
+
+## Rules on this page
+- &lt;UR / I / PD that apply here, restated concretely&gt;.
+- Do NOT &lt;the specific failure this page tends to produce&gt;.
+
+## Demo states (prototype only)
+- &lt;states the reviewer must be able to switch to: failing validation, interruption, tamper, etc.&gt;
+
+## Delivery
+Single static HTML file, inline CSS/JS, Google Fonts only, noindex, prototype control strip
+showing 「原型时钟 2026-09-26 18:00 JST」. Link to other prototype pages by relative file name.</pre>
+    <p><b>写 <code>Do NOT</code> 的标准</b>：只写本页<b>最容易生成错</b>的那一条（例如随机模式满员前显示逐位售出、工位端出现「再開」），不重复 §9.2 已有的全局禁令。</p>
+    <h4>缺陷分类</h4>
+    <div class="tw"><table><thead><tr><th>类</th><th>现象</th><th>根因</th><th>对策（已写入模板）</th></tr></thead><tbody><tr><td><b>D1 数据不自洽</b></td><td>示例价格隐含溢价 &gt;400%；9/28 写成周日；k 在两页不同</td><td>示例数字手写</td><td>数据由规则 / 种子生成；跨页事实写进 <code>Shared facts</code></td></tr><tr><td><b>D2 规则投影缺失</b></td><td>随机模式显示逐位售出；归属可自批；"原始画面"含系统信息</td><td>规则只写了原则，没写在本页的具体形态</td><td><code>Rules on this page</code> 具体化 + 一条 <code>Do NOT</code></td></tr><tr><td><b>D3 决策未定</b></td><td>支付方式（便利店、3DS）、深夜阈值口径</td><td>生成页面时才遇到产品问题</td><td>停下来进 PD 决策（PD9 / PD10），再生成</td></tr><tr><td><b>D4 交付约束冲突</b></td><td>prompt 要 recharts，仓库不允许构建；CSS 类名冲突</td><td>技术栈假设与仓库规则不一致</td><td><code>Delivery</code> 段固定写单文件规则</td></tr><tr><td><b>D5 演示性不足</b></td><td>向导初始全通过，看不出实时校验；断线、篡改无法演示</td><td>prompt 只描述正常态</td><td><code>Demo states</code> 段列出必须可切换的状态</td></tr></tbody></table></div>
+    <h4>结论</h4>
+    <p><b>结论</b>：17 条记录里 D2（规则投影缺失）最多 —— 第 6 / 8 章的原则对生成工具不够具体，必须在页面 prompt 里写成该页的具体形态。D3 只出现一次但代价最大：它说明<b>生成原型本身是一个决策检查点</b>，P1 页面（直播间、DRAFT）生成前应先过一遍 PD 清单。</p>
+    <p class="note">全局层面：各页"现在"不同；artifact 与仓库两处原件 → 统一原型时钟；仓库为唯一原件，UI-08 起只发预览站（回写 §9.3、§9.1、CLAUDE.md）。</p>
+  </section>
+
+  <section><div class="sec-h"><h2>用户端</h2><span>11 页</span></div><article class="page" id="UI-01">
+  <div class="ph"><span class="code">UI-01</span><h3>首页（U04）</h3>
+    <a class="open" href="prototype/ui-01-home.html">打开原型 →</a></div>
+  <div class="shots"><figure class="f-m"><a href="shots/ui-01-home-mobile.jpg" target="_blank" rel="noopener"><img src="shots/ui-01-home-mobile.jpg" alt="UI-01 手机 截图" loading="lazy"></a><figcaption>手机</figcaption></figure><figure class="f-d"><a href="shots/ui-01-home-desktop.jpg" target="_blank" rel="noopener"><img src="shots/ui-01-home-desktop.jpg" alt="UI-01 桌面 截图" loading="lazy"></a><figcaption>桌面</figcaption></figure></div>
+  <dl class="proc"><dt>暴露的问题</dt><dd>原示例价格隐含溢价 &gt;400%、星期错；Banner 位置与桌面适配未定义</dd><dt>处理</dt><dd>价格按"合计 ≈ 零售 × 1.10–1.30"重设；Banner 移到品类 Tab 上方；加 768 / 1024 两档</dd><dt>回写</dt><dd>§9.3 mock 规则；§9.2 Layout 断点；§8.11</dd><dt>类</dt><dd>D1</dd></dl>
+  <details><summary>页面 prompt（§9.4–§9.6 原文）</summary><pre>Build the user home page at route "/".
+
+Structure (top to bottom):
+1. Header (sticky): wordmark 「BOXラッシュ」 (Latin sub-label "Box Rush" in small caps), right side
+   notification bell and avatar. On desktop, text nav links next to the wordmark.
+2. Banner carousel ABOVE the category tabs (3 slides, auto-advance 5s, dots). Content: new
+   lottery announcement, "はじめての方へ：満員で開封・未達なら全額返金", confirmed opening
+   schedule (only LOCKED / READY lotteries — an unfilled lottery may never open).
+   Do not use discount banners. Responsive: 1 slide per view on mobile, 2 on tablet,
+   all 3 side by side on desktop (then stop auto-advance and hide dots).
+3. Category tabs: すべて / ポケモン / ワンピース / 遊戯王, horizontally scrollable,
+   active tab underlined with accent color. The tab bar sticks directly under the header
+   while scrolling.
+4. Sort chips: おすすめ / 開封が近い順 / 残り率 / 単価が安い順.
+   Filter chips for partition type: キャラ枠 / パック番号 / 番号レンジ / 混合 / BOX丸ごと.
+5. Section "はじめてでも参加しやすい" : horizontal scroll of pack-number (パック番号) or mixed-box (混合)
+   lotteries priced &lt;= ¥1,000/枠, cheapest first.
+6. Main grid of LotteryCard components for ON_SALE lotteries: 2 columns on mobile, 3 on tablet,
+   4 on desktop. On desktop the section-5 rail becomes a 4-column row instead of scrolling.
+7. Bottom tab bar (ホーム active) on mobile / tablet; hidden on desktop.
+
+LotteryCard component (reused elsewhere):
+- Product photo (4:3) with small seal icon overlay 「封印確認済」.
+- Title (2 lines max).
+- 「¥700〜/枠」 and small grey 「参考: BOX ¥5,400×2」. Render the reference price only when the
+  A/B flag `showReferencePrice` is true (PD2); the layout must look complete without it.
+- Guarantee line: 「保証: 各枠 3パック以上」.
+- Fill progress bar (thick, 8px) with text 「残り 2/12 枠」.
+- 「開封 9/28(月) 20:00」 and a teal chip 「検証可能」 with a shield-check icon.
+- Tag chips: partition type label, 「自営」 if selfOperated, 「残りわずか」 only if
+  remaining &lt;= 10% of total.
+- Include `showReferencePrice: boolean` in the mock lottery data (A/B flag).
+- Whole card is a link to /lottery/[id].
+
+States: loading skeleton for cards; empty state for a category with no lotteries
+(「現在販売中の開封会はありません」).
+Follow all HARD RULES from project instructions.</pre></details>
+</article><article class="page" id="UI-02">
+  <div class="ph"><span class="code">UI-02</span><h3>场次详情 + 规则快照（U07 / U09）</h3>
+    <a class="open" href="prototype/ui-02-lottery.html#L001">打开原型 →</a></div>
+  <div class="shots"><figure class="f-m"><a href="shots/ui-02-lottery-mobile.jpg" target="_blank" rel="noopener"><img src="shots/ui-02-lottery-mobile.jpg" alt="UI-02 手机 截图" loading="lazy"></a><figcaption>手机</figcaption></figure><figure class="f-d"><a href="shots/ui-02-lottery-desktop.jpg" target="_blank" rel="noopener"><img src="shots/ui-02-lottery-desktop.jpg" alt="UI-02 桌面 截图" loading="lazy"></a><figcaption>桌面</figcaption></figure></div>
+  <dl class="proc"><dt>暴露的问题</dt><dd>随机模式满员前显示逐位售出（泄露信息、制造压力）；キャラ枠保底按"包"不成立</dd><dt>处理</dt><dd>满员前只显示总进度；キャラ枠保底按张数</dd><dt>回写</dt><dd>UI-02 prompt</dd><dt>类</dt><dd>D2</dd></dl>
+  <details><summary>页面 prompt（§9.4–§9.6 原文）</summary><pre>Build the lottery detail page at "/lottery/[id]".
+
+Order of content is mandatory (evidence before the buy button):
+1. Image gallery of sealPhotos with caption 「入庫時の封印写真」 and capture date.
+2. Title, maker, series, sealed unit and quantity (e.g. 「BOX × 2」), 「自営」 badge if any,
+   merchant name.
+3. Guarantee block: e.g. 「保証：各枠 カード3枚以上」 (キャラ枠 guarantees a card count;
+   パック番号 guarantees packs) with an info icon explaining that every slot receives physical cards.
+4. Partition scheme: list of slots. For ENUMERATED show slot name, price, guarantee,
+   and an expandable list of card numbers included (「この枠に含まれるカード」).
+   Show the fallback rule: 「リスト外のカードの扱い」.
+   For POSITIONAL / RANDOM mode, list pack numbers but NEVER show per-number sold state before the
+   draw — numbers are not bound to buyers until the lottery is full.
+5. Fill block: large progress bar, 「10/12 枠 販売済」, sale deadline
+   「販売締切 9/27(日) 23:59」, and the sentence 「満員にならなければ全額返金」.
+6. Fairness block: 「抽選シード（コミット）」 hash in monospace with copy button,
+   「コミット日時 9/20(日) 12:00」, and link 「公正性の仕組み」.
+7. Opening: 「開封予定 9/28(月) 20:00」, note 「開封は予定時刻に実施。視聴しなくても権利は変わりません」.
+8. Link 「ルール全文（上架時スナップショット）」 opening a sheet that shows the frozen rules
+   as read-only text with the snapshot timestamp.
+
+Sticky bottom bar: price 「¥700〜」 and primary button:
+- PICK mode: 「枠を選ぶ」 → /lottery/[id]/pick
+- RANDOM mode: quantity stepper (1..purchase limit) + 「ランダムで購入」
+- Disabled with label 「販売終了」 if status != ON_SALE.
+Also show under the button in small text: 「満員にならなければ全額返金」 and
+「購入後のキャンセルはできません」.
+The reference retail price in the title block follows the same `showReferencePrice` flag as UI-01.
+
+Do not show any expected value, odds of profit, or total card value.</pre></details>
+</article><article class="page" id="UI-03">
+  <div class="ph"><span class="code">UI-03</span><h3>选位（U08）</h3>
+    <a class="open" href="prototype/ui-03-pick.html#L005">打开原型 →</a></div>
+  <div class="shots"><figure class="f-m"><a href="shots/ui-03-pick-mobile.jpg" target="_blank" rel="noopener"><img src="shots/ui-03-pick-mobile.jpg" alt="UI-03 手机 · 已选 #03 #05 截图" loading="lazy"></a><figcaption>手机 · 已选 #03 #05</figcaption></figure><figure class="f-d"><a href="shots/ui-03-pick-desktop.jpg" target="_blank" rel="noopener"><img src="shots/ui-03-pick-desktop.jpg" alt="UI-03 桌面 截图" loading="lazy"></a><figcaption>桌面</figcaption></figure></div>
+  <dl class="proc"><dt>暴露的问题</dt><dd>10 分钟确保到期 / 释放规则未定义</dd><dt>处理</dt><dd>实时锁位模拟（25 秒售出或释放，不动已选位）</dd><dt>回写</dt><dd>UI-03 prompt</dd><dt>类</dt><dd>D2</dd></dl>
+  <details><summary>页面 prompt（§9.4–§9.6 原文）</summary><pre>Build the slot picker at "/lottery/[id]/pick" for PICK mode.
+
+- Header with lottery title and a compact fill bar.
+- Grid of slot tiles (3 columns). Each tile: slot number, name (e.g. ピカチュウ枠), price,
+  and state styling: AVAILABLE (selectable), LOCKED (striped, 「手続き中」),
+  SOLD (greyed, 「販売済」).
+- Tapping an available tile opens a bottom sheet with the slot's definition and
+  card-number list, guarantee text, and 「この枠を選ぶ」.
+- Multi-select allowed up to the purchase limit; selected tiles get an accent border
+  and check icon. Show 「購入上限：1人 3 枠まで」.
+- Real-time feel: simulate another user locking a slot every 10s in mock mode. A lock resolves
+  after ~25s: it becomes SOLD, or is released back to AVAILABLE if unpaid. Never lock a slot the
+  current user has selected; never show who is locking or how many people are viewing.
+- Sticky bottom bar: 「選択中 2 枠 ¥1,400」 + 「購入手続きへ」.
+- Explain lock: when proceeding, 「10分間 枠を確保します」.
+No urgency animations. No "someone is viewing this" messages.</pre></details>
+</article><article class="page" id="UI-04">
+  <div class="ph"><span class="code">UI-04</span><h3>确认与支付 + 结果（U10 / U11）</h3>
+    <a class="open" href="prototype/ui-04-checkout.html#L005-3-5">打开原型 →</a></div>
+  <div class="shots"><figure class="f-m"><a href="shots/ui-04-checkout-mobile.jpg" target="_blank" rel="noopener"><img src="shots/ui-04-checkout-mobile.jpg" alt="UI-04 手机 截图" loading="lazy"></a><figcaption>手机</figcaption></figure><figure class="f-d"><a href="shots/ui-04-checkout-desktop.jpg" target="_blank" rel="noopener"><img src="shots/ui-04-checkout-desktop.jpg" alt="UI-04 桌面 截图" loading="lazy"></a><figcaption>桌面</figcaption></figure></div>
+  <dl class="proc"><dt>暴露的问题</dt><dd>支付方式未定；3DS 强制；深夜确认按单笔还是累计</dd><dt>处理</dt><dd>PD9 = A 不提供便利店支付；EMV 3-D Secure；PD10 = B 当夜累计 ¥10,000</dd><dt>回写</dt><dd>PD9 / PD10、R14、F2.2 / F5.x、UI-04 / UI-12 prompt</dd><dt>类</dt><dd>D3</dd></dl>
+  <details><summary>页面 prompt（§9.4–§9.6 原文）</summary><pre>Build checkout at "/checkout" and result at "/checkout/result".
+
+Checkout:
+- Countdown for the slot hold: 「確保時間 残り 09:32」 (plain text, no flashing).
+- Order summary: lottery title, selected slots, prices, total.
+- Rules recap card (required): 「満員にならなければ全額返金」,
+  「購入後のキャンセルはできません（不成立・中止の場合は全額返金）」,
+  「開封予定 9/28(月) 20:00」, 「当選カードは原則として倉庫で保管、まとめて発送できます」,
+  「カードの初期不良（印刷ズレ等）は現状のままお渡しします」.
+- A required checkbox 「上記を確認しました」 must be checked before the pay button enables.
+- Spending limit indicator: 「今月の利用額 ¥12,000 / 上限 ¥50,000」 with link to settings.
+  If this order exceeds the limit, block with an explanation and link to settings
+  (raising a limit takes effect after a cooling period).
+- Payment method selector (mock of Stripe Payment Element; do not load Stripe.js in prototypes):
+  クレジットカード / Apple Pay / Google Pay. Show PayPay as 「準備中」 (disabled) for now.
+  Do NOT offer コンビニ払い (PD9).
+  Show 「決済は Stripe が処理します。カード情報は当社のサーバーに保存されません」.
+  - Card: card number / expiry / CVC, then an EMV 3-D Secure step (mandatory for EC in Japan
+    since 2025-03) before processing.
+- Primary button 「支払う ¥1,400」.
+- If current time is between 0:00 and 6:00 JST and tonight's total spend including this order
+  reaches ¥10,000 (PD10), show a confirmation dialog 「深夜の高額購入です。内容をご確認ください」
+  with tonight's total before paying.
+
+Result page:
+- Success: check icon, 「購入が完了しました」, slot list, and next step:
+  「満員になると抽選結果（あなたの枠）をお知らせします」, button 「マイ枠で確認」.
+- Failure: reason and 「もう一度試す」; state that nothing was charged. Never mention points or balance.</pre></details>
+</article><article class="page" id="UI-05">
+  <div class="ph"><span class="code">UI-05</span><h3>マイ枠 + 场次进度（U13 / U14）</h3>
+    <a class="open" href="prototype/ui-05-my-slots.html#ready">打开原型 →</a></div>
+  <div class="shots"><figure class="f-m"><a href="shots/ui-05-my-slots-mobile.jpg" target="_blank" rel="noopener"><img src="shots/ui-05-my-slots-mobile.jpg" alt="UI-05 マイ枠 · 手机 截图" loading="lazy"></a><figcaption>マイ枠 · 手机</figcaption></figure><figure class="f-d"><a href="shots/ui-05-my-slots-desktop.jpg" target="_blank" rel="noopener"><img src="shots/ui-05-my-slots-desktop.jpg" alt="UI-05 マイ枠 · 桌面 截图" loading="lazy"></a><figcaption>マイ枠 · 桌面</figcaption></figure><figure class="f-m"><a href="shots/ui-05-progress-mobile.jpg" target="_blank" rel="noopener"><img src="shots/ui-05-progress-mobile.jpg" alt="UI-05 进度页 · 手机 截图" loading="lazy"></a><figcaption>进度页 · 手机</figcaption></figure><figure class="f-d"><a href="shots/ui-05-progress-desktop.jpg" target="_blank" rel="noopener"><img src="shots/ui-05-progress-desktop.jpg" alt="UI-05 进度页 · 桌面 截图" loading="lazy"></a><figcaption>进度页 · 桌面</figcaption></figure></div>
+  <dl class="proc"><dt>暴露的问题</dt><dd>LOCKED（满员・抽选待ち）属于哪个 Tab；日历文件需后端</dd><dt>处理</dt><dd>归入「開封待ち」并标识；日历用链接</dd><dt>回写</dt><dd>UI-05 prompt</dd><dt>类</dt><dd>D2</dd></dl>
+  <details><summary>页面 prompt（§9.4–§9.6 原文）</summary><pre>Build "/my-slots" and "/my-slots/[lotteryId]".
+
+/my-slots:
+- Segmented tabs: 満員待ち / 開封待ち / 確定 / 終了.
+- Card per lottery (reuse LotteryCard style, compact):
+  - 満員待ち: fill bar, deadline, 「未満員の場合は全額返金」.
+  - 開封待ち: 「あなたの枠: ピカチュウ枠 (#07)」, countdown 「開封まで 2日 03:14」,
+    buttons 「カレンダーに追加」 and 「割り当てを検証」.
+  - 確定: 「結果を見る」.
+  - 終了 (FAILED/ABORTED): 「不成立・返金済」 with refund date.
+  - A LOCKED lottery (full, draw pending) belongs to 開封待ち with a 「満員・抽選待ち」 badge and no
+    assignment yet. 「カレンダーに追加」 is a calendar link (e.g. Google Calendar), not a file download.
+
+/my-slots/[lotteryId] (progress page):
+- Vertical timeline of lifecycle steps with timestamps:
+  シードコミット → 販売開始 → 満員 → 抽選（割り当て公開） → 開封 → 振り分け → 確定 → 保管/発送.
+  Completed steps teal with check; current step accent; future steps grey.
+- Assignment card (after LOCKED): my slots with names; link 「割り当てを検証」 → verify page.
+- If status is ABORTED show a red notice with the reason and refund status.</pre></details>
+</article><article class="page" id="UI-07">
+  <div class="ph"><span class="code">UI-07</span><h3>录像回放（U19）</h3>
+    <a class="open" href="prototype/ui-07-recording.html#L011-t754">打开原型 →</a></div>
+  <div class="shots"><figure class="f-m"><a href="shots/ui-07-recording-mobile.jpg" target="_blank" rel="noopener"><img src="shots/ui-07-recording-mobile.jpg" alt="UI-07 手机 截图" loading="lazy"></a><figcaption>手机</figcaption></figure><figure class="f-d"><a href="shots/ui-07-recording-desktop.jpg" target="_blank" rel="noopener"><img src="shots/ui-07-recording-desktop.jpg" alt="UI-07 桌面 截图" loading="lazy"></a><figcaption>桌面</figcaption></figure></div>
+  <dl class="proc"><dt>暴露的问题</dt><dd>"原始画面"边界不清；无法从卡片跳到时刻</dd><dt>处理</dt><dd>相机水印属原始画面，系统信息全部放独立叠加层；<code>#L011-t秒</code> 深链、倍速</dd><dt>回写</dt><dd>UI-07 prompt</dd><dt>类</dt><dd>D2</dd></dl>
+  <details><summary>页面 prompt（§9.4–§9.6 原文）</summary><pre>Build the recording player page at "/lottery/[id]/recording".
+
+- 16:9 video player (mock with a placeholder video) with a chapter-marker timeline:
+  「封印確認」「抽選結果の表示」「パック1」…「パック20」.
+  Markers are clickable and jump to the timestamp.
+- Toggle 「元映像のみ表示」 (default OFF). When OFF, show an overlay layer on the video
+  with the current pack number and attributed slot; when ON, hide all overlays.
+- Below the player: segment checksum list (monospace, collapsible) with caption
+  「映像は区間ごとにハッシュを公開しています」.
+- Card list synced to playback: as the video passes a card's timestamp, highlight that
+  card row (card number, name, rarity, slot). Clicking a row seeks the video.
+- Picture-in-Picture button for supported browsers.
+- "Raw footage" means exactly what the camera recorded, including the camera's own timestamp
+  burn-in. Pack number, attributed slot and any other system info must live in a separate overlay
+  layer so that 「元映像のみ表示」 removes all of it.
+- Support deep links to a timestamp (e.g. from a card's 「映像で確認」) and a playback-speed control.</pre></details>
+</article><article class="page" id="UI-08">
+  <div class="ph"><span class="code">UI-08</span><h3>开盒结果（U20）</h3>
+    <a class="open" href="prototype/ui-08-result.html#L011">打开原型 →</a></div>
+  <div class="shots"><figure class="f-m"><a href="shots/ui-08-result-mobile.jpg" target="_blank" rel="noopener"><img src="shots/ui-08-result-mobile.jpg" alt="UI-08 手机 截图" loading="lazy"></a><figcaption>手机</figcaption></figure><figure class="f-d"><a href="shots/ui-08-result-desktop.jpg" target="_blank" rel="noopener"><img src="shots/ui-08-result-desktop.jpg" alt="UI-08 桌面 截图" loading="lazy"></a><figcaption>桌面</figcaption></figure></div>
+  <dl class="proc"><dt>暴露的问题</dt><dd>金色在 UI-07 用于 R；「手動」易被做成警告</dd><dt>处理</dt><dd>金色仅 SR 以上（跨页统一）；手動为中性标识；卡片与 UI-07 同种子</dd><dt>回写</dt><dd>UI-08 prompt、§9.7 #16</dd><dt>类</dt><dd>D1 · D2</dd></dl>
+  <details><summary>页面 prompt（§9.4–§9.6 原文）</summary><pre>Build the opening result page at "/lottery/[id]/result".
+
+- Summary header: lottery title, 「確定」 status, opened at time, 「検証する」 button.
+- My cards first: grid of card tiles for slots I own. Each tile: card image placeholder,
+  card number, name, rarity badge (gold only for SR and above), slot name,
+  attribution badge (自動 / 手動 / リスト外ルール), and 「映像で確認」 link that opens the
+  recording at videoTimestampSec.
+- All cards table (collapsible): card, rarity, slot, masked owner id, attribution,
+  timestamp link.
+- Dispute entry: 「振り分けに疑問がある場合」 → form prefilled with lottery id and card id.
+- Do NOT show totals, values, profit, or rankings of who got the best cards.
+- 「手動」 attribution means a human resolved an edge card with two-person review; show it as a
+  neutral badge, not a warning. Gold styling is for SR and above only, consistently across pages.
+- Next action card: 「カードは倉庫で保管中です」 → link to /collection.</pre></details>
+</article><article class="page" id="UI-09">
+  <div class="ph"><span class="code">UI-09</span><h3>验证页 + 公开验证站（U21 / V01 / V02）</h3>
+    <a class="open" href="prototype/ui-09-verify.html#L015">打开原型 →</a></div>
+  <div class="shots"><figure class="f-m"><a href="shots/ui-09-verify-mobile.jpg" target="_blank" rel="noopener"><img src="shots/ui-09-verify-mobile.jpg" alt="UI-09 手机 · 验证完成 截图" loading="lazy"></a><figcaption>手机 · 验证完成</figcaption></figure><figure class="f-d"><a href="shots/ui-09-verify-desktop.jpg" target="_blank" rel="noopener"><img src="shots/ui-09-verify-desktop.jpg" alt="UI-09 桌面 截图" loading="lazy"></a><figcaption>桌面</figcaption></figure></div>
+  <dl class="proc"><dt>暴露的问题</dt><dd>算法只有文字描述，无法真实复算；选位场次没有抽选</dd><dt>处理</dt><dd>定义 bx-shuffle-v1 并在浏览器内真算；选位场次只验 commit 与参与者 hash；新增随机场次 L015</dd><dt>回写</dt><dd>UI-09 prompt</dd><dt>类</dt><dd>D2 · D5</dd></dl>
+  <details><summary>页面 prompt（§9.4–§9.6 原文）</summary><pre>Build "/verify/[lotteryId]" (works without login; also used as a public share page).
+
+Sections:
+1. Explanation in plain Japanese (3 steps with icons):
+   ① 販売開始前にシードのハッシュを公開 ② 満員後に参加者と外部ビーコンを合成
+   ③ 公開アルゴリズムで割り当てを計算 → 誰でも再計算できます
+2. Inputs table (monospace, copy buttons): seedCommitHash, commit time, serverSeed (revealed),
+   participantsHash, beacon source/round/value/fetchedAt, algorithmVersion.
+3. 「ブラウザで再計算する」 button: runs a deterministic mock computation client-side
+   (SHA-256 of serverSeed must equal seedCommitHash; then a seeded shuffle produces the
+   assignment). Show step-by-step results with green checks:
+   「ハッシュ一致」「割り当て一致」. If any mismatch, show red with details.
+4. Assignment table: slot → masked owner id.
+5. Links: 「検証スクリプトをダウンロード」, 「アルゴリズム仕様」, 「開封映像を見る」.
+6. Share button (copy URL) and OG image meta for social sharing.
+
+Also build "/verify" (public verifier): a single input 「開封会IDを入力」 that routes to
+/verify/[lotteryId]. No login, no navigation tab bar on public pages.
+Use Web Crypto API for SHA-256.
+Prototype algorithm (bx-shuffle-v1, an instance of §6.6.1): final = SHA-256(serverSeed|participantsHash|beacon);
+Fisher–Yates from the last index, j = first 8 hex of SHA-256(final:i) mod (i+1); participants are one line
+per purchased slot in purchase order. For PICK lotteries there is no draw: verify the seed commitment and the
+participants-list hash only, and say so on the page. Downloads are blocked in some previews, so show the
+verification script inline with a copy button. Provide a 「改ざんされた値で試す」 toggle in prototypes.</pre></details>
+</article><article class="page" id="UI-10">
+  <div class="ph"><span class="code">UI-10</span><h3>仓库 + 发货申请（U22 / U24）</h3>
+    <a class="open" href="prototype/ui-10-collection.html#stored">打开原型 →</a></div>
+  <div class="shots"><figure class="f-m"><a href="shots/ui-10-collection-mobile.jpg" target="_blank" rel="noopener"><img src="shots/ui-10-collection-mobile.jpg" alt="UI-10 手机 截图" loading="lazy"></a><figcaption>手机</figcaption></figure><figure class="f-d"><a href="shots/ui-10-collection-desktop.jpg" target="_blank" rel="noopener"><img src="shots/ui-10-collection-desktop.jpg" alt="UI-10 桌面 截图" loading="lazy"></a><figcaption>桌面</figcaption></figure></div>
+  <dl class="proc"><dt>暴露的问题</dt><dd>保管期限与发货 k 需与运营端一致</dd><dt>处理</dt><dd>30 天免费保管（示例）；k = 3.4 与 UI-16 / 17 同源</dd><dt>回写</dt><dd>UI-10 prompt</dd><dt>类</dt><dd>D1</dd></dl>
+  <details><summary>页面 prompt（§9.4–§9.6 原文）</summary><pre>Build "/collection" and "/collection/ship".
+
+/collection:
+- Segmented tabs: 保管中 / 発送中 / 受取済.
+- Grid of card tiles (image, card number, name, rarity, source lottery).
+- Storage info banner: 「無料保管期限 10/31 まで」 for the earliest-expiring item.
+- Multi-select mode with 「まとめて発送」 button.
+- Tapping a tile opens card detail: source lottery link, 「映像で確認」 link, 参考価格 (single
+  card only, labeled 参考), storage dates.
+- There must be NO "sell", "exchange for points", or "convert" actions anywhere.
+
+/collection/ship:
+- Selected items list, shipping address selector (link to address management),
+  shipping fee, insured shipping toggle for high-value cards (「補償付き配送」).
+- Informational note: 「まとめて発送すると送料を抑えられます」 (factual, no pressure,
+  no "add N more items" nudges).
+- Confirm button 「発送を依頼する」 → success state with estimated ship date.
+- Prototype assumptions (mock, not decided): free storage 30 days after check-in; shipping fee
+  ¥390 standard / ¥680 insured. Group shipped / received items by source lottery with tracking number.</pre></details>
+</article><article class="page" id="UI-11">
+  <div class="ph"><span class="code">UI-11</span><h3>首次引导（U02）</h3>
+    <a class="open" href="prototype/ui-11-welcome.html">打开原型 →</a></div>
+  <div class="shots"><figure class="f-m"><a href="shots/ui-11-welcome-mobile.jpg" target="_blank" rel="noopener"><img src="shots/ui-11-welcome-mobile.jpg" alt="UI-11 手机 截图" loading="lazy"></a><figcaption>手机</figcaption></figure><figure class="f-d"><a href="shots/ui-11-welcome-desktop.jpg" target="_blank" rel="noopener"><img src="shots/ui-11-welcome-desktop.jpg" alt="UI-11 桌面 截图" loading="lazy"></a><figcaption>桌面</figcaption></figure></div>
+  <dl class="proc"><dt>暴露的问题</dt><dd>无新问题</dd><dt>处理</dt><dd>4 屏可跳过；首页「しくみを見る」接入</dd><dt>回写</dt><dd>—</dd><dt>类</dt><dd>—</dd></dl>
+  <details><summary>页面 prompt（§9.4–§9.6 原文）</summary><pre>Build "/welcome" (onboarding).
+
+4 swipeable screens with simple illustrations:
+1. 「みんなで1つのBOXを開封」 – you buy a slot, not a random pack from a pool.
+2. 「満員で開封、未達なら全額返金」.
+3. 「開封前にあなたの枠が決まる」 – assignment is published before opening and verifiable.
+4. 「すべて録画、いつでも確認」 – recordings are kept permanently.
+Final button 「はじめる」 → home. Skippable; show a 「スキップ」 link on every screen.
+Do not add identity or age verification steps.</pre></details>
+</article><article class="page" id="UI-12">
+  <div class="ph"><span class="code">UI-12</span><h3>消费保护设置（U27）</h3>
+    <a class="open" href="prototype/ui-12-spending.html">打开原型 →</a></div>
+  <div class="shots"><figure class="f-m"><a href="shots/ui-12-spending-mobile.jpg" target="_blank" rel="noopener"><img src="shots/ui-12-spending-mobile.jpg" alt="UI-12 手机 截图" loading="lazy"></a><figcaption>手机</figcaption></figure><figure class="f-d"><a href="shots/ui-12-spending-desktop.jpg" target="_blank" rel="noopener"><img src="shots/ui-12-spending-desktop.jpg" alt="UI-12 桌面 截图" loading="lazy"></a><figcaption>桌面</figcaption></figure></div>
+  <dl class="proc"><dt>暴露的问题</dt><dd>数字与支付页不一致风险</dd><dt>处理</dt><dd>本月 ¥12,000 / 上限 ¥50,000 与 UI-04 同值；深夜确认按 PD10</dd><dt>回写</dt><dd>UI-12 prompt</dd><dt>类</dt><dd>D1</dd></dl>
+  <details><summary>页面 prompt（§9.4–§9.6 原文）</summary><pre>Build "/settings/spending".
+
+- Current month usage card: 「今月の利用額 ¥12,000」 with a bar against the monthly limit.
+- Monthly limit and per-order limit fields with presets. Lowering applies immediately;
+  raising shows 「引き上げは72時間後に反映されます」 and a pending state.
+- Late-night confirmation toggle (default ON; cannot be turned off once tonight's total between
+  0:00 and 6:00 JST reaches ¥10,000 — PD10).
+- Self-exclusion: 「一定期間 購入を停止する」 with 7 / 30 / 90 days; confirmation dialog
+  stating it cannot be cancelled during the period.
+- Monthly statement list (month, spend, number of lotteries). No profit/loss numbers.
+Tone: supportive, not judgmental.</pre></details>
+</article></section><section><div class="sec-h"><h2>商家端</h2><span>1 页</span></div><article class="page" id="UI-13">
+  <div class="ph"><span class="code">UI-13</span><h3>场次创建向导 + 分位编辑器（B04 / B05）</h3>
+    <a class="open" href="prototype/ui-13-merchant-wizard.html">打开原型 →</a></div>
+  <div class="shots"><figure class="f-d"><a href="shots/ui-13-merchant-wizard-desktop.jpg" target="_blank" rel="noopener"><img src="shots/ui-13-merchant-wizard-desktop.jpg" alt="UI-13 桌面 · 步骤 2 分位编辑 截图" loading="lazy"></a><figcaption>桌面 · 步骤 2 分位编辑</figcaption></figure></div>
+  <dl class="proc"><dt>暴露的问题</dt><dd>初始全通过看不出校验；拖拽对触屏 / 键盘不可用；CSS 类名冲突</dd><dt>处理</dt><dd>故意不合格开场；加点选移动；类名改名</dd><dt>回写</dt><dd>UI-13 prompt</dd><dt>类</dt><dd>D5 · D4</dd></dl>
+  <details><summary>页面 prompt（§9.4–§9.6 原文）</summary><pre>Build the merchant console page "/merchant/lotteries/new" (desktop, 1280px, left sidebar).
+
+A 5-step wizard with a persistent right-side validation panel.
+
+Steps:
+1. 対象商品: search the master catalog (series, SKU, sealed unit), choose quantity,
+   pick an inventory lot that is already checked-in at the warehouse (show seal photo
+   thumbnails and 「入庫・封印確認済」). Lots not yet checked-in are disabled with
+   「入庫前は出品できません」.
+2. 分け方: choose partition type (キャラ枠 / パック番号 / 番号レンジ / BOX丸ごと / ドラフト).
+   For キャラ枠, load the platform's character template for the set, then allow editing:
+   a two-panel editor — left: all card numbers in the set; right: slot groups.
+   Drag cards between groups. Each card must belong to exactly one group.
+   Required field: 「リスト外カードの扱い」 (fallback rule).
+   For ドラフト: required 「不在時の自動選択ルール」.
+3. 販売設定: price per slot (uniform or per slot), purchase limit, sale window.
+   Show reference retail price and a computed read-only 「想定上乗せ率 m = +18%」.
+4. 開封日時: pick from available opening-station time slots (capacity shown).
+5. 確認: read-only summary + 「審査に提出」.
+
+Right validation panel (live, always visible), each rule with pass/fail icon:
+- I1 すべての枠に保証あり（最低枚数 &gt; 0）
+- I1 すべてのカードがいずれかの枠に属する（漏れなし）
+- 重複なし（1枚が2つの枠に属さない）
+- I2 成団条件 = 100%（変更不可、表示のみ）
+- I7 リパック商品ではない
+- I9 レアリティによる分け方ではない
+- フォールバックルール記入済み
+The submit button stays disabled until all pass. Failed rules link to the field.
+In prototypes, open in a deliberately failing state (e.g. newly listed cards not yet grouped, fallback empty)
+so the live validation is visible. Offer click-to-move (select card → 「ここへ」) as an alternative to drag
+for touch and keyboard users. I7 is satisfied structurally: only sealed manufacturer SKUs exist in master data.
+
+There is NO UI to trigger the draw, upload video, or edit after submission.
+After submission the lottery becomes read-only with 「上架後は変更できません」.</pre></details>
+</article></section><section><div class="sec-h"><h2>运营端</h2><span>4 页</span></div><article class="page" id="UI-14">
+  <div class="ph"><span class="code">UI-14</span><h3>开盒工位端（O11）</h3>
+    <a class="open" href="prototype/ui-14-station.html">打开原型 →</a></div>
+  <div class="shots"><figure class="f-t"><a href="shots/ui-14-station-tablet.jpg" target="_blank" rel="noopener"><img src="shots/ui-14-station-tablet.jpg" alt="UI-14 平板 1024×768 · 录像中 截图" loading="lazy"></a><figcaption>平板 1024×768 · 录像中</figcaption></figure></div>
+  <dl class="proc"><dt>暴露的问题</dt><dd>暗场工位用浅色主题刺眼；镜头画面加叠加层与"原始录像"矛盾</dd><dt>处理</dt><dd>允许单一深色高对比主题；镜头画面不加叠加层；断线只能中止</dd><dt>回写</dt><dd>UI-14 prompt</dd><dt>类</dt><dd>D2</dd></dl>
+  <details><summary>页面 prompt（§9.4–§9.6 原文）</summary><pre>Build "/station" for a tablet (1024×768, landscape) used by opening staff.
+
+Flow:
+1. Scan lottery QR (mock button 「QRを読み取る」) → show lottery card with status READY,
+   scheduled time, box lot IDs, and seal photos from check-in.
+2. Pre-check: camera feed placeholder (large, left 60%), checklist on the right:
+   「カメラ接続」「録画開始」「封印を映す」. Recording can only be started by the
+   platform camera; there is no upload option.
+3. Recording state: persistent red 「REC 00:12:34」 indicator, current pack counter
+   「パック 7 / 20」, button 「次のパック」.
+4. Card entry: after each pack, scan or select cards (search by card number).
+   Each entry is timestamped automatically and shows the auto-attributed slot.
+   Unknown cards go to 「リスト外」 queue.
+5. Finish: 「開封完了」 → summary counts → 「振り分けへ送る」.
+
+Interruption handling: if the camera disconnects, show a blocking red screen
+「録画が中断されました。この開封会は中止されます」 with only one action
+「責任者に連絡」. No resume button.
+Big touch targets (56px). High contrast.
+The station is used at a dim opening table: a single dark high-contrast theme is allowed here (does not follow
+system light/dark). Show the platform camera feed without overlays — it is the raw footage being recorded.</pre></details>
+</article><article class="page" id="UI-15">
+  <div class="ph"><span class="code">UI-15</span><h3>归属工作台（O12）</h3>
+    <a class="open" href="prototype/ui-15-attribution.html#L009">打开原型 →</a></div>
+  <div class="shots"><figure class="f-d"><a href="shots/ui-15-attribution-desktop.jpg" target="_blank" rel="noopener"><img src="shots/ui-15-attribution-desktop.jpg" alt="UI-15 桌面 · 选中一行 截图" loading="lazy"></a><figcaption>桌面 · 选中一行</figcaption></figure></div>
+  <dl class="proc"><dt>暴露的问题</dt><dd>二人确认没规定自批与驳回</dd><dt>处理</dt><dd>不能自批，可驳回回到要確認；确定后生成开盒记录 SHA-256</dd><dt>回写</dt><dd>UI-15 prompt</dd><dt>类</dt><dd>D2</dd></dl>
+  <details><summary>页面 prompt（§9.4–§9.6 原文）</summary><pre>Build "/ops/attribution/[lotteryId]" (desktop).
+
+- Left: video player synced to card list (reuse recording player without overlays).
+- Center: table of opened cards with columns: timestamp, card number, name, rarity,
+  auto-attributed slot, status (自動確定 / 要確認 / リスト外).
+- Right: detail panel for the selected card showing candidate slots from the frozen
+  snapshot, the fallback rule text, and actions 「この枠に割り当て」.
+- Manual attributions require a second reviewer: status 「承認待ち」 until another staff
+  member approves. Show both staff names and timestamps. The same person can never approve their own
+  assignment; a reviewer can also reject (back to 要確認). Off-list cards show the frozen fallback rule and
+  its resulting slot. Finalizing produces the OpeningRecord and shows its SHA-256.
+- Filter chips: 要確認 only / リスト外 only.
+- Top bar: progress 「確定 184 / 200」 and 「すべて確定して記録を生成」 (disabled until
+  all cards are confirmed). Every action writes to an audit log panel (bottom drawer).</pre></details>
+</article><article class="page" id="UI-16">
+  <div class="ph"><span class="code">UI-16</span><h3>仓储拣货与合单（O13）</h3>
+    <a class="open" href="prototype/ui-16-warehouse.html#pack">打开原型 →</a></div>
+  <div class="shots"><figure class="f-d"><a href="shots/ui-16-warehouse-desktop.jpg" target="_blank" rel="noopener"><img src="shots/ui-16-warehouse-desktop.jpg" alt="UI-16 桌面 · 梱包扫码中 截图" loading="lazy"></a><figcaption>桌面 · 梱包扫码中</figcaption></figure></div>
+  <dl class="proc"><dt>暴露的问题</dt><dd>扫码交互未定义；k 口径</dd><dt>处理</dt><dd>Enter = 一次扫码；k 与看板同一批发货申请计算</dd><dt>回写</dt><dd>UI-16 prompt</dd><dt>类</dt><dd>D1 · D2</dd></dl>
+  <details><summary>页面 prompt（§9.4–§9.6 原文）</summary><pre>Build "/ops/warehouse" (desktop + scanner-friendly).
+
+Tabs: 入庫（振り分け後） / 出荷依頼 / 梱包 / 出荷済.
+- 入庫: list of attributed cards waiting to be shelved by user bin (bin code per user).
+  Scan input field auto-focused.
+- 出荷依頼: grouped by user; each request shows item count, bins, insured flag.
+  KPI chip at top: 「平均まとめ件数 k = 3.4」.
+- 梱包: packing checklist per request (scan each item → green), high-value packaging
+  rule reminder, print label button.
+- 出荷済: tracking numbers.
+Keyboard and barcode-scanner first; large monospace codes. Enter in the auto-focused input = one scan.
+The k shown here and on the dashboard must be computed from the same shipping requests.</pre></details>
+</article><article class="page" id="UI-17">
+  <div class="ph"><span class="code">UI-17</span><h3>数据看板（O01）</h3>
+    <a class="open" href="prototype/ui-17-dashboard.html">打开原型 →</a></div>
+  <div class="shots"><figure class="f-d"><a href="shots/ui-17-dashboard-desktop.jpg" target="_blank" rel="noopener"><img src="shots/ui-17-dashboard-desktop.jpg" alt="UI-17 桌面 截图" loading="lazy"></a><figcaption>桌面</figcaption></figure></div>
+  <dl class="proc"><dt>暴露的问题</dt><dd>recharts 违反单文件规则；灰色第二系列未过色度下限</dd><dt>处理</dt><dd>内联 SVG；第二系列改信任青绿（经校验）；悬停提示 + 表格视图</dd><dt>回写</dt><dd>UI-17 prompt</dd><dt>类</dt><dd>D4</dd></dl>
+  <details><summary>页面 prompt（§9.4–§9.6 原文）</summary><pre>Build "/ops/dashboard" (desktop).
+
+Top row KPI cards (big numbers with small trend sparkline):
+- m（上乗せ率）: median across lotteries that sold out, plus the pricing-experiment tiers
+  (+10% / +20% / +30%) with sell-out rate for each.
+- k（まとめ発送係数）: average slots per shipment; a threshold line at 3 labeled 「成立ライン」.
+- 満員率 and median time-to-full.
+- 1開封あたり作業時間 (minutes).
+
+Charts:
+- Sell-out rate by price tier (bar).
+- k over time (line) with threshold line at 3.
+- Time-to-full distribution (histogram).
+- Verification page views / recording views per lottery (bar).
+
+A red banner appears if k &lt; 3 or no price tier reaches 100% sell-out for 4 consecutive
+weeks: 「生存変数がしきい値を下回っています」.
+Use recharts in production; prototypes draw inline SVG (single-file rule). Keep colors restrained: accent for
+the primary series; reference / threshold lines in grey dashes. A second data series must not be grey (fails
+the chroma floor) — use the trust teal (light #0F9D8A / dark #2AA897, validated with the indigo accent).
+Every chart: hover tooltip, a 「表で見る」 table view, and the alert banner carries an icon + text, not color alone.</pre></details>
+</article></section>
+
+  <section>
+    <div class="sec-h"><h2>项目层 prompt</h2><span>放进工具的项目级指令，所有页面共用</span></div>
+    <details><summary>§9.2 全局设计系统与硬规则</summary><pre>You are building the web front-end for "Box Rush" (Japanese brand name: BOXラッシュ),
+a Japanese trading-card "Breaking" platform
+(group box-opening: users buy slots in a sealed booster box; the platform opens it on
+camera at a promised time; each card goes to the slot that owns it).
+All UI copy is Japanese. Instructions below are in English.
+
+## Brand
+- Product name: BOXラッシュ (primary, Japanese UI) / Box Rush (Latin, secondary).
+- Use 「BOXラッシュ」 in page titles, header wordmark, emails and OG images.
+- The name must not be used to create urgency: never pair it with countdowns,
+  "急げ" / "今すぐ" style copy, or flashing effects (see UR7).
+
+## Product principles (in priority order)
+1. Evidence before action. Proof (seal photos, guarantee, fill progress, refund promise,
+   seed hash) always appears ABOVE any purchase button.
+2. Calm, trustworthy, collector-oriented. Not a casino, not a gacha.
+3. Mobile-first. Most users are on phones.
+
+## Layout
+- User-facing pages: mobile-first, design at 390px wide, then adapt at two breakpoints:
+  - &gt;= 768px (tablet): full-width layout, 24px side gutter, 3-column card grid,
+    chip rows wrap instead of scrolling.
+  - &gt;= 1024px (desktop): content max-width 1200px centered, 4-column card grid; the bottom
+    tab bar is replaced by text links in the header (ホーム / LIVE / マイ枠 / コレクション,
+    マイページ via the avatar); hover states on cards.
+  Sticky bottom action bar for primary CTA on mobile. Bottom tab bar (mobile / tablet) with 5 tabs:
+  ホーム / LIVE / マイ枠 / コレクション / マイページ (lucide icons: Home, Radio, Ticket,
+  Package, User).
+- Merchant and operations pages: desktop-first, 1280px, left sidebar navigation, dense tables.
+- Spacing scale 4/8/12/16/24/32. Card radius 12px. Tap targets &gt;= 44px.
+
+## Visual language (browse patterns borrowed from Japanese online card shops)
+- Horizontal scrollable category tabs at the top of browse pages.
+- Rotating banner carousel under the tabs.
+- Dense 2-column card grid of lotteries on mobile.
+- Each lottery card: product photo, title, price per slot, guarantee line,
+  a thick fill-progress bar with 「残り 2/12 枠」, opening time, and small tag chips.
+- Full-screen overlay ONLY for reveal moments (see rule UR3).
+
+## Design tokens (define as CSS variables; support light and dark)
+- Background: near-white #FAFAF7 (dark: #111214). Surface: #FFFFFF (dark: #1A1B1E).
+- Text primary #1A1A1A (dark: #F2F2F2); secondary #6B6B6B (dark: #A0A0A0).
+- Primary accent (CTA, progress fill): deep indigo #3B3FD8.
+- Trust / verified: teal #0F9D8A. Warning: amber #D98A00. Error: #D14343.
+- Rarity highlight (only for revealed cards, never for unrevealed ones): gold #C9A227.
+- Font: "Noto Sans JP" for UI; "JetBrains Mono" for hashes, IDs, timestamps.
+- Numbers use tabular figures.
+
+## Formatting
+- Currency: ¥12,800 (yen sign, thousands separator, no decimals).
+- Date/time in JST: 9/28(月) 20:00. Countdowns: 2日 03:14:05.
+- Hashes: monospace, truncated middle (e.g. 3f9a…c21e) with a copy button; full value on tap.
+
+## HARD RULES (violating any of these is a bug)
+UR1. There are NO points, coins, credits, wallet balance, top-up, cash-out, or
+    "sell back to platform" features anywhere. Never render a balance. Payment is always
+    a direct payment per order. Refunds always return to the original payment method.
+UR2. Never show profit/loss, expected value, "you won ¥X", ROI, or totals of card values
+    for a lottery. Individual card reference prices may appear only on a single card's
+    detail view, labeled 「参考価格」.
+UR3. Animations may only REPLAY a result that is already determined and recorded.
+    No slot-machine spinning, no roulette, no near-miss effects, no "almost got it".
+    Every reveal must end with a visible link to verification (「検証する」).
+    Every reveal is skippable (「スキップ」).
+UR4. Whenever a user can buy, show: 「満員にならなければ全額返金」 and the sale deadline.
+UR5. The seed commitment hash (「抽選シード（コミット）」) and its commit time are shown on
+    the lottery detail page above the fold.
+UR6. Recording is the source of truth. Any video player must allow turning OFF overlays
+    to show the raw footage (「元映像のみ表示」).
+UR7. Users have spending limits. Never add urgency dark patterns:
+    no fake scarcity, no countdown pressure on purchase modals, no "only you" messaging.
+    A factual 「残りわずか」 tag is allowed only when remaining slots &lt;= 10%.
+UR8. Self-operated lotteries always show a 「自営」 badge.
+UR9. No live tipping / gifting UI.
+
+## Accessibility
+- WCAG AA contrast. Progress bars also show numeric text. Do not rely on color alone
+  for states; pair color with icon + label.</pre></details>
+    <details><summary>§9.3 数据类型与 Mock 数据</summary><pre>Use these TypeScript types and mock data across all pages. Put them in /lib/types.ts
+and /lib/mock.ts.
+
+type LotteryStatus =
+  | "ON_SALE" | "FAILED" | "LOCKED" | "READY" | "OPENING"
+  | "ATTRIBUTING" | "ATTRIBUTED" | "FULFILLING" | "COMPLETED" | "ABORTED";
+
+// Japanese labels for status (use exactly these):
+// ON_SALE: 販売中 / FAILED: 不成立・返金済 / LOCKED: 満員・抽選待ち /
+// READY: 開封待ち / OPENING: 開封中 / ATTRIBUTING: 振り分け中 /
+// ATTRIBUTED: 確定 / FULFILLING: 保管中 / COMPLETED: 受取済 / ABORTED: 中止・返金
+
+type PartitionType = "ENUMERATED" | "POSITIONAL" | "ATTRIBUTE" | "WHOLE" | "DRAFT";
+// UI labels: ENUMERATED: キャラ枠 / POSITIONAL: パック番号 / ATTRIBUTE: 番号レンジ /
+// WHOLE: BOX丸ごと / DRAFT: ドラフト
+
+type Slot = {
+  id: string; number: number; name: string;        // e.g. "ピカチュウ枠"
+  definition: string;                               // which cards belong to this slot
+  cardNumbers: string[];                            // e.g. ["025/165","172/165"]
+  price: number; guaranteeText: string;             // e.g. "3パック以上"
+  state: "AVAILABLE" | "LOCKED" | "SOLD";
+  ownerDisplayId?: string;                          // masked, e.g. "user_8f2…"
+};
+
+type Lottery = {
+  id: string; title: string; category: "ポケモン" | "ワンピース" | "遊戯王";
+  maker: string; series: string; sealedUnit: "PACK" | "BOX" | "CASE"; quantity: number;
+  sealPhotos: string[]; referenceRetailPrice: number;
+  partitionType: PartitionType; selectionMode: "PICK" | "RANDOM";
+  slots: Slot[]; totalSlots: number; soldSlots: number;
+  saleEndsAt: string; openingAt: string;
+  seedCommitHash: string; seedCommittedAt: string;
+  status: LotteryStatus; selfOperated: boolean; merchantName: string;
+  fallbackRule: string;                             // rule for off-list cards
+};
+
+type OpenedCard = {
+  id: string; cardNumber: string; name: string; rarity: string;
+  slotId: string; videoTimestampSec: number; attribution: "AUTO" | "MANUAL" | "FALLBACK";
+};
+
+type FairnessRecord = {
+  serverSeed: string; seedCommitHash: string; participantsHash: string;
+  beacon: { source: string; round: string; value: string; fetchedAt: string };
+  algorithmVersion: string; assignment: { slotId: string; ownerDisplayId: string }[];
+};
+
+type CollectionItem = {
+  id: string; card: OpenedCard; lotteryTitle: string;
+  state: "STORED" | "SHIPPING" | "RECEIVED"; storedSince: string; freeStorageUntil: string;
+};
+
+Mock data: create 8 lotteries across ポケモン / ワンピース / 遊戯王 in varied statuses.
+Example: "ポケカ『テラスタルフェスex』2BOX キャラ枠", ¥700〜/枠 (prices differ by character),
+reference BOX ¥5,400 ×2, 12 slots, 10 sold, opening 9/28(月) 20:00, self-operated.
+Keep mock prices economically plausible: sum of all slot prices ≈ reference retail total × 1.10–1.30.
+Use one fixed prototype clock for every page: NOW = 2026-09-26 18:00 JST (const PROTO_NOW). All
+countdowns, "today", sale deadlines and lifecycle states are computed against it, never Date.now();
+show 「原型时钟 2026-09-26 18:00 JST」 in the prototype control strip.
+Use realistic Japanese card names. Use placeholder images from /public/mock/*.jpg.</pre></details>
+    <details><summary>§9.7 生成结果检查清单</summary><div class="tw"><table><thead><tr><th>#</th><th>检查项</th><th>对应</th></tr></thead><tbody><tr><td>1</td><td>全站无积分、余额、充值、提现、卖回、ポイント変換 相关 UI</td><td>UR1 · I3</td></tr><tr><td>2</td><td>无"盈亏""期待值""本场总价值""谁拿了最好的卡"类展示</td><td>UR2 · §8.1.3</td></tr><tr><td>3</td><td>所有演出都是回放已确定结果、可跳过、结尾有「検証する」</td><td>UR3 · §8.12.3</td></tr><tr><td>4</td><td>有购买入口的页面都显示「満員にならなければ全額返金」与截止时间</td><td>UR4 · I2</td></tr><tr><td>5</td><td>场次详情首屏可见种子承诺 hash</td><td>UR5 · I6</td></tr><tr><td>6</td><td>播放器可关闭叠加层看原始画面</td><td>UR6 · I5</td></tr><tr><td>7</td><td>无虚假稀缺、施压倒计时；「残りわずか」仅在剩余 ≤ 10% 时出现</td><td>UR7 · PD4</td></tr><tr><td>8</td><td>自营场次有「自営」标识</td><td>UR8 · G2</td></tr><tr><td>9</td><td>无打赏 / 礼物 UI</td><td>UR9 · §6.6.4</td></tr><tr><td>10</td><td>商家端无触发随机、上传录像、上架后编辑的入口</td><td>I4 · I5 · §6.7.2</td></tr><tr><td>11</td><td>工位端录像中断只有"中止"路径，无"继续"</td><td>§6.5.2 原则 2</td></tr><tr><td>12</td><td>文案为日文；金额 ¥ 千分位；时间为 JST 格式</td><td>§9.2 Formatting</td></tr><tr><td>13</td><td>购买处明示「購入後のキャンセルはできません」及例外；参考价受 <code>showReferencePrice</code> 开关控制</td><td>PD1 · PD2</td></tr><tr><td>14</td><td>时间全部按 <code>PROTO_NOW</code>（2026-09-26 18:00 JST）计算，原型设置条标明时钟</td><td>§9.3</td></tr><tr><td>15</td><td>跨页同一事实数字一致（价格、k、本月用量、我的枠、卡片归属）；卡片由共享种子生成，不手写</td><td>§9.8 D1</td></tr><tr><td>16</td><td>金色样式仅用于 SR 及以上；「手動」归属为中性标识，不作警告</td><td>UI-08</td></tr><tr><td>17</td><td>页面声明的演示状态都可在原型中切出（失败态、中断、篡改、空 / 加载）</td><td>§9.8 D5</td></tr><tr><td>18</td><td>单文件交付：内联 CSS/JS，外部仅 Google Fonts；无死链；有 noindex</td><td>CLAUDE.md 原型规则</td></tr></tbody></table></div></details>
+  </section>
+
+  <footer>
+    <span>截图为 Playwright 自动生成（手机 390px · 2x / 桌面 1440×900 / 工位端 1024×768，浅色），点击看原图。UI-06 本轮不做。</span>
+    <span>原型中的场次、价格、卡号、商家名均为示例；原型时钟统一为 2026-09-26 18:00 JST。</span>
+  </footer>
+</div>
+</body>
+</html>
