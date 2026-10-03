@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<!-- Box Rush 原型 UI-13 场次创建向导 + 分位编辑器（商家端，桌面）。由 docs/breaking-platform.md §9.5 UI-13 prompt 生成；静态单文件。
+     初始状态故意不合格（2 张新收录卡未分组、兜底条款未填），用来演示实时不变量校验。原型时钟 2026-09-26 18:00 JST。 -->
+<title>BOXラッシュ 開封会を作成</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+:root{
+  --bg:#F6F6F2; --surface:#FFFFFF; --ink:#1A1A1A; --ink-2:#666; --line:#E3E2DB; --track:#ECEBE4;
+  --accent:#3B3FD8; --accent-ink:#FFFFFF; --accent-soft:#ECEDFC;
+  --trust:#0F9D8A; --trust-soft:#E1F3F0; --warn:#B77400; --warn-soft:#FBF0DC; --error:#C93C3C; --error-soft:#FBE7E7;
+  --sans:"Noto Sans JP","Hiragino Kaku Gothic ProN","Hiragino Sans",Meiryo,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){color-scheme:dark;
+  --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --ink-2:#A0A0A0; --line:#2A2B2F; --track:#2A2B2F;
+  --accent:#8E91F7; --accent-ink:#111214; --accent-soft:#23244A; --trust:#3CC4B0; --trust-soft:#15302C; --warn:#F0A73A; --warn-soft:#3A2C12; --error:#EF6B6B; --error-soft:#3A1C1C;}}
+:root[data-theme="dark"]{color-scheme:dark;
+  --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --ink-2:#A0A0A0; --line:#2A2B2F; --track:#2A2B2F;
+  --accent:#8E91F7; --accent-ink:#111214; --accent-soft:#23244A; --trust:#3CC4B0; --trust-soft:#15302C; --warn:#F0A73A; --warn-soft:#3A2C12; --error:#EF6B6B; --error-soft:#3A1C1C;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.mono{font-family:var(--mono)} .muted{color:var(--ink-2)} .small{font-size:12px}
+.proto{background:var(--ink);color:var(--bg);font-size:12px}
+.proto summary{padding:6px 16px;cursor:pointer;list-style:none}
+.proto summary::-webkit-details-marker{display:none}
+/* ---------- admin shell (merchant / ops, desktop-first) ---------- */
+.adm{display:grid;grid-template-columns:1fr;min-height:100vh;background:var(--bg)}
+.side-nav{background:var(--surface);border-bottom:1px solid var(--line);padding:10px 14px;display:flex;gap:10px;align-items:center;overflow-x:auto}
+.side-nav .brand{font-weight:900;font-size:16px;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.side-nav .brand i{font-style:normal;background:var(--accent);color:var(--accent-ink);padding:0 5px;border-radius:5px;font-family:var(--mono);font-size:13px}
+.side-nav .brand small{font-size:11px;color:var(--ink-2);font-weight:700;border:1px solid var(--line);border-radius:4px;padding:0 5px}
+.side-nav nav{display:flex;gap:2px}
+.side-nav nav a{white-space:nowrap;padding:6px 10px;border-radius:8px;font-size:13px;color:var(--ink-2)}
+.side-nav nav a[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.side-nav nav a:hover{background:var(--track)}
+.side-nav .who{margin-left:auto;font-size:12px;color:var(--ink-2);white-space:nowrap}
+.main{min-width:0;padding:16px;display:flex;flex-direction:column;gap:14px}
+.ph{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.ph h1{margin:0;font-size:20px;font-weight:900}
+.ph .sub{font-size:12.5px;color:var(--ink-2)}
+.ph .sp{flex:1}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card h2{margin:0;font-size:14.5px;font-weight:900;display:flex;align-items:center;gap:8px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:0 12px;min-height:36px;font-size:13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--ink-2)}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.btn.ok{background:var(--trust);color:#fff;border-color:transparent}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.pill.ok{background:var(--trust-soft);color:var(--trust)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--error-soft);color:var(--error)}
+.pill.info{background:var(--accent-soft);color:var(--accent)}
+.pill.mute{background:var(--track);color:var(--ink-2)}
+.tbl{overflow:auto;border:1px solid var(--line);border-radius:10px}
+.tbl table{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbl th,.tbl td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl th{position:sticky;top:0;background:var(--surface);font-size:11.5px;color:var(--ink-2);z-index:1}
+.tbl tr.sel td{background:var(--accent-soft)}
+.tbl tr[data-row]{cursor:pointer}
+.tbl tr[data-row]:hover td{background:var(--track)}
+.chips{display:flex;gap:4px;flex-wrap:wrap}
+.chips button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 10px;font-size:12px;cursor:pointer;min-height:30px}
+.chips button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.kpi{display:flex;flex-direction:column;gap:2px}
+.kpi b{font-family:var(--mono);font-size:24px;line-height:1.1}
+.kpi span{font-size:12px;color:var(--ink-2)}
+@media (min-width:1024px){
+  .adm{grid-template-columns:220px minmax(0,1fr)}
+  .side-nav{flex-direction:column;align-items:stretch;border-bottom:0;border-right:1px solid var(--line);padding:16px 12px;position:sticky;top:0;height:100vh;overflow-y:auto;gap:14px}
+  .side-nav nav{flex-direction:column}
+  .side-nav nav a{padding:8px 10px}
+  .side-nav .who{margin-left:0;margin-top:auto}
+  .main{padding:20px 24px}
+}
+
+.layout{display:grid;grid-template-columns:1fr;gap:14px;align-items:start}
+@media (min-width:1100px){.layout{grid-template-columns:minmax(0,1fr) 320px}.val{position:sticky;top:20px}}
+.steps{display:flex;gap:4px;flex-wrap:wrap}
+.steps button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:12.5px;cursor:pointer;display:flex;gap:6px;align-items:center}
+.steps button b{font-family:var(--mono);width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:var(--track);font-size:11px}
+.steps button[aria-current="step"]{border-color:var(--accent);color:var(--accent);font-weight:700}
+.steps button[aria-current="step"] b{background:var(--accent);color:var(--accent-ink)}
+.f{display:flex;flex-direction:column;gap:4px}
+.f label,.f .lab{font-size:12px;color:var(--ink-2);font-weight:700}
+.f input,.f select,.f textarea{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 10px;min-height:38px}
+.f.err input,.f.err select,.f.err textarea{border-color:var(--error);background:var(--error-soft)}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.row>.f{flex:1;min-width:180px}
+.lots{display:flex;flex-direction:column;gap:8px}
+.lot{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer}
+.lot:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.lot.dis{opacity:.55;cursor:not-allowed}
+.lot input{accent-color:var(--accent)}
+.lot .lph{width:46px;height:38px;border-radius:6px;background:linear-gradient(160deg,#E76F51,#C2410C);position:relative;overflow:hidden;flex:none}
+.lot .lph::after{content:"";position:absolute;left:-10%;right:-10%;top:45%;height:5px;background:rgba(255,255,255,.6);transform:rotate(-8deg)}
+.lot .t{flex:1}
+.types{display:flex;gap:6px;flex-wrap:wrap}
+.types label{border:1px solid var(--line);border-radius:999px;padding:5px 12px;cursor:pointer;font-size:13px}
+.types label:has(input:checked){border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:700}
+.types input{position:absolute;opacity:0;pointer-events:none}
+.editor{display:grid;grid-template-columns:1fr;gap:10px}
+@media (min-width:900px){.editor{grid-template-columns:260px minmax(0,1fr)}}
+.pool,.group{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:8px}
+.pool{background:var(--bg)}
+.pool.err{border-color:var(--error);background:var(--error-soft)}
+.gh{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;margin-bottom:6px;flex-wrap:wrap}
+.gh .mono{color:var(--ink-2);font-weight:500}
+.gh input{width:52px;border:1px solid var(--line);border-radius:6px;padding:2px 6px;font-family:var(--mono);font-size:12px;background:var(--surface)}
+.gh input.bad{border-color:var(--error);background:var(--error-soft)}
+.gh .mv{margin-left:auto;border:1px dashed var(--accent);color:var(--accent);background:transparent;border-radius:6px;font-size:11px;padding:1px 6px;cursor:pointer}
+.chips2{display:flex;flex-wrap:wrap;gap:4px;min-height:28px}
+.cc{font-family:var(--mono);font-size:11.5px;border:1px solid var(--line);border-radius:6px;padding:2px 6px;background:var(--surface);cursor:grab;user-select:none}
+.cc.new{border-color:var(--warn);background:var(--warn-soft)}
+.cc.picked{outline:2px solid var(--accent)}
+.groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.group.over,.pool.over{outline:2px dashed var(--accent)}
+.vlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.vlist li button{width:100%;text-align:left;display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start;border:0;background:var(--bg);border-radius:8px;padding:8px 10px;cursor:pointer;font-size:12.5px}
+.vlist .ic{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:900;color:#fff;background:var(--trust)}
+.vlist li.ng button{background:var(--error-soft)} .vlist li.ng .ic{background:var(--error)}
+.vlist li.fixed button{cursor:default}
+.vlist .tag{font-family:var(--mono);font-size:10.5px;color:var(--ink-2)}
+.mbox{display:flex;gap:16px;align-items:baseline;flex-wrap:wrap;background:var(--bg);border-radius:10px;padding:10px 12px}
+.mbox b{font-family:var(--mono);font-size:22px}
+.ptbl input{width:90px;border:1px solid var(--line);border-radius:6px;padding:3px 6px;font-family:var(--mono);background:var(--surface)}
+.slots{display:flex;flex-direction:column;gap:6px}
+.slots label{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer}
+.slots label.full{opacity:.5;cursor:not-allowed}
+.slots label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.sumdl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0;font-size:13px}
+.sumdl dt{color:var(--ink-2)} .sumdl dd{margin:0}
+.locked{background:var(--trust-soft);border-radius:12px;padding:12px 14px;display:flex;gap:10px;align-items:center}
+.ro input,.ro select,.ro textarea,.ro button.mv{pointer-events:none;opacity:.7}
+.ro .cc{cursor:default}
+.nav2{display:flex;gap:8px;justify-content:space-between}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:12.5px;padding:8px 14px;border-radius:999px;z-index:40}
+</style>
+</head>
+<body>
+<details class="proto"><summary>原型 UI-13 场次创建向导 · 初始状态故意不合格以演示校验 · 示例数据 · 原型时钟 2026-09-26 18:00 JST</summary></details>
+<div class="adm">
+  <aside class="side-nav">
+    <span class="brand"><i>BOX</i>ラッシュ <small>出品者</small></span>
+    <nav aria-label="出品者メニュー"><a href="#" aria-current="page">開封会</a><a href="#lots" data-proto="入庫予約">入庫予約</a><a href="#sales" data-proto="売上・精算">売上・精算</a><a href="#shop" data-proto="店舗設定">店舗設定</a></nav>
+    <span class="who">BOXラッシュ（自営）· 伊藤</span>
+  </aside>
+  <main class="main">
+    <div class="ph"><div><h1>開封会を作成</h1><span class="sub">下書き · 審査に提出するまで変更できます</span></div></div>
+    <div class="locked" id="locked" hidden><b>審査中</b><span class="small">上架後は変更できません。抽選・録画は運営が行い、出品者は操作できません。</span></div>
+    <div class="layout">
+      <div style="display:flex;flex-direction:column;gap:14px;min-width:0" id="form">
+        <nav class="steps" id="steps" aria-label="ステップ"></nav>
+        <section class="card" id="pane"></section>
+        <div class="nav2"><button class="btn" type="button" id="prev">戻る</button><button class="btn pri" type="button" id="next">次へ</button></div>
+      </div>
+      <aside class="card val" aria-labelledby="v-h"><h2 id="v-h">ルールチェック</h2>
+        <span class="small muted">すべて満たすと審査に提出できます。項目を押すと該当箇所へ移動します。</span>
+        <ul class="vlist" id="vlist"></ul>
+        <button class="btn pri" type="button" id="submit" disabled>審査に提出</button>
+      </aside>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+<script>
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const yen=n=>"¥"+n.toLocaleString("ja-JP");
+const pad=n=>String(n).padStart(2,"0");
+/* catalog + inventory (I7: only sealed manufacturer products exist in the master catalog) */
+const SKU={id:"PKM-SV8a",name:"ポケカ『テラスタルフェスex』",maker:"株式会社ポケモン",unit:"BOX",retail:5400};
+const LOTS=[{id:"B-0920-01",qty:2,state:"in",at:"9/20 10:40"},{id:"B-0920-02",qty:4,state:"in",at:"9/20 10:55"},{id:"B-0928-01",qty:2,state:"pending",at:"9/28 入庫予定"}];
+/* platform character template (from master data), plus 2 newly listed cards not yet grouped */
+const TPL=[["ブラッキー枠",1900,["006","061","183","217"]],["ニンフィア枠",1600,["029","092","190","212"]],["エーフィ枠",1400,["021","053","186"]],["リーフィア枠",1100,["008","112","208"]],
+ ["グレイシア枠",1100,["033","117","201"]],["シャワーズ枠",900,["014","077","195"]],["サンダース枠",900,["018","081","197"]],["ブースター枠",900,["010","072","193"]],
+ ["イーブイ枠",800,["001","074","180"]],["その他ポケモン（ex）枠",800,["040","105","150"]],["その他ポケモン枠",700,["003","045","130"]],["トレーナーズ・エネルギー枠",700,["160","165","170"]]];
+const st={step:1,lot:"B-0920-01",qty:2,type:"ENUMERATED",basis:"number",groups:TPL.map(([n,p,cards])=>({n,p,g:3,cards:cards.map(c=>c+"/187")})),
+  pool:["238/187","239/187"],fallback:"",draftRule:"",uniform:false,uniPrice:1100,limit:3,saleStart:"2026-09-27T12:00",saleEnd:"2026-10-04T23:59",slot:null,submitted:false,picked:null};
+const OPEN_SLOTS=[["2026-10-05 20:00","ST-02",1],["2026-10-05 21:00","ST-02",0],["2026-10-06 20:00","ST-01",2],["2026-10-06 21:00","ST-02",1]];
+const STEPS=["対象商品","分け方","販売設定","開封日時","確認"];
+
+function checks(){
+  const enumT=st.type==="ENUMERATED", g=st.groups;
+  return [
+   {id:"guar",tag:"I1",label:"すべての枠に保証あり（最低枚数 > 0）",ok:!enumT||g.every(x=>x.g>0),step:2},
+   {id:"cover",tag:"I1",label:"すべてのカードがいずれかの枠に属する（漏れなし）",ok:!enumT||st.pool.length===0,step:2,detail:st.pool.length?`未割り当て ${st.pool.length} 枚：${st.pool.join("、")}`:""},
+   {id:"dup",tag:"",label:"重複なし（1枚が2つの枠に属さない）",ok:(()=>{const all=g.flatMap(x=>x.cards);return new Set(all).size===all.length;})(),step:2},
+   {id:"i2",tag:"I2",label:"成団条件 = 100%（変更不可、表示のみ）",ok:true,fixed:true},
+   {id:"i7",tag:"I7",label:"リパック商品ではない",ok:true,fixed:true,detail:"マスタ登録のメーカー未開封品のみ選択可能"},
+   {id:"i9",tag:"I9",label:"レアリティによる分け方ではない",ok:!(st.type==="ATTRIBUTE"&&st.basis==="rarity"),step:2},
+   {id:"fb",tag:"",label:"フォールバックルール記入済み",ok:st.fallback.trim().length>0,step:2},
+   ...(st.type==="DRAFT"?[{id:"draft",tag:"",label:"不在時の自動選択ルール記入済み",ok:st.draftRule.trim().length>0,step:2}]:[]),
+   {id:"lot",tag:"",label:"入庫・封印確認済みのロットを選択",ok:LOTS.find(l=>l.id===st.lot)?.state==="in",step:1},
+   {id:"slot",tag:"",label:"開封日時を選択",ok:!!st.slot,step:4}
+  ];
+}
+function prices(){return st.type==="ENUMERATED"?(st.uniform?st.groups.map(()=>st.uniPrice):st.groups.map(x=>x.p)):[];}
+function mValue(){const p=prices(); if(!p.length) return null; return p.reduce((a,b)=>a+b,0)/(SKU.retail*st.qty)-1;}
+
+function stepNav(){document.getElementById("steps").innerHTML=STEPS.map((s,i)=>`<button type="button" data-step="${i+1}" ${st.step===i+1?'aria-current="step"':""}><b>${i+1}</b>${s}</button>`).join("");}
+function pane(){
+  const p=document.getElementById("pane"), c=checks(), bad=id=>c.find(x=>x.id===id&&!x.ok);
+  if(st.step===1){
+    p.innerHTML=`<h2>1. 対象商品</h2>
+      <div class="row"><div class="f"><label for="q">商品マスタを検索</label><input id="q" value="テラスタルフェスex" placeholder="シリーズ名・SKU"></div>
+        <div class="f" style="max-width:140px"><label for="qty">数量（BOX）</label><input id="qty" type="number" min="1" max="4" value="${st.qty}"></div></div>
+      <div class="mbox"><span><b style="font-size:15px">${SKU.name}</b><br><span class="small muted">${SKU.maker} · ${SKU.unit} · 参考小売 ${yen(SKU.retail)} · SKU <span class="mono">${SKU.id}</span></span></span></div>
+      <div class="f ${bad("lot")?"err":""}" id="f-lot"><span class="lab">在庫ロット（倉庫で入庫・封印確認済みのもの）</span><div class="lots">${LOTS.map(l=>`<label class="lot ${l.state!=="in"?"dis":""}">
+        <input type="radio" name="lot" value="${l.id}" ${st.lot===l.id?"checked":""} ${l.state!=="in"?"disabled":""}><span class="lph" aria-hidden="true"></span>
+        <span class="t"><b class="mono">${l.id}</b> · ${l.qty} BOX<br><span class="small ${l.state==="in"?"":"muted"}">${l.state==="in"?`入庫・封印確認済（${l.at}）`:`入庫前は出品できません（${l.at}）`}</span></span></label>`).join("")}</div></div>
+      <p class="small muted" style="margin:0">リパック品・開封済み品はマスタに登録されていないため選択できません（I7）。</p>`;
+    p.querySelectorAll("input[name=lot]").forEach(r=>r.onchange=()=>{st.lot=r.value;update();});
+    p.querySelector("#qty").onchange=e=>{st.qty=Math.max(1,Math.min(4,+e.target.value||1));update();};
+  }else if(st.step===2){
+    const T=[["ENUMERATED","キャラ枠"],["POSITIONAL","パック番号"],["ATTRIBUTE","番号レンジ"],["WHOLE","BOX丸ごと"],["DRAFT","ドラフト"]];
+    p.innerHTML=`<h2>2. 分け方</h2><div class="types" role="radiogroup">${T.map(([v,l])=>`<label><input type="radio" name="type" value="${v}" ${st.type===v?"checked":""}>${l}</label>`).join("")}</div>
+      ${st.type==="ATTRIBUTE"?`<div class="f ${bad("i9")?"err":""}" id="f-i9" style="max-width:320px"><label for="basis">分ける基準</label><select id="basis"><option value="number" ${st.basis==="number"?"selected":""}>カード番号の範囲</option><option value="rarity" ${st.basis==="rarity"?"selected":""}>レアリティ（禁止）</option></select></div>`:""}
+      ${st.type==="ENUMERATED"?`<p class="small muted" style="margin:0">運営のキャラ枠テンプレート（${SKU.name}・9/20 版）を読み込みました。カードをドラッグ、またはカードを選んでから枠の「ここへ」を押して移動します。</p>
+      <div class="editor">
+        <div class="pool ${st.pool.length?"err":""}" id="f-cover" data-drop="pool"><div class="gh">未割り当て <span class="mono">${st.pool.length} 枚</span>${st.picked?`<button class="mv" type="button" data-to="pool">ここへ</button>`:""}</div>
+          <div class="chips2">${st.pool.map(c=>`<span class="cc new ${st.picked===c?"picked":""}" draggable="true" data-card="${c}" tabindex="0">${c} 新収録</span>`).join("")||`<span class="small muted">すべて割り当て済み</span>`}</div></div>
+        <div class="groups" id="f-guar">${st.groups.map((g,i)=>`<div class="group" data-drop="${i}"><div class="gh">#${pad(i+1)} ${esc(g.n)} <span class="mono">${g.cards.length}</span>
+          <label class="small muted">保証 <input type="number" min="0" value="${g.g}" data-g="${i}" class="${g.g>0?"":"bad"}" aria-label="${esc(g.n)} の保証枚数"> 枚</label>${st.picked?`<button class="mv" type="button" data-to="${i}">ここへ</button>`:""}</div>
+          <div class="chips2">${g.cards.map(c=>`<span class="cc ${st.picked===c?"picked":""}" draggable="true" data-card="${c}" tabindex="0">${c}</span>`).join("")}</div></div>`).join("")}</div>
+      </div>`:`<p class="small muted" style="margin:0">${st.type==="WHOLE"?"1 枠で BOX をまるごと販売します。":st.type==="POSITIONAL"?"パック番号ごとに枠を作ります（各枠 1 パック保証）。":st.type==="DRAFT"?"開封後、抽選した順番で参加者がカードを選びます。":"カード番号の範囲で枠を作ります。"}</p>`}
+      ${st.type==="DRAFT"?`<div class="f ${bad("draft")?"err":""}" id="f-draft"><label for="draft">不在時の自動選択ルール（必須）</label><textarea id="draft" rows="2" placeholder="例：持ち時間内に選ばなかった場合、残りのうちカード番号が最も小さいものを自動で選びます">${esc(st.draftRule)}</textarea></div>`:""}
+      <div class="f ${bad("fb")?"err":""}" id="f-fb"><label for="fb">リスト外カードの扱い（必須）</label><textarea id="fb" rows="2" placeholder="例：リストにないカード（エラー品・封入外カード等）は、開封順に 1 番枠から順番に振り分けます">${esc(st.fallback)}</textarea>
+        <button class="btn" type="button" id="fb-std" style="align-self:flex-start">標準の文言を入れる</button></div>`;
+    p.querySelectorAll("input[name=type]").forEach(r=>r.onchange=()=>{st.type=r.value;update();});
+    const b=p.querySelector("#basis"); if(b) b.onchange=e=>{st.basis=e.target.value;update();};
+    p.querySelector("#fb").oninput=e=>{st.fallback=e.target.value;renderVal();};
+    p.querySelector("#fb-std").onclick=()=>{st.fallback="リストにないカード（エラー品・封入外カード等）は、開封順に 1 番枠から順番に振り分けます。";update();};
+    const dr=p.querySelector("#draft"); if(dr) dr.oninput=e=>{st.draftRule=e.target.value;renderVal();};
+    p.querySelectorAll("[data-g]").forEach(i=>i.onchange=e=>{st.groups[+i.dataset.g].g=Math.max(0,+e.target.value||0);update();});
+    bindDnD(p);
+  }else if(st.step===3){
+    const m=mValue();
+    p.innerHTML=`<h2>3. 販売設定</h2>
+      <div class="row"><label class="small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="uni" ${st.uniform?"checked":""}>全枠同じ価格</label></div>
+      ${st.type==="ENUMERATED"?(st.uniform?`<div class="f" style="max-width:200px"><label for="up">1 枠の価格</label><input id="up" type="number" value="${st.uniPrice}"></div>`:
+        `<div class="tbl ptbl"><table><thead><tr><th>枠</th><th>価格</th></tr></thead><tbody>${st.groups.map((g,i)=>`<tr><td>#${pad(i+1)} ${esc(g.n)}</td><td><input type="number" value="${g.p}" data-p="${i}" aria-label="${esc(g.n)} の価格"></td></tr>`).join("")}</tbody></table></div>`):""}
+      <div class="mbox"><span class="small muted">参考小売 ${yen(SKU.retail)} × ${st.qty} = <b style="font-size:15px">${yen(SKU.retail*st.qty)}</b></span>
+        <span class="small muted">全枠の合計 <b style="font-size:15px">${yen(prices().reduce((a,b)=>a+b,0))}</b></span>
+        <span>想定上乗せ率 <b>m = ${m==null?"—":(m>=0?"+":"")+Math.round(m*100)+"%"}</b> <span class="small muted">（表示のみ）</span></span></div>
+      <div class="row"><div class="f"><label for="lim">購入上限（1 人あたり）</label><input id="lim" type="number" min="1" value="${st.limit}"></div>
+        <div class="f"><label for="ss">販売開始</label><input id="ss" type="datetime-local" value="${st.saleStart}"></div>
+        <div class="f"><label for="se">販売締切</label><input id="se" type="datetime-local" value="${st.saleEnd}"></div></div>
+      <p class="small muted" style="margin:0">成団条件は 100%（全枠完売）で固定です。締切までに完売しない場合は自動で不成立・全額返金になります。</p>`;
+    p.querySelector("#uni").onchange=e=>{st.uniform=e.target.checked;update();};
+    const up=p.querySelector("#up"); if(up) up.onchange=e=>{st.uniPrice=+e.target.value||0;update();};
+    p.querySelectorAll("[data-p]").forEach(i=>i.onchange=e=>{st.groups[+i.dataset.p].p=+e.target.value||0;update();});
+    p.querySelector("#lim").onchange=e=>{st.limit=+e.target.value||1;};
+  }else if(st.step===4){
+    p.innerHTML=`<h2>4. 開封日時</h2><p class="small muted" style="margin:0">集中開封ステーションの空き枠から選びます（販売締切の後のみ）。開封は運営が予定時刻に行い、録画も運営のカメラだけで行います。</p>
+      <div class="slots" id="f-slot">${OPEN_SLOTS.map(([t,stn,cap])=>`<label class="${cap?"":"full"}"><input type="radio" name="slot" value="${t}" ${st.slot===t?"checked":""} ${cap?"":"disabled"}>
+        <span class="mono">${t.replace("2026-","").replace("-","/")}</span><span>${stn}</span><span class="small muted" style="margin-left:auto">${cap?`空き ${cap}`:"満"}</span></label>`).join("")}</div>`;
+    p.querySelectorAll("input[name=slot]").forEach(r=>r.onchange=()=>{st.slot=r.value;update();});
+  }else{
+    const m=mValue(), T={ENUMERATED:"キャラ枠",POSITIONAL:"パック番号",ATTRIBUTE:"番号レンジ",WHOLE:"BOX丸ごと",DRAFT:"ドラフト"}[st.type];
+    p.innerHTML=`<h2>5. 確認</h2><dl class="sumdl">
+      <dt>商品</dt><dd>${SKU.name} × ${st.qty} ${SKU.unit}（ロット <span class="mono">${st.lot}</span>）</dd>
+      <dt>分け方</dt><dd>${T}${st.type==="ENUMERATED"?`・${st.groups.length} 枠`:""}</dd>
+      <dt>価格</dt><dd>${st.type==="ENUMERATED"?`${yen(Math.min(...prices()))}〜${yen(Math.max(...prices()))}・想定上乗せ率 m = ${(m>=0?"+":"")+Math.round(m*100)}%`:"—"}</dd>
+      <dt>販売</dt><dd>${st.saleStart.replace("T"," ")} 〜 ${st.saleEnd.replace("T"," ")}・1 人 ${st.limit} 枠まで・成団 100%</dd>
+      <dt>開封</dt><dd>${st.slot||"未選択"}</dd><dt>リスト外</dt><dd>${esc(st.fallback)||"未記入"}</dd></dl>
+      <p class="small muted" style="margin:0">提出すると、運営がシードのハッシュを公開してから販売を開始します。提出後は分け方・保証・価格を変更できません。</p>`;
+  }
+  document.getElementById("prev").disabled=st.step===1; document.getElementById("next").hidden=st.step===5;
+}
+function bindDnD(p){
+  p.querySelectorAll("[data-card]").forEach(c=>{
+    c.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",c.dataset.card);});
+    c.addEventListener("click",()=>{st.picked=st.picked===c.dataset.card?null:c.dataset.card;update();});
+    c.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();c.click();}});
+  });
+  p.querySelectorAll("[data-drop]").forEach(z=>{
+    z.addEventListener("dragover",e=>{e.preventDefault();z.classList.add("over");});
+    z.addEventListener("dragleave",()=>z.classList.remove("over"));
+    z.addEventListener("drop",e=>{e.preventDefault();z.classList.remove("over");move(e.dataTransfer.getData("text/plain"),z.dataset.drop);});
+  });
+  p.querySelectorAll("[data-to]").forEach(b=>b.onclick=e=>{e.stopPropagation();move(st.picked,b.dataset.to);});
+}
+function move(card,to){
+  if(!card||st.submitted) return;
+  st.pool=st.pool.filter(c=>c!==card); st.groups.forEach(g=>g.cards=g.cards.filter(c=>c!==card));   /* each card ends up in exactly one place */
+  if(to==="pool") st.pool.push(card); else st.groups[+to].cards.push(card);
+  st.picked=null; update();
+}
+function renderVal(){
+  const c=checks(), all=c.every(x=>x.ok);
+  document.getElementById("vlist").innerHTML=c.map(x=>`<li class="${x.ok?"":"ng"} ${x.fixed?"fixed":""}"><button type="button" ${x.fixed?"":`data-goto="${x.step}" data-field="${x.id}"`}>
+    <span class="ic">${x.ok?"✓":"✕"}</span><span>${x.tag?`<span class="tag">${x.tag}</span> `:""}${x.label}${x.detail?`<br><span class="small muted">${esc(x.detail)}</span>`:""}</span></button></li>`).join("");
+  document.getElementById("submit").disabled=!all||st.submitted;
+}
+function update(){stepNav();pane();renderVal();}
+document.addEventListener("click",e=>{
+  const s=e.target.closest("[data-step]"); if(s){st.step=+s.dataset.step;update();return;}
+  const g=e.target.closest("[data-goto]"); if(g){st.step=+g.dataset.goto;update();const f=document.getElementById("f-"+g.dataset.field);if(f){f.scrollIntoView({block:"center"});const i=f.querySelector("input,textarea,select,.cc");if(i)i.focus();}return;}
+  const p=e.target.closest("[data-proto]"); if(p){e.preventDefault();say(`原型：「${p.dataset.proto}」尚未生成`);}
+});
+document.getElementById("prev").onclick=()=>{st.step=Math.max(1,st.step-1);update();};
+document.getElementById("next").onclick=()=>{st.step=Math.min(5,st.step+1);update();};
+document.getElementById("submit").onclick=()=>{st.submitted=true;st.step=5;document.getElementById("form").classList.add("ro");document.getElementById("locked").hidden=false;update();say("審査に提出しました（原型）");};
+const toast=document.getElementById("toast"); let tt;
+function say(m){toast.textContent=m;toast.hidden=false;clearTimeout(tt);tt=setTimeout(()=>toast.hidden=true,2400);}
+update();
+</script>
+</body>
+</html>

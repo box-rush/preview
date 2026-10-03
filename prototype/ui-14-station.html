@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<!-- Box Rush 原型 UI-14 开盒工位端（平板横屏 1024×768）。由 docs/breaking-platform.md §9.6 UI-14 prompt 生成；静态单文件。
+     模拟 9/26 20:00 L009 的开盒班次（原型时钟 2026-09-26 18:00 JST 时，L009 为「開封待ち」）。卡片与 ui-15 / ui-16 同一种子。
+     单一深色高对比主题（工位环境），不跟随系统明暗。 -->
+<title>BOXラッシュ 開封ステーション</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Single dark, high-contrast look for the opening station (deliberate, not theme-following). */
+:root{
+  color-scheme:dark;
+  --bg:#0E0F11; --panel:#17191C; --panel2:#1F2226; --ink:#F4F4F2; --ink-2:#A7A9AD; --line:#2E3136;
+  --accent:#8E91F7; --accent-ink:#0E0F11; --trust:#3CC4B0; --warn:#F0A73A; --rec:#FF4D4D;
+  --sans:"Noto Sans JP","Hiragino Kaku Gothic ProN","Hiragino Sans",Meiryo,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5}
+button,input{font:inherit;color:inherit}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+.mono{font-family:var(--mono)}
+.proto{background:#2a2c30;color:var(--ink);font-size:12px;border-bottom:1px solid var(--line)}
+.proto summary{padding:6px 16px;cursor:pointer;list-style:none}
+.proto summary::-webkit-details-marker{display:none}
+.proto .opts{padding:2px 16px 10px;display:flex;gap:8px;flex-wrap:wrap}
+.proto button{background:transparent;border:1px solid var(--line);border-radius:999px;padding:3px 12px;font-size:12px;cursor:pointer}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 18px;background:var(--panel);border-bottom:1px solid var(--line)}
+.topbar b{font-size:16px}
+.topbar .st{font-size:13px;color:var(--ink-2)}
+.topbar .sp{flex:1}
+.rec{display:none;align-items:center;gap:8px;font-family:var(--mono);font-weight:700;font-size:20px;color:var(--rec)}
+.rec i{width:14px;height:14px;border-radius:50%;background:var(--rec);animation:blink 1.2s steps(2) infinite}
+@keyframes blink{50%{opacity:.25}}
+.recording .rec{display:flex}
+.big{min-height:56px;border:0;border-radius:12px;padding:0 22px;font-size:17px;font-weight:900;cursor:pointer;background:var(--accent);color:var(--accent-ink)}
+.big.sec{background:var(--panel2);color:var(--ink);border:1px solid var(--line)}
+.big.ok{background:var(--trust);color:#0E0F11}
+.big:disabled{opacity:.35;cursor:not-allowed}
+.view{padding:18px;max-width:1200px;margin:0 auto}
+/* scan */
+.scan{display:flex;flex-direction:column;align-items:center;gap:18px;padding-top:40px;text-align:center}
+.qr{width:160px;height:160px;border:3px dashed var(--line);border-radius:16px;display:grid;place-items:center;color:var(--ink-2);font-size:13px}
+.lot{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;grid-template-columns:1fr;gap:12px;width:100%;max-width:720px;text-align:left}
+.lot h2{margin:0;font-size:19px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:14px}
+.kv dt{color:var(--ink-2)} .kv dd{margin:0}
+.seals{display:flex;gap:10px}
+.seal{flex:1;aspect-ratio:4/3;border-radius:10px;background:linear-gradient(160deg,#E76F51,#C2410C);position:relative;overflow:hidden;display:flex;align-items:flex-end;padding:8px;font-family:var(--mono);font-size:12px;font-weight:700}
+.seal::after{content:"";position:absolute;left:-10%;right:-10%;top:45%;height:12px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.6) 0 12px,rgba(255,255,255,.25) 12px 18px);transform:rotate(-8deg)}
+.ready{font-size:12px;font-weight:700;color:var(--trust)}
+/* station */
+.station{display:grid;grid-template-columns:1fr;gap:14px}
+.cam{position:relative;background:#000;border-radius:14px;overflow:hidden;aspect-ratio:16/9}
+.cam canvas{width:100%;height:100%;display:block}
+.cam .lab{position:absolute;left:12px;top:10px;font-family:var(--mono);font-size:13px;background:rgba(0,0,0,.55);padding:2px 8px;border-radius:6px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.panel h3{margin:0;font-size:16px}
+.check{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.check li{display:flex;align-items:center;gap:12px;min-height:56px;background:var(--panel2);border-radius:12px;padding:8px 12px}
+.check .ic{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-weight:900;flex:none}
+.check li.done .ic{background:var(--trust);border-color:var(--trust);color:#0E0F11}
+.check .t{flex:1;font-weight:700}
+.check .t small{display:block;font-weight:400;color:var(--ink-2);font-size:12px}
+.check button{min-height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel);font-weight:700;cursor:pointer}
+.counter{display:flex;align-items:baseline;gap:10px}
+.counter b{font-family:var(--mono);font-size:34px}
+.counter span{color:var(--ink-2)}
+.entry{display:flex;gap:8px}
+.entry input{flex:1;min-height:56px;border-radius:12px;border:2px solid var(--line);background:var(--bg);padding:0 14px;font-family:var(--mono);font-size:18px}
+.entries{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto}
+.entries li{display:grid;grid-template-columns:70px 1fr auto;gap:10px;align-items:center;background:var(--panel2);border-radius:10px;padding:8px 10px;font-size:14px}
+.entries .tm{font-family:var(--mono);color:var(--ink-2);font-size:13px}
+.entries .nm small{font-family:var(--mono);color:var(--ink-2);margin-left:6px;font-size:12px}
+.tag{font-size:12px;font-weight:700;border-radius:999px;padding:2px 10px;white-space:nowrap}
+.tag.auto{background:rgba(60,196,176,.15);color:var(--trust)}
+.tag.rev{background:rgba(240,167,58,.15);color:var(--warn)}
+.tag.out{background:rgba(255,77,77,.15);color:var(--rec)}
+.queues{display:flex;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
+.queues b{font-family:var(--mono);color:var(--ink)}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.sum{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.sum div{background:var(--panel2);border-radius:12px;padding:12px}
+.sum b{display:block;font-family:var(--mono);font-size:28px}
+.sum span{color:var(--ink-2);font-size:13px}
+/* interruption */
+.abort{position:fixed;inset:0;background:#7A0E0E;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;padding:24px;z-index:100}
+.abort h2{margin:0;font-size:28px;font-weight:900}
+.abort p{margin:0;max-width:560px;font-size:15px;opacity:.9}
+.abort .big{background:#fff;color:#7A0E0E;min-width:260px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:13px;padding:10px 16px;border-radius:999px;z-index:120}
+@media (min-width:900px){
+  .station{grid-template-columns:3fr 2fr}
+  .lot{grid-template-columns:1fr 1fr}
+}
+@media (prefers-reduced-motion: reduce){ .rec i{animation:none} }
+</style>
+</head>
+<body>
+<details class="proto"><summary>原型 UI-14 开盒工位端 · 模拟 9/26 20:00 L009 开盒班次 · 原型时钟 2026-09-26 18:00 JST · 点此模拟异常</summary>
+  <div class="opts"><button type="button" id="sim-cut">模拟：摄像头断开</button><button type="button" id="sim-fast">原型：剩余各包一键录入</button></div></details>
+<header class="topbar" id="topbar">
+  <b>開封ステーション ST-02</b><span class="st" id="st">担当：佐藤（開封）</span><span class="sp"></span>
+  <span class="rec" aria-live="off"><i></i><span id="rec-t">REC 00:00:00</span></span>
+</header>
+<main class="view" id="view"></main>
+<div class="abort" id="abort" hidden role="alertdialog" aria-labelledby="ab-t">
+  <h2 id="ab-t">録画が中断されました。この開封会は中止されます</h2>
+  <p>録画が途切れた開封会は、ルールにより中止となり、参加者全員に全額返金されます。開封済みのカードは運営が引き取り、別の開封会には使いません。再開はできません。</p>
+  <button class="big" type="button" id="call">責任者に連絡</button>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+/* ---------- L009 mock opening data (deterministic, shared by ui-14 / ui-15 / ui-16) ---------- */
+function rng9(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const R9=rng9(20260926);
+const P9=60, C9=5, SEAL9=90, DRAW9=150, PACK9=40, DUR9=DRAW9+P9*PACK9+60;
+const SLOTS9=["ブラッキー枠","ニンフィア枠","エーフィ枠","リーフィア枠","グレイシア枠","シャワーズ枠","サンダース枠","ブースター枠","イーブイ枠","その他ポケモン（ex）枠","その他ポケモン枠","トレーナーズ・エネルギー枠"];
+const USERS9=["61d0","a7e3","f2c8","0e47","9b13","4ad6","c7f0","2e95","88b1","d04c","5f6a","37e2"];
+const CH9=[["ブラッキー",1],["ニンフィア",2],["エーフィ",3],["リーフィア",4],["グレイシア",5],["シャワーズ",6],["サンダース",7],["ブースター",8],["イーブイ",9]];
+const OT9=["ラルトス","ヒトカゲ","ポッチャマ","ゾロア","ミミッキュ","ルカリオ","カビゴン","ゲンガー","ガブリアス","ピカチュウ"];
+const TR9=["ネストボール","ハイパーボール","ナンジャモ","ペパー","ボスの指令","基本超エネルギー","基本悪エネルギー","ふしぎなアメ","すごいつりざお","ジャッジマン"];
+const RAR9=[["C",.5],["U",.25],["R",.11],["RR",.08],["AR",.04],["SR",.015],["SAR",.005]];
+function rar9(){let x=R9(),a=0;for(const [r,p] of RAR9){a+=p;if(x<a)return r;}return "C";}
+const CARDS9=[];
+for(let p=1;p<=P9;p++){for(let k=0;k<C9;k++){
+  const i=CARDS9.length, t=DRAW9+(p-1)*PACK9+8+k*6; let r=k===4?rar9():(R9()<.7?"C":"U"), name, slot;
+  const kind=R9();
+  if(kind<.25){name=TR9[Math.floor(R9()*TR9.length)];slot=12;if(r==="RR"||r==="AR")r="U";}
+  else if(kind<.6){const c=CH9[Math.floor(R9()*CH9.length)];const ex=(r==="RR"||r==="SR"||r==="SAR")&&R9()<.8;name=c[0]+(ex?"ex":"");slot=c[1];}
+  else{const o=OT9[Math.floor(R9()*OT9.length)];const ex=(r==="RR"||r==="SR"||r==="SAR")&&R9()<.8;name=o+(ex?"ex":"");slot=ex?10:11;}
+  const hi=r==="SR"||r==="SAR"||r==="AR";
+  const no=hi?String(160+Math.floor(R9()*40))+"/159":String(1+Math.floor(R9()*159)).padStart(3,"0")+"/159";
+  let status="auto", cand=null, note="";
+  if(i%53===17){status="review";const alt=slot===11?10:(slot>=1&&slot<=9?11:9);cand=[slot,alt];note="カード番号の読み取り信頼度が低い（"+(62+Math.floor(R9()*20))+"%）";}
+  CARDS9.push({i,t,pack:p,name,no,r,slot,status,cand,note});
+}}
+/* one off-list card (fallback rule: assigned in opening order starting from slot #01) */
+{const c=CARDS9[23*C9+1]; c.name="エラー印刷カード（番号なし）"; c.no="—"; c.r="?"; c.status="outside"; c.slot=1; c.cand=[1]; c.note="分位リストにないカード。上架時の兜底ルールで #01 に割り当て";}
+
+const pad=n=>String(n).padStart(2,"0");
+const hms=s=>`${pad(Math.floor(s/3600))}:${pad(Math.floor(s%3600/60))}:${pad(Math.floor(s%60))}`;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let stage="scan", recStart=0, recOn=false, pack=1, idx=0, checks={cam:false,rec:false,seal:false};
+const entered=[];
+const view=document.getElementById("view");
+
+function scanView(found){
+  view.innerHTML=`<div class="scan">
+    ${found?"":`<div class="qr">開封会の QR を<br>カメラにかざす</div><button class="big" type="button" id="scan">QRを読み取る</button>`}
+    ${found?`<section class="lot">
+      <div><h2>ポケカ『バトルパートナーズ』2BOX キャラ枠</h2><dl class="kv" style="margin-top:10px">
+        <dt>開封会 ID</dt><dd class="mono">L009</dd><dt>状態</dt><dd><span class="ready">READY · 満員・割り当て公開済み</span></dd>
+        <dt>開封予定</dt><dd class="mono">9/26(土) 20:00</dd><dt>BOX ロット</dt><dd class="mono">B-0917-01 / B-0917-02</dd><dt>パック数</dt><dd class="mono">60（2BOX × 30）</dd></dl></div>
+      <div style="display:flex;flex-direction:column;gap:10px"><span class="ready">入庫時の封印写真（9/17 15:20）</span>
+        <div class="seals"><div class="seal">B-0917-01</div><div class="seal">B-0917-02</div></div>
+        <button class="big" type="button" id="prep">準備を始める</button></div>
+    </section>`:""}</div>`;
+  const s=document.getElementById("scan"); if(s) s.onclick=()=>scanView(true);
+  const p=document.getElementById("prep"); if(p) p.onclick=()=>{stage="pre";render();setTimeout(()=>{checks.cam=true;render();},800);};
+}
+
+/* simple camera placeholder (no overlays — this is what the platform camera records) */
+let cv,ctx,raf;
+function camLoop(){
+  if(!cv) return; const W=cv.width,H=cv.height, now=performance.now()/1000;
+  ctx.fillStyle="#2a231c";ctx.fillRect(0,0,W,H);ctx.fillStyle="#4a3c2e";ctx.fillRect(0,H*.6,W,H*.4);
+  if(stage==="pre"||(stage==="rec"&&pack===1&&entered.length===0)){
+    [[.18,"B-0917-01"],[.54,"B-0917-02"]].forEach(([x,l])=>{ctx.fillStyle="#C2410C";ctx.fillRect(W*x,H*.2,W*.28,H*.55);
+      ctx.save();ctx.translate(W*x+W*.14,H*.5);ctx.rotate(-.12);ctx.fillStyle="rgba(255,255,255,.7)";ctx.fillRect(-W*.2,-7,W*.4,14);ctx.restore();
+      ctx.fillStyle="#fff";ctx.font="700 18px 'JetBrains Mono',monospace";ctx.fillText(l,W*x+12,H*.72);});
+  }else{
+    ctx.fillStyle="#C2410C";ctx.fillRect(W*.05,H*.3,W*.16,H*.35);
+    const c=entered[entered.length-1]; if(c){ctx.fillStyle=c.r==="SR"||c.r==="SAR"?"#e7cf7a":"#e9e9e4";ctx.fillRect(W*.4,H*.15,W*.2,H*.6);
+      ctx.fillStyle="#1a1a1a";ctx.font="900 20px 'Noto Sans JP',sans-serif";ctx.fillText(c.name.slice(0,10),W*.41,H*.24);
+      ctx.font="700 15px 'JetBrains Mono',monospace";ctx.fillText(c.no,W*.41,H*.71);}
+  }
+  ctx.fillStyle="rgba(0,0,0,.55)";ctx.fillRect(12,H-40,300,28);ctx.fillStyle="#fff";ctx.font="700 15px 'JetBrains Mono',monospace";
+  const sec=recOn?Math.floor((Date.now()-recStart)/1000):0, base=20*3600+sec;
+  ctx.fillText(`CAM-02  2026/09/26 ${pad(Math.floor(base/3600))}:${pad(Math.floor(base%3600/60))}:${pad(base%60)}`,20,H-21);
+  if(recOn&&Math.floor(now*1.6)%2===0){ctx.fillStyle="#ff4d4d";ctx.beginPath();ctx.arc(W-24,24,8,0,7);ctx.fill();}
+  raf=requestAnimationFrame(camLoop);
+}
+function mountCam(){cancelAnimationFrame(raf);cv=document.getElementById("cv");if(cv){ctx=cv.getContext("2d");camLoop();}}
+
+function preView(){
+  const all=checks.cam&&checks.rec&&checks.seal;
+  view.innerHTML=`<div class="station">
+    <div class="cam"><canvas id="cv" width="960" height="540" aria-label="プラットフォームカメラの映像"></canvas><span class="lab">CAM-02 · プラットフォームカメラ</span></div>
+    <section class="panel"><h3>開封前チェック</h3>
+      <ul class="check">
+        <li class="${checks.cam?"done":""}"><span class="ic">${checks.cam?"✓":"1"}</span><span class="t">カメラ接続<small>${checks.cam?"CAM-02 接続済み・映像を受信中":"接続を確認しています…"}</small></span></li>
+        <li class="${checks.rec?"done":""}"><span class="ic">${checks.rec?"✓":"2"}</span><span class="t">録画開始<small>録画はプラットフォームのカメラだけが開始できます。映像のアップロードはできません</small></span>
+          ${checks.rec?"":`<button type="button" id="c-rec" ${checks.cam?"":"disabled"}>録画開始</button>`}</li>
+        <li class="${checks.seal?"done":""}"><span class="ic">${checks.seal?"✓":"3"}</span><span class="t">封印を映す<small>2 箱の封印テープとロット番号をカメラに近づけて映す</small></span>
+          ${checks.seal?"":`<button type="button" id="c-seal" ${checks.rec?"":"disabled"}>映した</button>`}</li>
+      </ul>
+      <button class="big" type="button" id="go" ${all?"":"disabled"}>開封を始める</button>
+    </section></div>`;
+  mountCam();
+  const r=document.getElementById("c-rec"); if(r) r.onclick=()=>{checks.rec=true;recOn=true;recStart=Date.now();document.body.classList.add("recording");render();};
+  const s=document.getElementById("c-seal"); if(s) s.onclick=()=>{checks.seal=true;render();};
+  document.getElementById("go").onclick=()=>{stage="rec";render();};
+}
+
+function packCards(p){return entered.filter(c=>c.pack===p);}
+function recView(){
+  const inPack=packCards(pack), full=inPack.length>=C9;
+  const rev=entered.filter(c=>c.status==="review").length, out=entered.filter(c=>c.status==="outside").length;
+  view.innerHTML=`<div class="station">
+    <div class="cam"><canvas id="cv" width="960" height="540" aria-label="プラットフォームカメラの映像"></canvas><span class="lab">CAM-02 · 録画中</span></div>
+    <section class="panel">
+      <div class="counter"><b>パック ${pack} / ${P9}</b><span>このパック ${inPack.length} / ${C9} 枚</span></div>
+      <div class="entry"><input id="code" placeholder="カードをスキャン / 番号を入力" aria-label="カード番号" autocomplete="off" ${full?"disabled":""}><button class="big" type="button" id="add" ${full?"disabled":""}>入力</button></div>
+      <ul class="entries" id="entries">${inPack.slice().reverse().map(c=>`<li><span class="tm">${hms(c.at)}</span><span class="nm">${esc(c.name)}<small>${c.no}</small></span>
+        ${c.status==="auto"?`<span class="tag auto">#${pad(c.slot)} ${esc(SLOTS9[c.slot-1])}</span>`:c.status==="review"?`<span class="tag rev">要確認 → 振り分けへ</span>`:`<span class="tag out">リスト外</span>`}</li>`).join("")||`<li><span></span><span style="color:var(--ink-2)">パックを開けたら 1 枚ずつスキャンしてください</span><span></span></li>`}</ul>
+      <div class="queues"><span>入力済み <b>${entered.length}</b> / ${P9*C9}</span><span>要確認 <b>${rev}</b></span><span>リスト外 <b>${out}</b></span></div>
+      <div class="row">${pack<P9?`<button class="big ok" type="button" id="next" ${full?"":"disabled"}>次のパック</button>`:`<button class="big ok" type="button" id="finish" ${full?"":"disabled"}>開封完了</button>`}</div>
+    </section></div>`;
+  mountCam();
+  const code=document.getElementById("code"); if(code) code.focus();
+  const add=()=>{if(idx>=CARDS9.length) return; const c=CARDS9[idx++]; c.at=Math.floor((Date.now()-recStart)/1000); entered.push(c); render();};
+  document.getElementById("add").onclick=add; if(code) code.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();add();}});
+  const nx=document.getElementById("next"); if(nx) nx.onclick=()=>{pack++;render();};
+  const fi=document.getElementById("finish"); if(fi) fi.onclick=()=>{stage="done";recOn=false;document.body.classList.remove("recording");render();};
+}
+function doneView(){
+  const auto=entered.filter(c=>c.status==="auto").length, rev=entered.filter(c=>c.status==="review").length, out=entered.filter(c=>c.status==="outside").length;
+  view.innerHTML=`<section class="panel" style="max-width:760px;margin:20px auto"><h3>開封完了 · L009</h3>
+    <div class="sum"><div><b>${P9}</b><span>パック</span></div><div><b>${entered.length}</b><span>カード</span></div>
+      <div><b>${auto}</b><span>自動で振り分け</span></div><div><b>${rev+out}</b><span>振り分けで確認（要確認 ${rev} · リスト外 ${out}）</span></div></div>
+    <p style="margin:0;color:var(--ink-2);font-size:13px">録画は自動で保存され、区間ハッシュを計算しています。録画ファイルを手元に保存・編集することはできません。</p>
+    <a class="big" href="ui-15-attribution.html#L009" style="display:grid;place-items:center;text-decoration:none">振り分けへ送る</a></section>`;
+}
+function render(){ if(stage==="scan") scanView(false); else if(stage==="pre") preView(); else if(stage==="rec") recView(); else doneView(); }
+setInterval(()=>{if(recOn) document.getElementById("rec-t").textContent="REC "+hms((Date.now()-recStart)/1000);},500);
+
+/* prototype controls */
+document.getElementById("sim-cut").onclick=()=>{if(!recOn){say("録画中のみ模擬できます（チェック 2 の録画開始後）");return;}recOn=false;document.getElementById("abort").hidden=false;document.getElementById("call").focus();};
+document.getElementById("call").onclick=()=>say("責任者に通知しました（原型：送信はしていません）");
+document.getElementById("sim-fast").onclick=()=>{if(stage!=="rec"){say("開封中のみ使えます");return;}
+  const base=Math.floor((Date.now()-recStart)/1000); while(idx<CARDS9.length){const c=CARDS9[idx++];c.at=base+Math.floor(c.t-DRAW9);entered.push(c);} pack=P9; render();};
+const toast=document.getElementById("toast"); let tt;
+function say(m){toast.textContent=m;toast.hidden=false;clearTimeout(tt);tt=setTimeout(()=>toast.hidden=true,2600);}
+render();
+</script>
+</body>
+</html>

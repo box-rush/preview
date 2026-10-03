@@ -175,16 +175,28 @@ footer{font-size:12.5px;color:var(--ink-2);border-top:1px solid var(--line);padd
     </div>
   </section>
 
+
+  <section aria-labelledby="h-ops">
+    <div class="sec-h"><h2 id="h-ops">运营端 · 商家端</h2><span>桌面优先；模拟 9/26 20:00 L009 的开盒班次</span></div>
+    <div class="grid">
+      <a class="card" href="prototype/ui-14-station.html"><div class="top"><span class="code">UI-14</span><span class="status">已生成</span></div><h3>开盒工位端</h3>
+        <p>平板横屏、深色高对比。扫码 → 开盒前检查（只能用平台相机录像）→ 逐张录入 → 完成；可模拟摄像头断开（整屏红色，只能联系负责人）。</p><span class="go">打开 →</span></a>
+      <a class="card" href="prototype/ui-15-attribution.html#L009"><div class="top"><span class="code">UI-15</span><span class="status">已生成</span></div><h3>归属工作台</h3>
+        <p>原始录像 + 300 张卡表 + 候选归属位；人工归属须二人确认（不能批准自己的），审计日志，全部确认后生成开盒记录哈希。</p><span class="go">打开 →</span></a>
+      <a class="card" href="prototype/ui-16-warehouse.html"><div class="top"><span class="code">UI-16</span><span class="status">已生成</span></div><h3>仓储拣货与合单</h3>
+        <p>扫码优先：入库按用户货位、出货申请（k = 3.4）、逐件扫码梱包与高额包装规范、已出货追踪号。</p><span class="go">打开 →</span></a>
+      <a class="card" href="prototype/ui-17-dashboard.html"><div class="top"><span class="code">UI-17</span><span class="status">已生成</span></div><h3>数据看板（m / k）</h3>
+        <p>m、k、满员率、每场工时；价格档售罄率、k 趋势与成立线、满员时长分布、验证 / 录像浏览量；可模拟生存变量告警。</p><span class="go">打开 →</span></a>
+      <a class="card" href="prototype/ui-13-merchant-wizard.html"><div class="top"><span class="code">UI-13</span><span class="status">已生成</span></div><h3>场次创建向导（商家端）</h3>
+        <p>5 步向导 + 实时不变量校验面板；キャラ枠分组编辑（拖拽 / 点选移动）、兜底条款必填、隐含溢价 m、开封时段；提交后只读。</p><span class="go">打开 →</span></a>
+    </div>
+  </section>
+
   <section aria-labelledby="h-todo">
     <div class="sec-h"><h2 id="h-todo">待生成</h2><span>第 9 章已有 prompt，尚未生成原型（UI-06 分位公示动画为 P1，本轮不做）</span></div>
     <ul class="todo">
       <li><span class="c">UI-11</span>首次引导<span class="p">MVP</span></li>
       <li><span class="c">UI-12</span>消费保护设置<span class="p">MVP</span></li>
-      <li><span class="c">UI-13</span>场次创建向导 + 分位编辑器（商家）<span class="p">MVP</span></li>
-      <li><span class="c">UI-14</span>开盒工位端（运营）<span class="p">MVP</span></li>
-      <li><span class="c">UI-15</span>归属工作台（运营）<span class="p">MVP</span></li>
-      <li><span class="c">UI-16</span>仓储拣货与合单（运营）<span class="p">MVP</span></li>
-      <li><span class="c">UI-17</span>数据看板 m / k（运营）<span class="p">MVP</span></li>
     </ul>
   </section>
 
