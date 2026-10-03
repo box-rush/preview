@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<!-- Box Rush 原型 UI-07 录像回放。由 docs/breaking-platform.md §9.4 UI-07 prompt 生成；静态单文件，无需构建。
+     "录像"由 Canvas 实时绘制（模拟原始画面）；包号 / 归属等系统信息在独立叠加层，「元映像のみ表示」时全部隐藏。
+     #L011（默认）/ #L011-t754（从第 754 秒开始）。 -->
+<title>BOXラッシュ 開封録画</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Tokens: docs/breaking-platform.md §9.2 (same as ui-01..05) */
+:root{
+  --gut:16px;
+  --ground:#EEEEE8;
+  --bg:#FAFAF7; --surface:#FFFFFF; --ink:#1A1A1A; --ink-2:#6B6B6B; --line:#E6E5DE; --track:#ECEBE4;
+  --accent:#3B3FD8; --accent-ink:#FFFFFF; --accent-soft:#ECEDFC;
+  --trust:#0F9D8A; --trust-soft:#E1F3F0;
+  --gold:#C9A227; --gold-soft:#F6EFD6;
+  --shadow:0 1px 2px rgba(20,20,40,.06),0 4px 14px rgba(20,20,40,.05);
+  --sans:"Noto Sans JP","Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic",Meiryo,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#0A0B0C;
+    --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --ink-2:#A0A0A0; --line:#2A2B2F; --track:#2A2B2F;
+    --accent:#8E91F7; --accent-ink:#111214; --accent-soft:#23244A;
+    --trust:#3CC4B0; --trust-soft:#15302C;
+    --gold:#E0BD4A; --gold-soft:#3A3014;
+    --shadow:0 1px 2px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#0A0B0C;
+  --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --ink-2:#A0A0A0; --line:#2A2B2F; --track:#2A2B2F;
+  --accent:#8E91F7; --accent-ink:#111214; --accent-soft:#23244A;
+  --trust:#3CC4B0; --trust-soft:#15302C;
+  --gold:#E0BD4A; --gold-soft:#3A3014;
+  --shadow:0 1px 2px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button,select,input{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--mono)}
+.small{font-size:12px}
+.muted{color:var(--ink-2)}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+.app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);padding-bottom:24px}
+.wrap{width:100%;max-width:1240px;margin-inline:auto}
+
+.proto{background:var(--ink);color:var(--bg);font-size:12px}
+.proto summary{padding:6px 16px;cursor:pointer;list-style:none}
+.proto summary::-webkit-details-marker{display:none}
+.proto .opts{padding:2px 16px 10px}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:8px;padding:10px var(--gut)}
+.back{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;margin-left:-8px;flex:none}
+.back:hover{background:var(--track)}
+.ttl{flex:1;min-width:0}
+.ttl h1{margin:0;font-size:15px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ttl span{font-size:11.5px;color:var(--ink-2)}
+
+.layout{display:flex;flex-direction:column;gap:12px;padding-top:0}
+.col-player{display:flex;flex-direction:column;gap:10px}
+
+/* player */
+.player{position:relative;background:#000;aspect-ratio:16/9;max-width:100%;overflow:hidden}
+.player canvas{width:100%;height:100%;display:block}
+.ov{position:absolute;inset:0;pointer-events:none;font-family:var(--sans)}
+.ov .chip{position:absolute;right:10px;top:10px;background:rgba(17,18,20,.78);color:#fff;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;display:flex;gap:6px;align-items:center}
+.ov .chip b{font-family:var(--mono)}
+.ov .card{position:absolute;left:10px;right:10px;bottom:10px;background:rgba(17,18,20,.82);color:#fff;border-radius:10px;padding:8px 12px;display:flex;gap:10px;align-items:center;font-size:12.5px}
+.ov .card .r{font-family:var(--mono);font-size:11px;font-weight:700;border-radius:4px;padding:0 6px;background:rgba(255,255,255,.15)}
+.ov .card .r.hi{background:var(--gold);color:#1A1A1A}
+.ov .card .arrow{opacity:.7}
+.ov .card .slot{font-weight:700}
+.ov .card .mine{margin-left:auto;background:var(--accent);color:#fff;border-radius:4px;padding:0 6px;font-size:11px;font-weight:700}
+.ov .tag{position:absolute;left:10px;top:38px;background:rgba(15,157,138,.9);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px}
+.raw .ov{display:none}
+.bigplay{position:absolute;inset:0;margin:auto;width:64px;height:64px;border-radius:50%;border:0;background:rgba(17,18,20,.7);color:#fff;display:grid;place-items:center;cursor:pointer}
+.bigplay svg{width:28px;height:28px;fill:currentColor;stroke:none}
+
+.ctrl{display:flex;flex-direction:column;gap:6px;padding:0 var(--gut)}
+.scrub{position:relative;height:28px;display:flex;align-items:center}
+.scrub input{width:100%;margin:0;accent-color:var(--accent);height:28px;background:transparent;position:relative;z-index:2}
+.ticks{position:absolute;left:0;right:0;top:50%;height:12px;transform:translateY(-50%);pointer-events:none}
+.ticks i{position:absolute;top:0;width:2px;height:12px;background:var(--ink-2);opacity:.45;border-radius:1px}
+.ticks i.k{background:var(--trust);opacity:.9;width:3px}
+.btns{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ib{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;cursor:pointer}
+.ib:disabled{opacity:.4;cursor:not-allowed}
+.ib svg.f{fill:currentColor;stroke:none;width:18px;height:18px}
+.time{font-family:var(--mono);font-size:13px}
+.sp{flex:1}
+.speed{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.speed button{border:0;background:var(--surface);padding:0 10px;height:38px;font-family:var(--mono);font-size:12px;cursor:pointer}
+.speed button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.rawtgl{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;cursor:pointer;min-height:40px}
+.rawtgl input{width:18px;height:18px;accent-color:var(--accent)}
+
+.chapters{display:flex;gap:6px;overflow-x:auto;scrollbar-width:thin;padding:2px var(--gut) 6px}
+.chapters button{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 11px;font-size:12px;cursor:pointer;min-height:32px}
+.chapters button.key{border-color:color-mix(in srgb,var(--trust) 50%,transparent);color:var(--trust);font-weight:700}
+.chapters button[aria-current="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+
+.blk{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;margin:0 var(--gut)}
+.blk h2{margin:0;font-size:14.5px;font-weight:900}
+details.sums summary{cursor:pointer;font-weight:700;font-size:13.5px;list-style:none;display:flex;align-items:center;gap:6px}
+details.sums summary::-webkit-details-marker{display:none}
+details.sums summary::before{content:"▸";transition:transform .15s}
+details.sums[open] summary::before{transform:rotate(90deg)}
+.sumlist{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:4px;font-family:var(--mono);font-size:11.5px}
+.sumlist li{display:flex;gap:10px;overflow-wrap:anywhere}
+.sumlist li span:first-child{color:var(--ink-2);flex:none;min-width:100px}
+.sumlist li.on{color:var(--accent)}
+
+/* card list */
+.listhead{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.listhead h2{flex:1}
+.filters{display:flex;gap:4px}
+.filters button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 10px;font-size:12px;cursor:pointer;min-height:30px}
+.filters button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.cards{list-style:none;margin:0;padding:0;max-height:420px;overflow-y:auto;border-top:1px solid var(--line)}
+.cards li{display:grid;grid-template-columns:52px 1fr auto;gap:2px 10px;padding:7px 4px;border-bottom:1px solid var(--line);cursor:pointer;align-items:center;border-radius:6px}
+.cards li:hover{background:var(--track)}
+.cards li.cur{background:var(--accent-soft);outline:1px solid color-mix(in srgb,var(--accent) 40%,transparent)}
+.cards li.future{opacity:.45}
+.cards .t{font-family:var(--mono);font-size:11px;color:var(--ink-2);grid-row:span 2}
+.cards .n{font-size:13px;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cards .n small{font-family:var(--mono);font-weight:500;color:var(--ink-2);font-size:11px;margin-left:4px}
+.cards .r{font-family:var(--mono);font-size:10.5px;font-weight:700;border-radius:4px;padding:0 6px;background:var(--track);justify-self:end}
+.cards .r.hi{background:var(--gold-soft);color:var(--gold)}
+.cards .s{font-size:11.5px;color:var(--ink-2);grid-column:2/4;display:flex;gap:6px;align-items:center}
+.cards .me{background:var(--accent);color:var(--accent-ink);border-radius:4px;padding:0 5px;font-size:10.5px;font-weight:700}
+.autoscroll{font-size:12px;color:var(--ink-2);display:flex;gap:6px;align-items:center}
+.links{display:flex;gap:8px;flex-wrap:wrap;padding:0 var(--gut)}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:0 14px;min-height:42px;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.btn:hover{border-color:var(--ink-2)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:12.5px;padding:8px 14px;border-radius:999px;z-index:40;max-width:calc(100% - 32px);text-align:center}
+
+@media (min-width:768px){
+  :root{--gut:24px}
+  body{background:var(--bg)}
+  .app{max-width:none}
+  .layout{max-width:860px;margin-inline:auto;padding-top:16px}
+  .player{border-radius:12px;margin:0 var(--gut)}
+}
+@media (min-width:1024px){
+  .layout{max-width:1240px;display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:20px;align-items:start;padding:20px var(--gut) 0}
+  .player{margin:0}
+  .ctrl,.chapters{padding-inline:0}
+  .blk{margin:0}
+  .links{padding:0}
+  .col-side{position:sticky;top:80px;display:flex;flex-direction:column;gap:12px}
+  .cards{max-height:calc(100vh - 260px)}
+}
+@media (prefers-reduced-motion: reduce){ details.sums summary::before{transition:none} }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 18 9 12l6-6"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4v16l13-8Z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></symbol>
+    <symbol id="i-pip" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><rect x="12" y="11" width="7" height="6" rx="1"/></symbol>
+    <symbol id="i-rew" viewBox="0 0 24 24"><path d="M11 18 4 12l7-6M20 18l-7-6 7-6"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></symbol>
+  </defs>
+</svg>
+
+<div class="app">
+  <details class="proto">
+    <summary>原型 UI-07 录像回放 · 画面由 Canvas 模拟 · 示例数据（卡名、卡号为示例）</summary>
+    <div class="opts">"原始画面"只包含相机拍到的内容（含相机时间水印）；包号、归属位等系统信息在独立叠加层。地址可加 -t秒数 从指定时间开始，例如 #L011-t754。</div>
+  </details>
+
+  <header class="top">
+    <div class="bar wrap">
+      <a class="back" href="ui-05-my-slots.html#p-L011" aria-label="進捗に戻る"><svg class="i"><use href="#i-back"/></svg></a>
+      <div class="ttl"><h1>ポケカ『シャイニートレジャーex』2BOX キャラ枠</h1><span>開封録画 · 2026/9/21(月) 20:00〜 · 全 24:00</span></div>
+    </div>
+  </header>
+
+  <div class="layout wrap">
+    <div class="col-player">
+      <div class="player" id="player">
+        <canvas id="cv" width="1280" height="720" aria-label="開封録画の映像"></canvas>
+        <div class="ov" id="ov" aria-hidden="true">
+          <span class="chip" id="ov-chip"></span>
+          <span class="tag" id="ov-tag" hidden></span>
+          <div class="card" id="ov-card" hidden></div>
+        </div>
+        <button class="bigplay" id="bigplay" type="button" aria-label="再生"><svg class="i"><use href="#i-play"/></svg></button>
+        <video id="pipv" muted playsinline hidden></video>
+      </div>
+
+      <div class="ctrl">
+        <div class="scrub"><div class="ticks" id="ticks"></div><input type="range" id="seek" min="0" max="1440" step="1" value="0" aria-label="再生位置"></div>
+        <div class="btns">
+          <button class="ib" type="button" id="play" aria-label="再生"><svg class="i f" id="play-ic"><use href="#i-play"/></svg></button>
+          <button class="ib" type="button" id="back10" aria-label="10秒戻る"><svg class="i"><use href="#i-rew"/></svg></button>
+          <span class="time num" id="time">00:00 / 24:00</span>
+          <span class="sp"></span>
+          <div class="speed" role="group" aria-label="再生速度">
+            <button type="button" data-sp="1" aria-pressed="false">1×</button>
+            <button type="button" data-sp="4" aria-pressed="true">4×</button>
+            <button type="button" data-sp="16" aria-pressed="false">16×</button>
+          </div>
+          <button class="ib" type="button" id="pip" aria-label="ピクチャー・イン・ピクチャー"><svg class="i"><use href="#i-pip"/></svg></button>
+        </div>
+        <label class="rawtgl"><input type="checkbox" id="raw">元映像のみ表示<span class="small muted" style="font-weight:400">（表示情報をすべて消して、カメラの映像だけを見る）</span></label>
+      </div>
+
+      <nav class="chapters" id="chapters" aria-label="チャプター"></nav>
+
+      <section class="blk">
+        <details class="sums" id="sums">
+          <summary>区間ハッシュ（SHA-256）</summary>
+          <p class="small muted" style="margin:6px 0 0">映像は区間ごとにハッシュを公開しています。ダウンロードした映像から同じ値を計算できれば、改変されていないことを確認できます。</p>
+          <ul class="sumlist" id="sumlist"></ul>
+        </details>
+      </section>
+
+      <div class="links">
+        <a class="btn" href="#result" data-proto="開封結果（UI-08）">開封結果を見る</a>
+        <a class="btn" href="#verify" data-proto="検証ページ（UI-09）"><svg class="i" style="width:16px;height:16px"><use href="#i-shield"/></svg>割り当てを検証</a>
+      </div>
+    </div>
+
+    <div class="col-side">
+      <section class="blk">
+        <div class="listhead"><h2>開封されたカード</h2>
+          <div class="filters" role="group" aria-label="絞り込み">
+            <button type="button" data-f="all" aria-pressed="true">すべて</button>
+            <button type="button" data-f="hi" aria-pressed="false">R以上</button>
+            <button type="button" data-f="me" aria-pressed="false">あなたの枠</button>
+          </div>
+        </div>
+        <label class="autoscroll"><input type="checkbox" id="follow" checked>再生に合わせてスクロール</label>
+        <ol class="cards" id="cards"></ol>
+      </section>
+    </div>
+  </div>
+  <div class="toast" id="toast" role="status" hidden></div>
+</div>
+
+<script>
+/* ---------- mock recording data (deterministic) ---------- */
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const R=rng(20260921);
+const DUR=1440, SEAL_END=90, DRAW_END=150, PACK_LEN=60, PACKS=20, CARDS_PER=10;
+const SLOTS=["ピカチュウ枠","リザードン枠","テラパゴス枠","ミュウ枠","ミライドン枠","コライドン枠","ルカリオ枠","ゲンガー枠","ニンフィア枠","その他ポケモン（ex）枠","その他ポケモン枠","トレーナーズ・エネルギー枠"];
+const MY_SLOT=3;
+const CHAR=[["ピカチュウ",1],["リザードン",2],["テラパゴス",3],["ミュウ",4],["ミライドン",5],["コライドン",6],["ルカリオ",7],["ゲンガー",8],["ニンフィア",9]];
+const OTHERS=["ヤドン","ポッチャマ","モクロー","カイリュー","サーナイト","ヘラクロス","ミミッキュ","パモ","ホゲータ","ニャオハ","クワッス","ドラパルト"];
+const TRAINERS=["ネストボール","ハイパーボール","ナンジャモ","ボスの指令","ペパー","ふしぎなアメ","基本雷エネルギー","基本炎エネルギー","ポケモンいれかえ","ジャッジマン"];
+const RAR=[["C",.48],["U",.24],["R",.11],["RR",.08],["AR",.05],["SR",.025],["SAR",.015]];
+function rar(){let x=R(),a=0;for(const [r,p] of RAR){a+=p;if(x<a)return r;}return "C";}
+const CARDS=[];
+for(let p=1;p<=PACKS;p++){
+  const start=DRAW_END+(p-1)*PACK_LEN;
+  for(let i=0;i<CARDS_PER;i++){
+    const t=start+12+i*4.5; let name,slot,rr;
+    if(i>=7){rr=rar();} else {rr=R()<.7?"C":"U";}
+    const kind=R();
+    if(kind<.24){name=TRAINERS[Math.floor(R()*TRAINERS.length)];slot=12;if(rr==="RR"||rr==="AR")rr="U";}
+    else if(kind<.62){const c=CHAR[Math.floor(R()*CHAR.length)];const ex=(rr==="RR"||rr==="SR"||rr==="SAR")&&R()<.8;name=c[0]+(ex?"ex":"");slot=c[1];}
+    else{const o=OTHERS[Math.floor(R()*OTHERS.length)];const ex=(rr==="RR"||rr==="SR"||rr==="SAR")&&R()<.8;name=o+(ex?"ex":"");slot=ex?10:11;}
+    const no=String(1+Math.floor(R()*(rr==="SR"||rr==="SAR"||rr==="AR"?140:190))).padStart(3,"0")+"/190";
+    CARDS.push({t,pack:p,name,no:(rr==="SR"||rr==="SAR"||rr==="AR")?String(191+Math.floor(R()*90))+"/190":no,r:rr,slot});
+  }
+}
+const HI=new Set(["R","RR","AR","SR","SAR"]), GOLD=new Set(["AR","SR","SAR"]);
+const CH=[{t:0,label:"封印確認",key:1},{t:SEAL_END,label:"抽選結果の表示",key:1}].concat(Array.from({length:PACKS},(_,i)=>({t:DRAW_END+i*PACK_LEN,label:`パック${i+1}`})),[{t:DRAW_END+PACKS*PACK_LEN,label:"開封終了"}]);
+function hex(n){let s="";for(let i=0;i<n;i++)s+="0123456789abcdef"[Math.floor(R()*16)];return s;}
+const SEGS=Array.from({length:DUR/120},(_,i)=>({a:i*120,b:(i+1)*120,h:hex(64)}));
+
+/* ---------- formatting ---------- */
+const mmss=s=>`${String(Math.floor(s/60)).padStart(2,"0")}:${String(Math.floor(s%60)).padStart(2,"0")}`;
+const pad=n=>String(n).padStart(2,"0");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---------- state ---------- */
+let t=0, playing=false, speed=4, last=0, filter="all";
+const cv=document.getElementById("cv"), ctx=cv.getContext("2d");
+const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- canvas: the "raw footage" ---------- */
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function box(x,y,w,h,label,sealed){
+  ctx.fillStyle="#C2410C";rr(x,y,w,h,10);ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,.18)";rr(x,y,w,h*.12,10);ctx.fill();
+  ctx.fillStyle="#fff";ctx.font="900 26px 'Noto Sans JP',sans-serif";ctx.fillText("シャイニートレジャーex",x+22,y+h*.5);
+  ctx.font="700 18px 'JetBrains Mono',monospace";ctx.fillText(label,x+22,y+h-22);
+  if(sealed){ctx.save();ctx.translate(x+w/2,y+h*.62);ctx.rotate(-0.12);ctx.fillStyle="rgba(255,255,255,.75)";ctx.fillRect(-w*.7,-9,w*1.4,18);
+    ctx.fillStyle="#0F9D8A";ctx.font="700 12px 'JetBrains Mono',monospace";ctx.fillText("SEALED · LOT B-0921-0"+label.slice(-1),-w*.32,4);ctx.restore();}
+}
+function draw(){
+  const W=cv.width,H=cv.height;
+  const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,"#3a3127");g.addColorStop(1,"#241d16");ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  ctx.fillStyle="#5b4a39";ctx.fillRect(0,H*.62,W,H*.38);
+  if(t<SEAL_END){
+    const z=1+.18*Math.sin(t/7);
+    ctx.save();ctx.translate(W/2,H/2);ctx.scale(z,z);ctx.translate(-W/2,-H/2);
+    box(W*.18,H*.18,W*.3,H*.62,"BOX 1",true);box(W*.53,H*.18,W*.3,H*.62,"BOX 2",true);ctx.restore();
+  }else if(t<DRAW_END){
+    ctx.fillStyle="#f5f5f0";rr(W*.22,H*.1,W*.56,H*.8,12);ctx.fill();
+    ctx.fillStyle="#1a1a1a";ctx.font="900 26px 'Noto Sans JP',sans-serif";ctx.fillText("割り当て（9/19 22:11 公開済み）",W*.26,H*.19);
+    ctx.font="500 17px 'Noto Sans JP',sans-serif";
+    SLOTS.forEach((s,i)=>{const y=H*.26+i*38;ctx.fillStyle="#6b6b6b";ctx.font="700 15px 'JetBrains Mono',monospace";ctx.fillText("#"+pad(i+1),W*.26,y);
+      ctx.fillStyle="#1a1a1a";ctx.font="500 17px 'Noto Sans JP',sans-serif";ctx.fillText(s,W*.31,y);ctx.fillStyle="#6b6b6b";ctx.font="500 15px 'JetBrains Mono',monospace";ctx.fillText("user_"+hexs(i),W*.62,y);});
+  }else if(t<DRAW_END+PACKS*PACK_LEN){
+    const p=Math.floor((t-DRAW_END)/PACK_LEN)+1, into=(t-DRAW_END)%PACK_LEN;
+    box(W*.04,H*.2,W*.18,H*.42,p<=10?"BOX 1":"BOX 2",false);
+    for(let k=0;k<Math.min(8,PACKS-p);k++){ctx.fillStyle=k%2?"#d9a441":"#e8b850";rr(W*.25+k*6,H*.5-k*3,W*.07,H*.17,6);ctx.fill();}
+    if(into<12){ctx.save();ctx.translate(W*.5,H*.45);ctx.rotate(-.06);ctx.fillStyle="#e8b850";rr(-W*.07,-H*.2,W*.14,H*.4,8);ctx.fill();
+      ctx.fillStyle="rgba(255,255,255,.5)";ctx.fillRect(-W*.07,-H*.2+into*4,W*.14,4);ctx.restore();}
+    const shown=CARDS.filter(c=>c.pack===p&&c.t<=t);
+    shown.slice(0,-1).forEach((c,i)=>{ctx.fillStyle="#ddd";rr(W*.66+i*10,H*.3+i*4,W*.09,H*.26,6);ctx.fill();});
+    const cur=shown[shown.length-1];
+    if(cur){const gold=GOLD.has(cur.r);const cw=W*.2,ch=H*.56,cx=W*.4,cy=H*.18;
+      const cg=ctx.createLinearGradient(cx,cy,cx+cw,cy+ch);cg.addColorStop(0,gold?"#f3e3a2":"#f2f2ee");cg.addColorStop(1,gold?"#c9a227":"#cfcfc8");
+      ctx.fillStyle=cg;rr(cx,cy,cw,ch,10);ctx.fill();ctx.fillStyle="rgba(0,0,0,.08)";rr(cx+14,cy+44,cw-28,ch*.45,6);ctx.fill();
+      ctx.fillStyle="#1a1a1a";ctx.font="900 22px 'Noto Sans JP',sans-serif";ctx.fillText(cur.name,cx+16,cy+32);
+      ctx.font="700 16px 'JetBrains Mono',monospace";ctx.fillText(cur.no,cx+16,cy+ch-20);ctx.fillText(cur.r,cx+cw-16-ctx.measureText(cur.r).width,cy+ch-20);}
+  }else{
+    ctx.fillStyle="#f5f5f0";rr(W*.3,H*.36,W*.4,H*.2,10);ctx.fill();ctx.fillStyle="#1a1a1a";ctx.font="900 30px 'Noto Sans JP',sans-serif";ctx.fillText("全 20 パック 開封終了",W*.355,H*.48);
+  }
+  /* camera burn-in (part of the raw footage) */
+  const base=new Date("2026-09-21T20:00:00+09:00").getTime()+t*1000, d=new Date(base+9*3600e3);
+  ctx.fillStyle="rgba(0,0,0,.55)";ctx.fillRect(14,14,330,30);ctx.fillStyle="#fff";ctx.font="700 16px 'JetBrains Mono',monospace";
+  ctx.fillText(`CAM-02  2026/09/21 ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`,24,35);
+  ctx.fillStyle="#e33";ctx.beginPath();ctx.arc(W-30,30,8,0,Math.PI*2);ctx.fill();
+}
+function hexs(i){return ["8f2a","19c0","a7e3","3d51","c04b","72fe","0b9d","e615","5a2c","d3f8","4e07","b18a"][i];}
+
+/* ---------- overlay (system info, hidden in raw mode) ---------- */
+function curCard(){let c=null;for(const x of CARDS){if(x.t<=t)c=x;else break;}return c;}
+function renderOverlay(){
+  const chip=document.getElementById("ov-chip"), card=document.getElementById("ov-card"), tag=document.getElementById("ov-tag");
+  if(t<SEAL_END){chip.innerHTML="封印確認";tag.hidden=false;tag.textContent="LOT B-0921-01 / -02 と入庫写真が一致";card.hidden=true;return;}
+  if(t<DRAW_END){chip.innerHTML="抽選結果の表示";tag.hidden=false;tag.textContent="開封前に公開済みの割り当て";card.hidden=true;return;}
+  tag.hidden=true;
+  if(t>=DRAW_END+PACKS*PACK_LEN){chip.innerHTML="開封終了";card.hidden=true;return;}
+  const p=Math.floor((t-DRAW_END)/PACK_LEN)+1; chip.innerHTML=`パック <b>${p} / ${PACKS}</b>`;
+  const c=curCard(); if(!c||c.pack!==p){card.hidden=true;return;}
+  card.hidden=false;
+  card.innerHTML=`<span class="r ${GOLD.has(c.r)?"hi":""}">${c.r}</span><span>${esc(c.name)} <span class="mono" style="opacity:.7">${c.no}</span></span><span class="arrow">→</span><span class="slot">${esc(SLOTS[c.slot-1])} (#${pad(c.slot)})</span>${c.slot===MY_SLOT?'<span class="mine">あなた</span>':""}`;
+}
+
+/* ---------- card list ---------- */
+const list=document.getElementById("cards");
+function renderList(){
+  const rows=CARDS.map((c,i)=>({c,i})).filter(({c})=>filter==="all"||(filter==="hi"&&HI.has(c.r))||(filter==="me"&&c.slot===MY_SLOT));
+  list.innerHTML=rows.map(({c,i})=>`<li data-i="${i}" tabindex="0"><span class="t">${mmss(c.t)}<br>P${pad(c.pack)}</span><span class="n">${esc(c.name)}<small>${c.no}</small></span><span class="r ${GOLD.has(c.r)?"hi":""}">${c.r}</span>
+    <span class="s">→ ${esc(SLOTS[c.slot-1])} (#${pad(c.slot)})${c.slot===MY_SLOT?'<span class="me">あなた</span>':""}</span></li>`).join("")||`<li style="cursor:default"><span></span><span class="muted small">該当するカードはありません</span></li>`;
+  syncList(true);
+}
+let lastCur=-1;
+function syncList(force){
+  const c=curCard(); const ci=c?CARDS.indexOf(c):-1;
+  if(ci===lastCur&&!force) return; lastCur=ci;
+  list.querySelectorAll("li[data-i]").forEach(li=>{const i=+li.dataset.i;li.classList.toggle("cur",i===ci);li.classList.toggle("future",CARDS[i].t>t);});
+  if(document.getElementById("follow").checked){const el=list.querySelector("li.cur");if(el){const lt=el.offsetTop-list.offsetTop;if(lt<list.scrollTop||lt>list.scrollTop+list.clientHeight-50)list.scrollTop=lt-list.clientHeight/3;}}
+}
+list.addEventListener("click",e=>{const li=e.target.closest("li[data-i]");if(li){seek(CARDS[+li.dataset.i].t-1.5);}});
+list.addEventListener("keydown",e=>{const li=e.target.closest("li[data-i]");if(li&&(e.key==="Enter"||e.key===" ")){e.preventDefault();seek(CARDS[+li.dataset.i].t-1.5);}});
+document.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{filter=b.dataset.f;document.querySelectorAll("[data-f]").forEach(x=>x.setAttribute("aria-pressed",x===b));renderList();});
+
+/* ---------- chapters, ticks, checksums ---------- */
+document.getElementById("chapters").innerHTML=CH.map((c,i)=>`<button type="button" data-ch="${i}" class="${c.key?"key":""}">${c.label}<span class="mono muted" style="margin-left:6px;font-size:11px">${mmss(c.t)}</span></button>`).join("");
+document.getElementById("ticks").innerHTML=CH.map(c=>`<i class="${c.key?"k":""}" style="left:calc(${c.t/DUR*100}% - 1px)"></i>`).join("");
+document.getElementById("chapters").addEventListener("click",e=>{const b=e.target.closest("[data-ch]");if(b) seek(CH[+b.dataset.ch].t);});
+document.getElementById("sumlist").innerHTML=SEGS.map((s,i)=>`<li data-seg="${i}"><span>${mmss(s.a)}–${mmss(s.b)}</span><span>${s.h}</span></li>`).join("");
+
+/* ---------- transport ---------- */
+const seekEl=document.getElementById("seek");
+function seek(x){t=Math.max(0,Math.min(DUR,x));frame();}
+function frame(){
+  draw(); renderOverlay(); syncList(false);
+  seekEl.value=Math.floor(t); document.getElementById("time").textContent=`${mmss(t)} / ${mmss(DUR)}`;
+  const ci=CH.reduce((a,c,i)=>c.t<=t?i:a,0);
+  document.querySelectorAll("[data-ch]").forEach(b=>b.setAttribute("aria-current",+b.dataset.ch===ci));
+  const si=Math.min(SEGS.length-1,Math.floor(t/120)); document.querySelectorAll("[data-seg]").forEach(l=>l.classList.toggle("on",+l.dataset.seg===si));
+}
+function loop(now){if(!playing) return; const dt=(now-last)/1000; last=now; t+=dt*speed; if(t>=DUR){t=DUR;setPlaying(false);} frame(); requestAnimationFrame(loop);}
+function setPlaying(p){playing=p;document.getElementById("bigplay").hidden=p;
+  document.getElementById("play-ic").innerHTML=`<use href="#i-${p?"pause":"play"}"/>`;document.getElementById("play").setAttribute("aria-label",p?"一時停止":"再生");
+  if(p){if(t>=DUR)t=0;last=performance.now();requestAnimationFrame(loop);}}
+document.getElementById("play").onclick=()=>setPlaying(!playing);
+document.getElementById("bigplay").onclick=()=>setPlaying(true);
+document.getElementById("back10").onclick=()=>seek(t-10);
+seekEl.addEventListener("input",()=>seek(+seekEl.value));
+document.querySelectorAll("[data-sp]").forEach(b=>b.onclick=()=>{speed=+b.dataset.sp;document.querySelectorAll("[data-sp]").forEach(x=>x.setAttribute("aria-pressed",x===b));});
+document.getElementById("raw").onchange=e=>document.getElementById("player").classList.toggle("raw",e.target.checked);
+
+/* ---------- Picture-in-Picture: canvas → MediaStream → <video> ---------- */
+const pipBtn=document.getElementById("pip"), pipv=document.getElementById("pipv");
+const pipOK=!!(document.pictureInPictureEnabled&&cv.captureStream&&pipv.requestPictureInPicture);
+if(!pipOK){pipBtn.disabled=true;pipBtn.title="このブラウザはピクチャー・イン・ピクチャーに対応していません";}
+pipBtn.onclick=async()=>{
+  try{
+    if(document.pictureInPictureElement){await document.exitPictureInPicture();return;}
+    if(!pipv.srcObject) pipv.srcObject=cv.captureStream(30);
+    await pipv.play(); await pipv.requestPictureInPicture();
+    if(!playing) setPlaying(true);
+  }catch(err){say("この環境ではピクチャー・イン・ピクチャーを開始できませんでした");}
+};
+
+const toast=document.getElementById("toast"); let tt;
+function say(m){toast.textContent=m;toast.hidden=false;clearTimeout(tt);tt=setTimeout(()=>toast.hidden=true,2400);}
+document.addEventListener("click",e=>{const p=e.target.closest("[data-proto]");if(p){e.preventDefault();say(`原型：「${p.dataset.proto}」尚未生成`);}});
+
+const m=(location.hash||"").match(/-t(\d+)/); if(m) t=Math.min(DUR,+m[1]);
+renderList(); frame();
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>frame());
+</script>
+</body>
+</html>

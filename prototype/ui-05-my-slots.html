@@ -248,7 +248,7 @@ const H=[
  {id:"L010",cat:"op",title:"ワンピースカード『ロイヤルブラッド』1BOX パック番号",status:"LOCKED",mode:"RANDOM",total:24,sold:24,
   mine:[{random:2}],
   commitAt:"2026-09-20T15:00:00+09:00",saleStartAt:"2026-09-20T15:05:00+09:00",fullAt:"2026-09-26T17:52:00+09:00",openAt:"2026-09-26T21:00:00+09:00"},
- {id:"L011",cat:"poke",title:"ポケカ『ステラミラクル』2BOX キャラ枠",status:"ATTRIBUTED",mode:"PICK",total:12,sold:12,
+ {id:"L011",cat:"poke",title:"ポケカ『シャイニートレジャーex』2BOX キャラ枠",status:"ATTRIBUTED",mode:"PICK",total:12,sold:12,
   mine:[{no:3,name:"テラパゴス枠"}],cards:4,
   commitAt:"2026-09-12T12:00:00+09:00",saleStartAt:"2026-09-12T12:05:00+09:00",fullAt:"2026-09-19T22:10:00+09:00",drawAt:"2026-09-19T22:11:00+09:00",
   openAt:"2026-09-21T20:00:00+09:00",attribAt:"2026-09-21T21:05:00+09:00",doneAt:"2026-09-21T21:40:00+09:00",storeAt:"2026-09-22T11:00:00+09:00"},
@@ -291,7 +291,7 @@ function card(h){
         ${h.status==="READY"?`<a class="btn" href="#verify" data-proto="割り当ての検証（UI-09）" data-stop><svg class="i"><use href="#i-shield"/></svg>割り当てを検証</a>`:""}</div>`;}
   else if(h.status==="ATTRIBUTED"){
     body=`<div class="mine">${mineHTML(h)}</div><div class="row"><span>開封 ${jst(h.openAt)}</span><span>カード <b>${h.cards}</b> 枚・倉庫で保管中</span></div>
-      <div class="acts"><a class="btn pri" href="#result" data-proto="開封結果（UI-08）" data-stop>結果を見る</a></div>`;}
+      <div class="acts"><a class="btn pri" href="#result" data-proto="開封結果（UI-08）" data-stop>結果を見る</a><a class="btn" href="ui-07-recording.html#${h.id}" data-stop>録画を見る</a></div>`;}
   else{
     body=`<div class="mine">${mineHTML(h)}</div><div class="refund">${h.status==="FAILED"?"不成立・返金済":"中止・返金済"}（返金日 ${jday(h.refundAt)}・元のお支払い方法へ）</div>`;}
   return `<article class="hc" data-go="${h.id}" tabindex="0" aria-label="${esc(h.title)} の進捗">
@@ -344,7 +344,7 @@ function renderProgress(id){
     assign=`<section class="blk"><h2>割り当て（${jst(h.drawAt)} 公開）</h2><ul class="assign">${rows.map(m=>`<li><span><span class="no">#${pad(m.no)}</span> <b>${esc(m.name)}</b></span><span class="small muted">あなた</span></li>`).join("")}</ul>
       <a class="link" href="#verify" data-proto="割り当ての検証（UI-09）"><svg class="i" style="width:16px;height:16px"><use href="#i-shield"/></svg>割り当てを検証<svg class="i" style="width:14px;height:14px"><use href="#i-chev"/></svg></a></section>`;}
   const extra=h.status==="READY"?`<a class="btn" href="${gcal(h)}" target="_blank" rel="noopener"><svg class="i"><use href="#i-cal"/></svg>カレンダーに追加</a>`:
-    h.status==="ATTRIBUTED"?`<a class="btn pri" href="#result" data-proto="開封結果（UI-08）">結果を見る</a><a class="btn" href="#collection" data-proto="コレクション（UI-10）">コレクションを見る</a>`:"";
+    h.status==="ATTRIBUTED"?`<a class="btn pri" href="#result" data-proto="開封結果（UI-08）">結果を見る</a><a class="btn" href="ui-07-recording.html#${h.id}">録画を見る</a><a class="btn" href="#collection" data-proto="コレクション（UI-10）">コレクションを見る</a>`:"";
   document.getElementById("main").innerHTML=`<div class="pg">
     ${abort}
     <section class="blk full"><div class="hc-top"><span class="thumb ${h.cat}" aria-hidden="true"></span><div><h3 style="margin:0;font-size:15px">${esc(h.title)}</h3><span class="st ${cls}">${lab}</span></div></div>
