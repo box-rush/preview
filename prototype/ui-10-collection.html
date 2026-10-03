@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex, nofollow">
 <!-- Box Rush 原型 UI-10 仓库 + 发货申请。由 docs/breaking-platform.md §9.4 UI-10 prompt 生成；静态单文件，无需构建。
      #stored / #shipping / #received；L011 的卡片与 ui-07 / ui-08 同一种子生成。原型时钟 2026-09-26 18:00 JST。
-     免费保管期（入库后 30 天）、运费金额为示例值。 -->
+     免费保管期（入库后 30 天）、运费 ¥390 / 补偿付き ¥680 按 PD11 已定；保管期满处置未定。 -->
 <title>BOXラッシュ コレクション</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -191,7 +191,7 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
   </defs>
 </svg>
 <div class="app">
-  <details class="proto"><summary>原型 UI-10 仓库 + 发货申请 · 示例数据（免费保管 30 天、运费为示例值）· 原型时钟 2026-09-26 18:00 JST</summary></details>
+  <details class="proto"><summary>原型 UI-10 仓库 + 发货申请 · 示例数据（免费保管 30 天、运费按 PD11）· 原型时钟 2026-09-26 18:00 JST</summary></details>
   <header class="top"><div class="bar wrap" id="bar"></div></header>
   <main class="wrap" id="main"></main>
   <div class="cta" id="cta" hidden></div>
@@ -325,7 +325,7 @@ function renderShip(){
       <div class="info">まとめて発送すると送料を抑えられます。</div></section>
     <section class="blk"><h2>送料</h2><div class="fees"><div><span>${insured?"補償付き配送":"通常配送（追跡あり）"}</span><span class="mono">${yen(fee)}</span></div>
       <div class="tot"><span>お支払い</span><span class="mono">${yen(fee)}</span></div></div>
-      <p class="small muted" style="margin:0">送料は登録済みのお支払い方法で決済します。金額は示例です。</p>
+      <p class="small muted" style="margin:0">送料は登録済みのお支払い方法で決済します。</p>
       <button class="btn pri" type="button" id="confirm" style="min-height:50px;font-size:15px">発送を依頼する</button></section>
   </div>`;
   document.getElementById("ins").onchange=e=>{insured=e.target.checked;renderShip();};
