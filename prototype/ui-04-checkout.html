@@ -453,7 +453,7 @@ function showResult(kind){
       <h2>購入が完了しました</h2><p class="small muted">${esc(st.lot.title)}</p></div>
       <ul class="lines">${lines}</ul><div class="total"><span>お支払い済み</span><b class="num">${yen(st.total)}</b></div>
       <div class="nextbox">満員になると抽選結果（あなたの枠）をお知らせします。<br><span class="small muted">満員にならなかった場合は、お支払いに使った方法へ全額返金します。</span></div>
-      <button class="primary" type="button" data-proto="マイ枠（UI-05）">マイ枠で確認</button></section>`;
+      <a class="primary" href="ui-05-my-slots.html#wait" style="display:grid;place-items:center;text-decoration:none">マイ枠で確認</a></section>`;
   }else{
     const reason=kind==="auth"?"カード会社の本人認証が完了しませんでした。":"カード会社によりお支払いが承認されませんでした。別のカードまたはお支払い方法をお試しください。";
     html=`<section class="blk"><div class="result ng"><span class="badge"><svg class="i"><use href="#i-x"/></svg></span>

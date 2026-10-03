@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<!-- Box Rush 原型 UI-05 マイ枠 + 场次进度。由 docs/breaking-platform.md §9.4 UI-05 prompt 生成；静态单文件，无需构建。
+     #wait / #ready / #done / #ended 打开对应 Tab；#p-L009 等打开单个场次的进度页。原型时钟固定为 2026-09-26 18:00 JST。 -->
+<title>BOXラッシュ マイ枠</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Tokens: docs/breaking-platform.md §9.2 (same as ui-01..04) */
+:root{
+  --hdr:61px; --gut:16px;
+  --ground:#EEEEE8;
+  --bg:#FAFAF7; --surface:#FFFFFF; --ink:#1A1A1A; --ink-2:#6B6B6B; --line:#E6E5DE; --track:#ECEBE4;
+  --accent:#3B3FD8; --accent-ink:#FFFFFF; --accent-soft:#ECEDFC;
+  --trust:#0F9D8A; --trust-soft:#E1F3F0;
+  --warn:#B77400; --warn-soft:#FBF0DC; --error:#C93C3C; --error-soft:#FBE7E7;
+  --shadow:0 1px 2px rgba(20,20,40,.06),0 4px 14px rgba(20,20,40,.05);
+  --sans:"Noto Sans JP","Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic",Meiryo,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#0A0B0C;
+    --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --ink-2:#A0A0A0; --line:#2A2B2F; --track:#2A2B2F;
+    --accent:#8E91F7; --accent-ink:#111214; --accent-soft:#23244A;
+    --trust:#3CC4B0; --trust-soft:#15302C;
+    --warn:#F0A73A; --warn-soft:#3A2C12; --error:#EF6B6B; --error-soft:#3A1C1C;
+    --shadow:0 1px 2px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#0A0B0C;
+  --bg:#111214; --surface:#1A1B1E; --ink:#F2F2F2; --ink-2:#A0A0A0; --line:#2A2B2F; --track:#2A2B2F;
+  --accent:#8E91F7; --accent-ink:#111214; --accent-soft:#23244A;
+  --trust:#3CC4B0; --trust-soft:#15302C;
+  --warn:#F0A73A; --warn-soft:#3A2C12; --error:#EF6B6B; --error-soft:#3A1C1C;
+  --shadow:0 1px 2px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--mono)}
+.small{font-size:12px}
+.muted{color:var(--ink-2)}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+.app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))}
+.wrap{width:100%;max-width:1200px;margin-inline:auto}
+
+/* prototype strip */
+.proto{background:var(--ink);color:var(--bg);font-size:12px}
+.proto summary{padding:6px 16px;cursor:pointer;list-style:none;display:flex;gap:8px;align-items:center}
+.proto summary::-webkit-details-marker{display:none}
+.proto summary::before{content:"▸";transition:transform .15s}
+.proto[open] summary::before{transform:rotate(90deg)}
+.proto .opts{padding:4px 16px 12px;display:flex;flex-direction:column;gap:6px}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:8px;padding:10px var(--gut)}
+.back{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;margin-left:-8px;flex:none}
+.back:hover{background:var(--track)}
+.mark{display:flex;align-items:baseline;gap:8px}
+.mark b{font-weight:900;font-size:19px;letter-spacing:.02em;display:flex;align-items:center;gap:1px}
+.mark b i{font-style:normal;background:var(--accent);color:var(--accent-ink);padding:0 5px;border-radius:5px;margin-right:2px;font-family:var(--mono);font-size:16px;line-height:1.35}
+.mark small{font-size:10px;letter-spacing:.18em;color:var(--ink-2);font-variant:small-caps;text-transform:lowercase}
+.bar h1{margin:0;font-size:16px;font-weight:900;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dnav{display:none}
+.sp{flex:1}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:13px}
+
+/* segmented tabs */
+.seg{display:flex;gap:4px;margin:12px var(--gut) 4px;background:var(--track);border-radius:12px;padding:4px}
+.seg button{flex:1;border:0;background:transparent;border-radius:9px;padding:8px 4px;font-size:13px;font-weight:500;color:var(--ink-2);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:0;min-height:44px;justify-content:center}
+.seg button b{font-family:var(--mono);font-size:11px;font-weight:700}
+.seg button[aria-selected="true"]{background:var(--surface);color:var(--ink);font-weight:700;box-shadow:var(--shadow)}
+
+.list{display:grid;grid-template-columns:1fr;gap:10px;padding:10px var(--gut) 16px}
+.empty{padding:36px 16px;text-align:center;color:var(--ink-2);border:1px dashed var(--line);border-radius:12px}
+
+/* holding card */
+.hc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;cursor:pointer}
+.hc:hover{border-color:var(--ink-2)}
+.hc-top{display:flex;gap:10px;align-items:flex-start}
+.thumb{width:44px;height:48px;border-radius:6px;flex:none;position:relative;overflow:hidden}
+.thumb::after{content:"";position:absolute;left:-20%;right:-20%;top:46%;height:5px;background:rgba(255,255,255,.5);transform:rotate(-8deg)}
+.thumb.poke{background:linear-gradient(160deg,#E76F51,#C2410C)} .thumb.op{background:linear-gradient(160deg,#2F4F7F,#16305A)} .thumb.ygo{background:linear-gradient(160deg,#6D597A,#3F2F4C)}
+.hc h3{margin:0;font-size:13.5px;font-weight:700;line-height:1.4}
+.st{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;border-radius:4px;padding:0 6px;margin-top:3px}
+.st.wait{background:var(--accent-soft);color:var(--accent)}
+.st.ready{background:var(--trust-soft);color:var(--trust)}
+.st.lock{background:var(--warn-soft);color:var(--warn)}
+.st.done{background:var(--track);color:var(--ink)}
+.st.end{background:var(--error-soft);color:var(--error)}
+.mine{font-size:13px}
+.mine b{font-weight:900}
+.mine .no{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.track{height:7px;border-radius:4px;background:var(--track);overflow:hidden}
+.track i{display:block;height:100%;background:var(--accent);border-radius:4px}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;color:var(--ink-2);flex-wrap:wrap}
+.row b{font-family:var(--mono);color:var(--ink)}
+.count{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--ink)}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:0 12px;min-height:40px;font-size:12.5px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--ink-2)}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.btn svg{width:16px;height:16px}
+.refund{font-size:12.5px;color:var(--ink)}
+
+/* progress page */
+.pg{display:flex;flex-direction:column;gap:14px;padding:14px var(--gut) 18px}
+.blk{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.blk h2{margin:0;font-size:15px;font-weight:900}
+.alert{background:var(--error-soft);border:1px solid color-mix(in srgb,var(--error) 35%,transparent);border-radius:12px;padding:12px 14px;display:flex;gap:10px}
+.alert svg{color:var(--error);margin-top:2px}
+.alert b{display:block;margin-bottom:2px}
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.tl li{display:grid;grid-template-columns:28px 1fr;gap:10px;position:relative;padding-bottom:16px}
+.tl li:last-child{padding-bottom:0}
+.tl li::before{content:"";position:absolute;left:13px;top:26px;bottom:2px;width:2px;background:var(--line)}
+.tl li:last-child::before{display:none}
+.tl li.done::before{background:var(--trust)}
+.dot{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line);background:var(--surface);color:var(--ink-2);z-index:1}
+.dot svg{width:15px;height:15px;stroke-width:2.6}
+.done .dot{background:var(--trust);border-color:var(--trust);color:#fff}
+.now .dot{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.now .dot::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.fail .dot{background:var(--error);border-color:var(--error);color:#fff}
+.tl .t{display:flex;flex-direction:column;gap:1px;padding-top:3px}
+.tl .t b{font-size:14px}
+.tl .t span{font-size:12px;color:var(--ink-2)}
+.todo .t b{color:var(--ink-2);font-weight:500}
+.now .t b{color:var(--accent)}
+.fail .t b{color:var(--error)}
+.assign{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.assign li{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--bg);border-radius:8px;padding:10px 12px}
+.assign .no{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.link{color:var(--accent);font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:4px}
+.link:hover{text-decoration:underline}
+
+/* bottom nav */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:color-mix(in srgb,var(--surface) 96%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));z-index:30}
+.nav a{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;color:var(--ink-2);padding:4px 0;min-height:48px;justify-content:center}
+.nav a[aria-current="page"]{color:var(--accent);font-weight:700}
+.nav svg.i{width:22px;height:22px}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:12.5px;padding:8px 14px;border-radius:999px;z-index:40;max-width:calc(100% - 32px);text-align:center}
+
+@media (min-width:768px){
+  :root{--gut:24px}
+  body{background:var(--bg)}
+  .app{max-width:none}
+  .nav{max-width:none}
+  .seg{max-width:560px}
+  .list{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .pg{max-width:720px;margin-inline:auto}
+}
+@media (min-width:1024px){
+  :root{--hdr:65px}
+  .bar{padding-block:12px}
+  .dnav{display:flex;gap:4px;margin-left:28px}
+  .dnav a{padding:8px 14px;border-radius:999px;color:var(--ink-2);font-weight:500}
+  .dnav a:hover{background:var(--track);color:var(--ink)}
+  .dnav a[aria-current="page"]{color:var(--ink);font-weight:700;background:var(--track)}
+  .nav{display:none}
+  .app{padding-bottom:24px}
+  .list{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .pg{max-width:1100px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+  .pg>.full{grid-column:1/-1}
+  .toast{bottom:24px}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></symbol>
+    <symbol id="i-radio" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8a6 6 0 0 1 0 8.4M7.8 16.2a6 6 0 0 1 0-8.4M19 5a10 10 0 0 1 0 14M5 19A10 10 0 0 1 5 5"/></symbol>
+    <symbol id="i-ticket" viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4Z"/><path d="M13 6v2M13 11v2M13 16v2"/></symbol>
+    <symbol id="i-package" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="M3 8l9 5 9-5M12 13v8M7.5 5.5l9 5"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 18 9 12l6-6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2 20h20Z"/><path d="M12 10v4M12 17h.01"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+  </defs>
+</svg>
+
+<div class="app">
+  <details class="proto">
+    <summary>原型 UI-05 マイ枠 · 示例数据 · 原型时钟 2026-09-26 18:00 JST</summary>
+    <div class="opts">
+      <span>为让各状态都有内容，本页时间固定在 9/26 18:00（倒计时据此计算）。点卡片进入进度页；地址 #p-L009 等可直接打开。</span>
+    </div>
+  </details>
+
+  <header class="top">
+    <div class="bar wrap" id="bar"></div>
+  </header>
+
+  <main class="wrap" id="main"></main>
+
+  <nav class="nav" aria-label="メイン">
+    <a href="ui-01-home.html"><svg class="i"><use href="#i-home"/></svg>ホーム</a>
+    <a href="#live" data-proto="LIVE"><svg class="i"><use href="#i-radio"/></svg>LIVE</a>
+    <a href="#wait" aria-current="page"><svg class="i"><use href="#i-ticket"/></svg>マイ枠</a>
+    <a href="#collection" data-proto="コレクション（UI-10）"><svg class="i"><use href="#i-package"/></svg>コレクション</a>
+    <a href="#mypage" data-proto="マイページ"><svg class="i"><use href="#i-user"/></svg>マイページ</a>
+  </nav>
+  <div class="toast" id="toast" role="status" hidden></div>
+</div>
+
+<script>
+/* Mock data. Prototype clock fixed so every tab has content. */
+const NOW=new Date("2026-09-26T18:00:00+09:00").getTime();
+const WD="日月火水木金土";
+const T=iso=>new Date(iso).getTime();
+function jst(iso){const t=new Date(T(iso)+9*3600e3);return `${t.getUTCMonth()+1}/${t.getUTCDate()}(${WD[t.getUTCDay()]}) ${String(t.getUTCHours()).padStart(2,"0")}:${String(t.getUTCMinutes()).padStart(2,"0")}`;}
+function jday(iso){const t=new Date(T(iso)+9*3600e3);return `${t.getUTCMonth()+1}/${t.getUTCDate()}(${WD[t.getUTCDay()]})`;}
+function until(iso){let m=Math.max(0,Math.round((T(iso)-NOW)/60000));const d=Math.floor(m/1440);m-=d*1440;const h=Math.floor(m/60);m-=h*60;return `${d}日 ${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pad=n=>String(n).padStart(2,"0");
+const DETAIL=new Set(["L001","L002","L005","L009"]);
+
+const H=[
+ {id:"L005",cat:"poke",title:"ポケカ『超電ブレイカー』4BOX キャラ枠",status:"ON_SALE",mode:"PICK",total:16,sold:7,
+  mine:[{no:3,name:"ラティアス枠"},{no:5,name:"パーモット枠"}],
+  commitAt:"2026-09-24T12:00:00+09:00",saleStartAt:"2026-09-24T12:05:00+09:00",saleEndsAt:"2026-10-02T23:59:00+09:00",openAt:"2026-10-03T20:00:00+09:00"},
+ {id:"L002",cat:"poke",title:"ポケカ『ロケット団の栄光』1BOX パック番号",status:"ON_SALE",mode:"RANDOM",total:30,sold:23,
+  mine:[{random:2}],
+  commitAt:"2026-09-22T10:00:00+09:00",saleStartAt:"2026-09-22T10:05:00+09:00",saleEndsAt:"2026-09-29T18:00:00+09:00",openAt:"2026-09-29T21:00:00+09:00"},
+ {id:"L009",cat:"poke",title:"ポケカ『バトルパートナーズ』2BOX キャラ枠",status:"READY",mode:"PICK",total:12,sold:12,
+  mine:[{no:2,name:"ニンフィア枠"}],
+  commitAt:"2026-09-18T12:00:00+09:00",saleStartAt:"2026-09-18T12:05:00+09:00",fullAt:"2026-09-25T21:40:00+09:00",drawAt:"2026-09-25T21:41:00+09:00",openAt:"2026-09-26T20:00:00+09:00"},
+ {id:"L010",cat:"op",title:"ワンピースカード『ロイヤルブラッド』1BOX パック番号",status:"LOCKED",mode:"RANDOM",total:24,sold:24,
+  mine:[{random:2}],
+  commitAt:"2026-09-20T15:00:00+09:00",saleStartAt:"2026-09-20T15:05:00+09:00",fullAt:"2026-09-26T17:52:00+09:00",openAt:"2026-09-26T21:00:00+09:00"},
+ {id:"L011",cat:"poke",title:"ポケカ『ステラミラクル』2BOX キャラ枠",status:"ATTRIBUTED",mode:"PICK",total:12,sold:12,
+  mine:[{no:3,name:"テラパゴス枠"}],cards:4,
+  commitAt:"2026-09-12T12:00:00+09:00",saleStartAt:"2026-09-12T12:05:00+09:00",fullAt:"2026-09-19T22:10:00+09:00",drawAt:"2026-09-19T22:11:00+09:00",
+  openAt:"2026-09-21T20:00:00+09:00",attribAt:"2026-09-21T21:05:00+09:00",doneAt:"2026-09-21T21:40:00+09:00",storeAt:"2026-09-22T11:00:00+09:00"},
+ {id:"L013",cat:"ygo",title:"遊戯王OCG『インフィニット・フォビドゥン』1BOX パック番号",status:"FAILED",mode:"RANDOM",total:30,sold:18,
+  mine:[{random:1}],
+  commitAt:"2026-09-13T10:00:00+09:00",saleStartAt:"2026-09-13T10:05:00+09:00",saleEndsAt:"2026-09-20T23:59:00+09:00",refundAt:"2026-09-21T10:00:00+09:00",
+  reason:"販売締切（9/20 23:59）までに満員（30枠）にならなかったため、開封せずに不成立となりました。"},
+ {id:"L014",cat:"op",title:"ワンピースカード『謀略の王国』2BOX キャラ枠",status:"ABORTED",mode:"PICK",total:12,sold:12,
+  mine:[{no:8,name:"ロー枠"}],
+  commitAt:"2026-09-15T12:00:00+09:00",saleStartAt:"2026-09-15T12:05:00+09:00",fullAt:"2026-09-21T19:30:00+09:00",drawAt:"2026-09-21T19:31:00+09:00",
+  openAt:"2026-09-23T20:00:00+09:00",abortAt:"2026-09-23T20:14:00+09:00",refundAt:"2026-09-24T10:00:00+09:00",
+  reason:"開封中に録画が中断したため、ルールに従いこの開封会を中止しました。開封済みのカードは運営が引き取り、再度の開封会には使いません。"}
+];
+const TAB={ON_SALE:"wait",LOCKED:"ready",READY:"ready",OPENING:"ready",ATTRIBUTING:"ready",ATTRIBUTED:"done",FULFILLING:"done",COMPLETED:"done",FAILED:"ended",ABORTED:"ended"};
+const TABS=[["wait","満員待ち"],["ready","開封待ち"],["done","確定"],["ended","終了"]];
+const STLABEL={ON_SALE:["wait","販売中"],LOCKED:["lock","満員・抽選待ち"],READY:["ready","開封待ち"],ATTRIBUTED:["done","確定・保管中"],FAILED:["end","不成立・返金済"],ABORTED:["end","中止・返金済"]};
+
+function mineHTML(h){
+  if(h.mine[0].random){const n=h.mine[0].random;
+    return h.drawAt?`あなたの枠: <b>パック番号</b>`:`<b>ランダム ${n} 枠</b> <span class="muted small">（番号は満員後の抽選で決定）</span>`;}
+  return "あなたの枠: "+h.mine.map(m=>`<b>${esc(m.name)}</b> <span class="no">(#${pad(m.no)})</span>`).join("、");
+}
+function gcal(h){
+  const f=iso=>new Date(T(iso)).toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"");
+  const end=new Date(T(h.openAt)+3600e3).toISOString();
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent("BOXラッシュ 開封: "+h.title)}&dates=${f(h.openAt)}/${f(end)}&details=${encodeURIComponent("開封は予定時刻に実施されます。視聴しなくても権利は変わりません。")}`;
+}
+function card(h){
+  const [cls,lab]=STLABEL[h.status];
+  let body="";
+  if(h.status==="ON_SALE"){const pct=Math.round(h.sold/h.total*100);
+    body=`<div class="mine">${mineHTML(h)}</div>
+      <div class="track" role="progressbar" aria-valuemin="0" aria-valuemax="${h.total}" aria-valuenow="${h.sold}" aria-label="販売済み ${h.sold}/${h.total}"><i style="width:${pct}%"></i></div>
+      <div class="row"><span>販売済 <b>${h.sold}/${h.total}</b> 枠</span><span>販売締切 <b>${jst(h.saleEndsAt)}</b></span></div>
+      <div class="refund">未満員の場合は全額返金</div>`;}
+  else if(h.status==="READY"||h.status==="LOCKED"){
+    body=`<div class="mine">${h.status==="LOCKED"?`満員になりました。<b>抽選結果を準備中</b>です（外部の公開値の確定待ち）。`:mineHTML(h)}</div>
+      <div class="row"><span>開封まで <span class="count num">${until(h.openAt)}</span></span><span>${jst(h.openAt)}</span></div>
+      <div class="acts"><a class="btn" href="${gcal(h)}" target="_blank" rel="noopener" data-stop><svg class="i"><use href="#i-cal"/></svg>カレンダーに追加</a>
+        ${h.status==="READY"?`<a class="btn" href="#verify" data-proto="割り当ての検証（UI-09）" data-stop><svg class="i"><use href="#i-shield"/></svg>割り当てを検証</a>`:""}</div>`;}
+  else if(h.status==="ATTRIBUTED"){
+    body=`<div class="mine">${mineHTML(h)}</div><div class="row"><span>開封 ${jst(h.openAt)}</span><span>カード <b>${h.cards}</b> 枚・倉庫で保管中</span></div>
+      <div class="acts"><a class="btn pri" href="#result" data-proto="開封結果（UI-08）" data-stop>結果を見る</a></div>`;}
+  else{
+    body=`<div class="mine">${mineHTML(h)}</div><div class="refund">${h.status==="FAILED"?"不成立・返金済":"中止・返金済"}（返金日 ${jday(h.refundAt)}・元のお支払い方法へ）</div>`;}
+  return `<article class="hc" data-go="${h.id}" tabindex="0" aria-label="${esc(h.title)} の進捗">
+    <div class="hc-top"><span class="thumb ${h.cat}" aria-hidden="true"></span><div><h3>${esc(h.title)}</h3><span class="st ${cls}">${lab}</span></div></div>${body}</article>`;
+}
+
+function renderList(tab){
+  document.getElementById("bar").innerHTML=`<a class="mark" href="ui-01-home.html" aria-label="BOXラッシュ ホーム"><b><i>BOX</i>ラッシュ</b><small>Box Rush</small></a>
+    <nav class="dnav" aria-label="メイン（デスクトップ）"><a href="ui-01-home.html">ホーム</a><a href="#live" data-proto="LIVE">LIVE</a><a href="#wait" aria-current="page">マイ枠</a><a href="#collection" data-proto="コレクション（UI-10）">コレクション</a></nav>
+    <span class="sp"></span><a class="avatar" href="#mypage" data-proto="マイページ" aria-label="マイページ">S</a>`;
+  const counts=Object.fromEntries(TABS.map(([k])=>[k,H.filter(h=>TAB[h.status]===k).length]));
+  const items=H.filter(h=>TAB[h.status]===tab).sort((a,b)=>T(a.openAt||a.saleEndsAt)-T(b.openAt||b.saleEndsAt));
+  document.getElementById("main").innerHTML=`
+    <div class="seg" role="tablist" aria-label="マイ枠">${TABS.map(([k,v])=>`<button type="button" role="tab" data-tab="${k}" aria-selected="${k===tab}">${v}<b>${counts[k]}</b></button>`).join("")}</div>
+    <div class="list">${items.length?items.map(card).join(""):`<div class="empty">該当する開封会はありません</div>`}</div>`;
+}
+
+function step(cls,title,sub){const icon=cls==="done"?'<svg class="i"><use href="#i-check"/></svg>':cls==="fail"?'<svg class="i"><use href="#i-x"/></svg>':"";
+  return `<li class="${cls}"><span class="dot">${icon}</span><span class="t"><b>${title}</b><span>${sub}</span></span></li>`;}
+function timeline(h){
+  const s=[];
+  s.push(step("done","シードコミット",jst(h.commitAt)));
+  s.push(step("done","販売開始",jst(h.saleStartAt)));
+  if(h.status==="ON_SALE"){s.push(step("now","満員",`販売中 ${h.sold}/${h.total} 枠・締切 ${jst(h.saleEndsAt)}`));
+    ["抽選（割り当て公開）","開封","振り分け","確定","保管 / 発送"].forEach((t,i)=>s.push(step("todo",t,i===1?`予定 ${jst(h.openAt)}`:"—")));return s.join("");}
+  if(h.status==="FAILED"){s.push(step("fail","満員にならず不成立",`締切 ${jst(h.saleEndsAt)} 時点 ${h.sold}/${h.total} 枠`));s.push(step("done","全額返金",jst(h.refundAt)));return s.join("");}
+  s.push(step("done","満員",jst(h.fullAt)));
+  if(h.status==="LOCKED"){s.push(step("now","抽選（割り当て公開）","外部の公開値の確定を待っています"));
+    ["開封","振り分け","確定","保管 / 発送"].forEach((t,i)=>s.push(step("todo",t,i===0?`予定 ${jst(h.openAt)}`:"—")));return s.join("");}
+  s.push(step("done","抽選（割り当て公開）",jst(h.drawAt)));
+  if(h.status==="READY"){s.push(step("now","開封",`予定 ${jst(h.openAt)}（あと ${until(h.openAt)}）`));
+    ["振り分け","確定","保管 / 発送"].forEach(t=>s.push(step("todo",t,"—")));return s.join("");}
+  if(h.status==="ABORTED"){s.push(step("fail","開封中止",`${jst(h.abortAt)}・録画中断`));s.push(step("done","全額返金",jst(h.refundAt)));return s.join("");}
+  s.push(step("done","開封",jst(h.openAt)));s.push(step("done","振り分け",jst(h.attribAt)));s.push(step("done","確定",jst(h.doneAt)));
+  s.push(step("now","保管 / 発送",`${jst(h.storeAt)} から倉庫で保管中`));return s.join("");
+}
+function renderProgress(id){
+  const h=H.find(x=>x.id===id); if(!h){renderList("wait");return;}
+  const tab=TAB[h.status];
+  document.getElementById("bar").innerHTML=`<a class="back" href="#${tab}" aria-label="マイ枠に戻る"><svg class="i"><use href="#i-back"/></svg></a><h1>開封会の進捗</h1>`;
+  const [cls,lab]=STLABEL[h.status];
+  const abort=(h.status==="ABORTED"||h.status==="FAILED")?`<div class="alert full" role="alert"><svg class="i"><use href="#i-alert"/></svg><div><b>${h.status==="ABORTED"?"この開封会は中止されました":"この開封会は不成立になりました"}</b>${esc(h.reason)}<br><span class="small">返金状況：<b>全額返金済み</b>（${jst(h.refundAt)}・元のお支払い方法へ）</span></div></div>`:"";
+  let assign="";
+  if(h.status==="ON_SALE"){assign=`<section class="blk"><h2>あなたの枠</h2><div class="mine">${mineHTML(h)}</div>
+      <p class="small muted" style="margin:0">${h.mode==="RANDOM"?"満員になると抽選を行い、開封前にあなたの番号を公開します。":"満員になると割り当てが確定し、開封前に公開します。"}</p></section>`;}
+  else if(h.status==="LOCKED"){assign=`<section class="blk"><h2>割り当て</h2><p style="margin:0">満員になりました。抽選は外部の公開値が確定してから行い、<b>開封前</b>に結果を公開します。</p>
+      <p class="small muted" style="margin:0">抽選の入力（シード・参加者・公開値）はすべて公開され、誰でも再計算できます。</p></section>`;}
+  else if(h.status!=="FAILED"){
+    const rows=h.mine[0].random?[{no:7,name:"パック 7"},{no:18,name:"パック 18"}]:h.mine;
+    assign=`<section class="blk"><h2>割り当て（${jst(h.drawAt)} 公開）</h2><ul class="assign">${rows.map(m=>`<li><span><span class="no">#${pad(m.no)}</span> <b>${esc(m.name)}</b></span><span class="small muted">あなた</span></li>`).join("")}</ul>
+      <a class="link" href="#verify" data-proto="割り当ての検証（UI-09）"><svg class="i" style="width:16px;height:16px"><use href="#i-shield"/></svg>割り当てを検証<svg class="i" style="width:14px;height:14px"><use href="#i-chev"/></svg></a></section>`;}
+  const extra=h.status==="READY"?`<a class="btn" href="${gcal(h)}" target="_blank" rel="noopener"><svg class="i"><use href="#i-cal"/></svg>カレンダーに追加</a>`:
+    h.status==="ATTRIBUTED"?`<a class="btn pri" href="#result" data-proto="開封結果（UI-08）">結果を見る</a><a class="btn" href="#collection" data-proto="コレクション（UI-10）">コレクションを見る</a>`:"";
+  document.getElementById("main").innerHTML=`<div class="pg">
+    ${abort}
+    <section class="blk full"><div class="hc-top"><span class="thumb ${h.cat}" aria-hidden="true"></span><div><h3 style="margin:0;font-size:15px">${esc(h.title)}</h3><span class="st ${cls}">${lab}</span></div></div>
+      <div class="acts">${extra}${DETAIL.has(h.id)?`<a class="btn" href="ui-02-lottery.html#${h.id}">開封会の詳細</a>`:""}</div></section>
+    <section class="blk"><h2>進捗</h2><ol class="tl">${timeline(h)}</ol></section>
+    ${assign}
+  </div>`;
+}
+
+function route(){
+  const h=(location.hash||"#wait").slice(1);
+  if(h.startsWith("p-")) renderProgress(h.slice(2));
+  else renderList(TABS.some(([k])=>k===h)?h:"wait");
+  scrollTo(0,0);
+}
+window.addEventListener("hashchange",route);
+document.addEventListener("click",e=>{
+  const p=e.target.closest("[data-proto]"); if(p){e.preventDefault();e.stopPropagation();say(`原型：「${p.dataset.proto}」尚未生成`);return;}
+  if(e.target.closest("[data-stop]")) return;
+  const t=e.target.closest("[data-tab]"); if(t){location.hash=t.dataset.tab;return;}
+  const g=e.target.closest("[data-go]"); if(g){location.hash="p-"+g.dataset.go;}
+});
+document.addEventListener("keydown",e=>{const g=e.target.closest&&e.target.closest("[data-go]");if(g&&(e.key==="Enter"||e.key===" ")){e.preventDefault();location.hash="p-"+g.dataset.go;}});
+const toast=document.getElementById("toast"); let tt;
+function say(m){toast.textContent=m;toast.hidden=false;clearTimeout(tt);tt=setTimeout(()=>toast.hidden=true,2200);}
+route();
+</script>
+</body>
+</html>
