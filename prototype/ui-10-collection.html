@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex, nofollow">
 <!-- Box Rush 原型 UI-10 仓库 + 发货申请。由 docs/breaking-platform.md §9.4 UI-10 prompt 生成；静态单文件，无需构建。
      #stored / #shipping / #received；L011 的卡片与 ui-07 / ui-08 同一种子生成。原型时钟 2026-09-26 18:00 JST。
-     免费保管期（入库后 30 天）、运费 ¥390 / 补偿付き ¥680 按 PD11 已定；保管期满处置未定。 -->
+     免费保管期（入库后 30 天）、运费 ¥390 / 补偿付き ¥680 按 PD11 已定；保管期满强制发货（PD12）。 -->
 <title>BOXラッシュ コレクション</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -269,7 +269,7 @@ function renderList(){
   }else body=`<div class="grid">${list.map(tile).join("")}</div>`;
   document.getElementById("main").innerHTML=`
     <div class="seg" role="tablist">${TABS.map(([k,v],i)=>`<button type="button" role="tab" data-tab="${k}" aria-selected="${k===tab}">${v}<b>${counts[i]}</b></button>`).join("")}</div>
-    ${st==="STORED"&&stored.length?`<div class="banner"><svg class="i"><use href="#i-clock"/></svg><span>無料保管期限 <b>${jday(first)}</b> まで（${firstN} 点）。期限後の扱いはルールをご確認ください。</span></div>
+    ${st==="STORED"&&stored.length?`<div class="banner"><svg class="i"><use href="#i-clock"/></svg><span>無料保管期限 <b>${jday(first)}</b> まで（${firstN} 点）。期限を過ぎると登録住所へ発送します。</span></div>
       <div class="tools"><span class="small muted">${list.length} 点を保管中</span><button class="btn" type="button" id="selmode">${selMode?"選択をやめる":"選択して発送"}</button></div>`:""}
     <div class="${selMode?"selmode":""}" id="area">${list.length?body:`<div class="empty">該当するカードはありません</div>`}</div>`;
   const sm=document.getElementById("selmode"); if(sm) sm.onclick=()=>{selMode=!selMode; if(!selMode) sel.clear(); renderList();};
