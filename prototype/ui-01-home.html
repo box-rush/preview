@@ -313,7 +313,7 @@ main{display:flex;flex-direction:column;gap:18px;padding-block:14px 8px}
     </div>
 
     <section id="low-sec" class="wrap" aria-labelledby="low-h">
-      <div class="sec-h"><h2 id="low-h">はじめてでも参加しやすい</h2><span>パック番号・混合 / ¥1,000以下</span></div>
+      <div class="sec-h"><h2 id="low-h">はじめてでも参加しやすい</h2><span>番号ランダム / ¥1,000以下</span></div>
       <div style="height:10px"></div>
       <div class="rail" id="rail"></div>
     </section>
@@ -341,20 +341,20 @@ main{display:flex;flex-direction:column;gap:18px;padding-block:14px 8px}
 <script>
 /* Mock data — types follow §9.3. Prices: sum of slot prices ≈ reference retail total × 1.10–1.30 */
 const DETAIL="ui-02-lottery.html"; const HAS_DETAIL=new Set(["L001","L002","L005"]);
-const PT={ENUMERATED:"キャラ枠",POSITIONAL:"パック番号",ATTRIBUTE:"番号レンジ",WHOLE:"BOX丸ごと",DRAFT:"ドラフト"};
+const PT={CARDNO:"番号ランダム",ENUMERATED:"キャラ枠",POSITIONAL:"パック番号",ATTRIBUTE:"番号レンジ",WHOLE:"BOX丸ごと",DRAFT:"ドラフト"};
 const CATS=["すべて","ポケモン","ワンピース","遊戯王"];
 const ART={"ポケモン":"poke","ワンピース":"op","遊戯王":"ygo"};
 const LOTTERIES=[
- {id:"L001",category:"ポケモン",series:"テラスタルフェスex",title:"ポケカ『テラスタルフェスex』2BOX キャラ枠",quantity:2,sealedUnit:"BOX",referenceRetailPrice:5400,partitionType:"ENUMERATED",mixed:false,minPrice:700,uniform:false,totalSlots:12,soldSlots:10,openingAt:"2026-09-28T20:00:00+09:00",guaranteeText:"各枠 カード3枚以上",selfOperated:true,status:"ON_SALE",rec:1},
- {id:"L002",category:"ポケモン",series:"ロケット団の栄光",title:"ポケカ『ロケット団の栄光』1BOX パック番号",quantity:1,sealedUnit:"BOX",referenceRetailPrice:5400,partitionType:"POSITIONAL",mixed:false,minPrice:210,uniform:true,totalSlots:30,soldSlots:21,openingAt:"2026-09-29T21:00:00+09:00",guaranteeText:"各枠 1パック",selfOperated:false,status:"ON_SALE",rec:4},
- {id:"L003",category:"ワンピース",series:"新たなる皇帝",title:"ワンピースカード『新たなる皇帝』3BOX 混合",quantity:3,sealedUnit:"BOX",referenceRetailPrice:5280,partitionType:"POSITIONAL",mixed:true,minPrice:760,uniform:true,totalSlots:24,soldSlots:23,openingAt:"2026-09-27T20:00:00+09:00",guaranteeText:"各枠 3パック（3BOXから1パックずつ）",selfOperated:true,status:"ON_SALE",rec:2},
- {id:"L004",category:"遊戯王",series:"QUARTER CENTURY BONANZA",title:"遊戯王OCG『QUARTER CENTURY BONANZA』BOX丸ごと",quantity:1,sealedUnit:"BOX",referenceRetailPrice:6600,partitionType:"WHOLE",mixed:false,minPrice:7480,uniform:true,totalSlots:1,soldSlots:0,openingAt:"2026-10-01T20:00:00+09:00",guaranteeText:"BOX 1箱分すべて",selfOperated:false,status:"ON_SALE",rec:7},
- {id:"L005",category:"ポケモン",series:"超電ブレイカー",title:"ポケカ『超電ブレイカー』4BOX キャラ枠",quantity:4,sealedUnit:"BOX",referenceRetailPrice:5400,partitionType:"ENUMERATED",mixed:false,minPrice:1200,uniform:false,totalSlots:16,soldSlots:5,openingAt:"2026-10-03T20:00:00+09:00",guaranteeText:"各枠 カード5枚以上",selfOperated:true,status:"ON_SALE",rec:3},
- {id:"L006",category:"ワンピース",series:"二つの伝説",title:"ワンピースカード『二つの伝説』2BOX キャラ枠",quantity:2,sealedUnit:"BOX",referenceRetailPrice:5280,partitionType:"ENUMERATED",mixed:false,minPrice:650,uniform:false,totalSlots:12,soldSlots:9,openingAt:"2026-09-30T21:00:00+09:00",guaranteeText:"各枠 カード3枚以上",selfOperated:false,status:"ON_SALE",rec:5},
- {id:"L007",category:"遊戯王",series:"ALLIANCE INSIGHT",title:"遊戯王OCG『ALLIANCE INSIGHT』1BOX 番号レンジ",quantity:1,sealedUnit:"BOX",referenceRetailPrice:4400,partitionType:"ATTRIBUTE",mixed:false,minPrice:620,uniform:true,totalSlots:8,soldSlots:3,openingAt:"2026-10-04T20:00:00+09:00",guaranteeText:"各枠 カード4枚以上",selfOperated:false,status:"ON_SALE",rec:6},
- {id:"L008",category:"ポケモン",series:"スノーハザード",title:"ポケカ『スノーハザード』1BOX パック番号",quantity:1,sealedUnit:"BOX",referenceRetailPrice:5400,partitionType:"POSITIONAL",mixed:false,minPrice:205,uniform:true,totalSlots:30,soldSlots:12,openingAt:"2026-10-02T20:00:00+09:00",guaranteeText:"各枠 1パック",selfOperated:true,status:"ON_SALE",rec:8},
- {id:"L009",category:"ポケモン",series:"バトルパートナーズ",title:"ポケカ『バトルパートナーズ』2BOX キャラ枠",openingAt:"2026-09-26T20:00:00+09:00",status:"READY"},
- {id:"L010",category:"ワンピース",series:"ロイヤルブラッド",title:"ワンピースカード『ロイヤルブラッド』1BOX パック番号",openingAt:"2026-09-26T21:00:00+09:00",status:"LOCKED"}
+ {id:"L001",category:"ポケモン",series:"テラスタルフェスex",title:"ポケカ『テラスタルフェスex』2BOX 番号ランダム",quantity:2,sealedUnit:"BOX",referenceRetailPrice:5400,partitionType:"CARDNO",mixed:false,minPrice:1080,uniform:true,totalSlots:12,soldSlots:10,openingAt:"2026-09-28T20:00:00+09:00",guaranteeText:"各枠 1枚以上（0枚なら指定カード）",selfOperated:true,status:"ON_SALE",rec:1},
+ {id:"L002",category:"ポケモン",series:"ロケット団の栄光",title:"ポケカ『ロケット団の栄光』1BOX 番号ランダム",quantity:1,sealedUnit:"BOX",referenceRetailPrice:5400,partitionType:"CARDNO",mixed:false,minPrice:210,uniform:true,totalSlots:30,soldSlots:21,openingAt:"2026-09-29T21:00:00+09:00",guaranteeText:"各枠 1枚以上（0枚なら指定カード）",selfOperated:false,status:"ON_SALE",rec:4},
+ {id:"L003",category:"ワンピース",series:"新たなる皇帝",title:"ワンピースカード『新たなる皇帝』3BOX 番号ランダム",quantity:3,sealedUnit:"BOX",referenceRetailPrice:5280,partitionType:"CARDNO",mixed:false,minPrice:760,uniform:true,totalSlots:24,soldSlots:23,openingAt:"2026-09-27T20:00:00+09:00",guaranteeText:"各枠 1枚以上（0枚なら指定カード）",selfOperated:true,status:"ON_SALE",rec:2},
+ {id:"L004",category:"遊戯王",series:"QUARTER CENTURY BONANZA",title:"遊戯王OCG『QUARTER CENTURY BONANZA』1BOX 番号ランダム",quantity:1,sealedUnit:"BOX",referenceRetailPrice:6600,partitionType:"CARDNO",mixed:false,minPrice:930,uniform:true,totalSlots:8,soldSlots:0,openingAt:"2026-10-01T20:00:00+09:00",guaranteeText:"各枠 1枚以上（0枚なら指定カード）",selfOperated:false,status:"ON_SALE",rec:7},
+ {id:"L005",category:"ポケモン",series:"超電ブレイカー",title:"ポケカ『超電ブレイカー』4BOX 番号ランダム",quantity:4,sealedUnit:"BOX",referenceRetailPrice:5400,partitionType:"CARDNO",mixed:false,minPrice:1620,uniform:true,totalSlots:16,soldSlots:5,openingAt:"2026-10-03T20:00:00+09:00",guaranteeText:"各枠 1枚以上（0枚なら指定カード）",selfOperated:true,status:"ON_SALE",rec:3},
+ {id:"L006",category:"ワンピース",series:"二つの伝説",title:"ワンピースカード『二つの伝説』2BOX 番号ランダム",quantity:2,sealedUnit:"BOX",referenceRetailPrice:5280,partitionType:"CARDNO",mixed:false,minPrice:1060,uniform:true,totalSlots:12,soldSlots:9,openingAt:"2026-09-30T21:00:00+09:00",guaranteeText:"各枠 1枚以上（0枚なら指定カード）",selfOperated:false,status:"ON_SALE",rec:5},
+ {id:"L007",category:"遊戯王",series:"ALLIANCE INSIGHT",title:"遊戯王OCG『ALLIANCE INSIGHT』1BOX 番号ランダム",quantity:1,sealedUnit:"BOX",referenceRetailPrice:4400,partitionType:"CARDNO",mixed:false,minPrice:620,uniform:true,totalSlots:8,soldSlots:3,openingAt:"2026-10-04T20:00:00+09:00",guaranteeText:"各枠 1枚以上（0枚なら指定カード）",selfOperated:false,status:"ON_SALE",rec:6},
+ {id:"L008",category:"ポケモン",series:"スノーハザード",title:"ポケカ『スノーハザード』1BOX 番号ランダム",quantity:1,sealedUnit:"BOX",referenceRetailPrice:5400,partitionType:"CARDNO",mixed:false,minPrice:205,uniform:true,totalSlots:30,soldSlots:12,openingAt:"2026-10-02T20:00:00+09:00",guaranteeText:"各枠 1枚以上（0枚なら指定カード）",selfOperated:true,status:"ON_SALE",rec:8},
+ {id:"L009",category:"ポケモン",series:"バトルパートナーズ",title:"ポケカ『バトルパートナーズ』2BOX 番号ランダム",openingAt:"2026-09-26T20:00:00+09:00",status:"READY"},
+ {id:"L010",category:"ワンピース",series:"ロイヤルブラッド",title:"ワンピースカード『ロイヤルブラッド』1BOX 番号ランダム",openingAt:"2026-09-26T21:00:00+09:00",status:"LOCKED"}
 ];
 
 const state={cat:"すべて",sort:"rec",filters:new Set(),showRef:true,view:"normal"};
@@ -411,7 +411,7 @@ function render(){
     empty.hidden=true; lowSec.hidden=false; document.getElementById("count").textContent="読み込み中…"; return;
   }
   const list=visible();
-  const low=list.filter(l=>(l.partitionType==="POSITIONAL"||l.mixed)&&l.minPrice<=1000).sort((a,b)=>a.minPrice-b.minPrice);
+  const low=list.filter(l=>l.minPrice<=1000).sort((a,b)=>a.minPrice-b.minPrice);
   rail.innerHTML=low.map(cardHTML).join(""); lowSec.hidden=low.length===0;
   grid.innerHTML=list.map(cardHTML).join("");
   document.getElementById("count").textContent=list.length?`${list.length}件`:"";
@@ -428,7 +428,7 @@ cats.addEventListener("click",e=>{const b=e.target.closest("[data-cat]");if(!b)r
 
 /* sort + filter chips */
 const SORTS=[["rec","おすすめ"],["open","開封が近い順"],["rem","残り率"],["price","単価が安い順"]];
-const FILTERS=[["ENUMERATED","キャラ枠"],["POSITIONAL","パック番号"],["ATTRIBUTE","番号レンジ"],["MIXED","混合"],["WHOLE","BOX丸ごと"]];
+const FILTERS=[["CARDNO","番号ランダム"]]; /* 第一版只有卡号随机（PD17） */
 document.getElementById("sorts").innerHTML=SORTS.map(([k,v])=>`<button type="button" class="chip sort" data-sort="${k}" aria-pressed="${k===state.sort}">${v}</button>`).join("");
 document.getElementById("filters").insertAdjacentHTML("beforeend",FILTERS.map(([k,v])=>`<button type="button" class="chip" data-f="${k}" aria-pressed="false">${v}</button>`).join(""));
 function syncChips(){
@@ -440,7 +440,7 @@ document.getElementById("filters").addEventListener("click",e=>{const b=e.target
 
 /* carousel */
 const nl=LOTTERIES.find(l=>l.id==="L006");
-document.getElementById("new-title").textContent="ワンピースカード『二つの伝説』キャラ枠 販売開始";
+document.getElementById("new-title").textContent="ワンピースカード『二つの伝説』番号ランダム 販売開始";
 document.getElementById("new-sub").textContent=`2BOX・${nl.totalSlots}枠・${jst(nl.openingAt)} 開封`;
 document.getElementById("sched").innerHTML=LOTTERIES.filter(l=>l.status==="LOCKED"||l.status==="READY")
   .sort((a,b)=>new Date(a.openingAt)-new Date(b.openingAt)).slice(0,3)

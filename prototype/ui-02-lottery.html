@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <!-- Box Rush 原型 UI-02 场次详情 + 规则快照。由 docs/breaking-platform.md §9.4 UI-02 prompt 生成；静态单文件，无需构建。
-     用 #L001 / #L005 / #L002 / #L009 切换示例场次；「枠を選ぶ」跳转 ui-03-pick.html。 -->
+     用 #L001 / #L005 / #L002 / #L009 切换示例场次；第一版只做卡号随机（PD17），「ランダムで購入」跳转 ui-04-checkout.html。 -->
 <title>BOXラッシュ 開封会詳細</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -276,9 +276,9 @@ dialog.sheet::backdrop{background:rgba(0,0,0,.45)}
     <summary>原型 UI-02 场次详情 · 示例数据 · 原型时钟 2026-09-26 18:00 JST · 点此切换</summary>
     <div class="opts">
       <div class="row"><span>示例场次</span>
-        <button type="button" data-sample="L001" aria-pressed="true">キャラ枠 · 选位</button>
-        <button type="button" data-sample="L005" aria-pressed="false">キャラ枠 · 16 枠</button>
-        <button type="button" data-sample="L002" aria-pressed="false">パック番号 · 随机</button>
+        <button type="button" data-sample="L001" aria-pressed="true">番号随机 · 12 枠</button>
+        <button type="button" data-sample="L005" aria-pressed="false">番号随机 · 16 枠</button>
+        <button type="button" data-sample="L002" aria-pressed="false">番号随机 · 30 枠</button>
         <button type="button" data-sample="L009" aria-pressed="false">已结束</button>
       </div>
       <div class="row"><span>参考价格（PD2 A/B）</span>
@@ -321,57 +321,42 @@ dialog.sheet::backdrop{background:rgba(0,0,0,.45)}
 
 <script>
 /* Mock data (§9.3 types). Prices: sum of slot prices ≈ reference retail total × 1.10–1.30. Card numbers are samples. */
-const PT={ENUMERATED:"キャラ枠",POSITIONAL:"パック番号",ATTRIBUTE:"番号レンジ",WHOLE:"BOX丸ごと",DRAFT:"ドラフト"};
+const PT={CARDNO:"番号ランダム",ENUMERATED:"キャラ枠",POSITIONAL:"パック番号",ATTRIBUTE:"番号レンジ",WHOLE:"BOX丸ごと",DRAFT:"ドラフト"};
 const ART={"ポケモン":"poke","ワンピース":"op","遊戯王":"ygo"};
 const MAKER={"ポケモン":"株式会社ポケモン","ワンピース":"株式会社バンダイ","遊戯王":"株式会社コナミデジタルエンタテインメント"};
-function packs(n,price,soldSet){return Array.from({length:n},(_,i)=>({number:i+1,name:`パック ${i+1}`,price,guaranteeText:"1パック",state:soldSet.has(i+1)?"SOLD":"AVAILABLE"}));}
-const ENUM=[
- ["ブラッキー枠",1900,["006/187","061/187","183/187","217/187"],"SOLD"],
- ["ニンフィア枠",1600,["029/187","092/187","190/187","212/187"],"SOLD"],
- ["エーフィ枠",1400,["021/187","053/187","186/187"],"SOLD"],
- ["リーフィア枠",1100,["008/187","112/187","208/187"],"SOLD"],
- ["グレイシア枠",1100,["033/187","117/187","201/187"],"AVAILABLE"],
- ["シャワーズ枠",900,["014/187","077/187","195/187"],"SOLD"],
- ["サンダース枠",900,["018/187","081/187","197/187"],"SOLD"],
- ["ブースター枠",900,["010/187","072/187","193/187"],"SOLD"],
- ["イーブイ枠",800,["001/187","074/187","180/187"],"SOLD"],
- ["その他ポケモン（ex）枠",800,["上記以外のポケモン ex 全種（例: 040/187, 105/187, 150/187）"],"SOLD"],
- ["その他ポケモン枠",700,["上記以外のポケモン全種（例: 003/187, 045/187, 130/187）"],"SOLD"],
- ["トレーナーズ・エネルギー枠",700,["グッズ・サポート・スタジアム・エネルギー全種"],"AVAILABLE"]
-].map(([name,price,cards,state],i)=>({number:i+1,name,price,cardNumbers:cards,guaranteeText:"カード3枚以上",state}));
-
+/* 第一版只做卡号随机（J7，PD17）：每位统一价；满员后把卡号清单按位轮流发；按位保底，0 张的位配保底卡（PD18） */
+const CL9=[["001/159","ナンジャモ","C"],["002/159","イーブイ","C"],["003/159","ラルトス","C"],["004/159","基本悪エネルギー","C"],["005/159","ゾロア","C"],["006/159","基本超エネルギー","C"],["007/159","ミミッキュ","C"],["008/159","ピカチュウ","C"],["009/159","ピカチュウ","C"],["010/159","ブースター","C"],["011/159","ゾロア","C"],["012/159","ヒトカゲ","C"],["013/159","シャワーズ","C"],["014/159","ハイパーボール","C"],["015/159","ハイパーボール","C"],["016/159","ガブリアス","C"],["017/159","ナンジャモ","C"],["018/159","ポッチャマ","C"],["019/159","ブースター","C"],["020/159","ポッチャマ","C"],["021/159","ニンフィア","C"],["022/159","サンダース","C"],["023/159","ボスの指令","C"],["024/159","ゾロア","C"],["025/159","ハイパーボール","C"],["026/159","ガブリアス","C"],["027/159","ラルトス","C"],["028/159","リーフィア","C"],["029/159","ネストボール","C"],["030/159","ブラッキー","C"],["031/159","ポッチャマ","C"],["032/159","ヒトカゲ","C"],["033/159","すごいつりざお","C"],["034/159","ジャッジマン","C"],["035/159","ゾロア","C"],["036/159","ゲンガー","C"],["037/159","ヒトカゲ","C"],["038/159","ポッチャマ","C"],["039/159","ルカリオ","C"],["040/159","基本悪エネルギー","C"],["041/159","サンダース","C"],["042/159","ミミッキュ","C"],["043/159","イーブイ","C"],["044/159","ブラッキー","C"],["045/159","グレイシア","C"],["046/159","エーフィ","C"],["047/159","ナンジャモ","C"],["048/159","ブラッキー","C"],["049/159","ブースター","C"],["050/159","ジャッジマン","C"],["051/159","ブラッキー","C"],["052/159","ハイパーボール","C"],["053/159","ふしぎなアメ","C"],["054/159","ブースター","C"],["055/159","エーフィ","C"],["056/159","グレイシア","C"],["057/159","ペパー","C"],["058/159","グレイシア","C"],["059/159","エーフィ","C"],["060/159","ブラッキー","C"],["061/159","ラルトス","C"],["062/159","イーブイ","C"],["063/159","ブースター","C"],["064/159","すごいつりざお","C"],["065/159","シャワーズ","C"],["066/159","イーブイ","C"],["067/159","グレイシア","C"],["068/159","カビゴン","C"],["069/159","ラルトス","C"],["070/159","グレイシア","C"],["071/159","ニンフィア","C"],["072/159","カビゴン","C"],["073/159","基本悪エネルギー","C"],["074/159","ピカチュウ","C"],["075/159","基本悪エネルギー","C"],["076/159","カビゴン","C"],["077/159","サンダース","C"],["078/159","ラルトス","C"],["079/159","ジャッジマン","C"],["080/159","ペパー","C"],["081/159","ネストボール","C"],["082/159","エーフィ","C"],["083/159","ブラッキー","C"],["084/159","ピカチュウ","C"],["085/159","ブラッキー","C"],["086/159","ふしぎなアメ","C"],["087/159","ハイパーボール","C"],["088/159","イーブイ","C"],["089/159","基本超エネルギー","C"],["090/159","ブラッキー","C"],["091/159","カビゴン","U"],["092/159","イーブイ","U"],["093/159","ポッチャマ","U"],["094/159","すごいつりざお","U"],["095/159","ゲンガー","U"],["096/159","ブラッキー","U"],["097/159","ハイパーボール","U"],["098/159","ニンフィア","U"],["099/159","ブラッキー","U"],["100/159","エーフィ","U"],["101/159","ルカリオ","U"],["102/159","ネストボール","U"],["103/159","ゾロア","U"],["104/159","ハイパーボール","U"],["105/159","すごいつりざお","U"],["106/159","ラルトス","U"],["107/159","リーフィア","U"],["108/159","ピカチュウ","U"],["109/159","ゾロア","U"],["110/159","ルカリオ","U"],["111/159","ラルトス","U"],["112/159","ブースター","U"],["113/159","ゲンガー","U"],["114/159","ミミッキュ","U"],["115/159","ニンフィア","U"],["116/159","ヒトカゲ","U"],["117/159","ガブリアス","U"],["118/159","ピカチュウ","U"],["119/159","イーブイ","U"],["120/159","ゲンガー","U"],["121/159","ブラッキー","U"],["122/159","サンダース","U"],["123/159","ブラッキー","U"],["124/159","ポッチャマ","U"],["125/159","グレイシア","U"],["126/159","イーブイ","U"],["127/159","ネストボール","U"],["128/159","ゾロア","U"],["129/159","ミミッキュ","U"],["130/159","リーフィア","U"],["131/159","イーブイ","R"],["132/159","グレイシア","R"],["133/159","ニンフィア","R"],["134/159","ニンフィア","R"],["135/159","ゲンガー","R"],["136/159","リーフィア","R"],["137/159","ラルトス","R"],["138/159","リーフィア","R"],["139/159","ブースター","R"],["140/159","ピカチュウ","R"],["141/159","リーフィア","R"],["142/159","ゾロア","R"],["143/159","ニンフィア","R"],["144/159","カビゴン","R"],["145/159","ラルトス","R"],["146/159","カビゴンex","RR"],["147/159","イーブイex","RR"],["148/159","サンダースex","RR"],["149/159","ピカチュウex","RR"],["150/159","グレイシアex","RR"],["151/159","シャワーズex","RR"],["152/159","ニンフィアex","RR"],["153/159","ガブリアスex","RR"],["154/159","イーブイex","RR"],["155/159","エーフィex","RR"],["156/159","ピカチュウex","RR"],["157/159","ガブリアスex","RR"],["158/159","サンダースex","RR"],["159/159","サンダースex","RR"],["160/159","サンダース","AR"],["161/159","ルカリオ","AR"],["162/159","ピカチュウ","AR"],["163/159","エーフィ","AR"],["164/159","ルカリオ","AR"],["165/159","グレイシア","AR"],["166/159","ミミッキュ","AR"],["167/159","イーブイ","AR"],["168/159","ポッチャマ","AR"],["169/159","リーフィア","AR"],["170/159","ブラッキー","AR"],["171/159","ブースター","AR"],["172/159","ラルトス","AR"],["173/159","ガブリアス","AR"],["174/159","ニンフィア","AR"],["175/159","ヒトカゲ","AR"],["176/159","ブラッキー","AR"],["177/159","リーフィア","AR"],["178/159","ブースター","AR"],["179/159","エーフィ","AR"],["180/159","ポッチャマ","AR"],["181/159","ヒトカゲ","AR"],["182/159","シャワーズ","AR"],["183/159","リーフィア","AR"],["184/159","グレイシア","AR"],["185/159","カビゴン","AR"],["186/159","シャワーズex","SR"],["187/159","カビゴンex","SR"],["188/159","ピカチュウex","SR"],["189/159","シャワーズex","SR"],["190/159","ナンジャモ","SR"],["191/159","ブースターex","SR"],["192/159","リーフィア","SR"],["193/159","ガブリアスex","SR"],["194/159","イーブイex","SR"],["195/159","ゲンガーex","SR"],["196/159","ブラッキー","SAR"],["197/159","ミミッキュ","SAR"],["198/159","ラルトスex","SAR"],["199/159","ブースター","SAR"]];
+function mockChecklist(seed,base,bands){let x=seed;const r=()=>(x=(x*1103515245+12345)%2147483648)/2147483648;
+  const P=["ピカチュウ","リザードン","イーブイ","ミュウ","ゲンガー","ルカリオ","ミミッキュ","ニャオハ","ホゲータ","クワッス","ラティアス","パーモット","ナンジャモ","ペパー","ネストボール","基本エネルギー"];
+  const out=[];let n=0;for(const [rr,c] of bands)for(let i=0;i<c;i++){n++;out.push([String(n).padStart(3,"0")+"/"+base,P[Math.floor(r()*P.length)]+(rr==="RR"||rr==="SR"||rr==="SAR"?"ex":""),rr]);}return out;}
+const slotsN=(n,price,sold)=>Array.from({length:n},(_,i)=>({number:i+1,price,state:i<sold?"SOLD":"AVAILABLE"}));
+const FALLBACK="カード番号リストにないカード（エラー品・封入外カード等）は、開封順に #01 から順番に振り分けます。";
+const G_TEXT="各枠 1枚以上（0枚の枠には保証カードを進呈）";
 const L={
- L001:{id:"L001",category:"ポケモン",series:"テラスタルフェスex",title:"ポケカ『テラスタルフェスex』2BOX キャラ枠",quantity:2,sealedUnit:"BOX",referenceRetailPrice:5400,
-   partitionType:"ENUMERATED",selectionMode:"PICK",slots:ENUM,guaranteeText:"各枠 カード3枚以上",selfOperated:true,merchantName:"BOXラッシュ（自営）",
+ L001:{id:"L001",category:"ポケモン",series:"テラスタルフェスex",title:"ポケカ『テラスタルフェスex』2BOX 番号ランダム",quantity:2,sealedUnit:"BOX",referenceRetailPrice:5400,
+   partitionType:"CARDNO",selectionMode:"RANDOM",slots:slotsN(12,1080,10),checklist:mockChecklist(1,187,[["C",95],["U",45],["R",15],["RR",17],["AR",36],["SR",18],["SAR",10]]),
+   guaranteeText:G_TEXT,guaranteeCard:{name:"プロモカード『イーブイ』（未開封）",ref:600,stock:11},selfOperated:true,merchantName:"BOXラッシュ（自営）",
    saleEndsAt:"2026-09-27T23:59:00+09:00",openingAt:"2026-09-28T20:00:00+09:00",seedCommittedAt:"2026-09-20T12:00:00+09:00",saleStartsAt:"2026-09-20T12:05:00+09:00",snapshotAt:"2026-09-20T12:00:00+09:00",
    photoAt:"2026-09-19T14:32:00+09:00",purchaseLimit:3,status:"ON_SALE",
-   seedCommitHash:"f6f958f44d762cb638098774f69a8fe4d88af259438aa1867d9668ab6571249c",
-   fallbackRule:"リストにないカード（エラー品・封入外カード等）は、開封順に 1 番枠から順番に振り分けます。"},
- L002:{id:"L002",category:"ポケモン",series:"ロケット団の栄光",title:"ポケカ『ロケット団の栄光』1BOX パック番号",quantity:1,sealedUnit:"BOX",referenceRetailPrice:5400,
-   partitionType:"POSITIONAL",selectionMode:"RANDOM",slots:packs(30,210,new Set([1,2,3,5,6,8,9,10,12,13,15,16,18,19,21,22,24,25,27,28,30])),guaranteeText:"各枠 1パック",selfOperated:false,merchantName:"トレカ工房ミナト",
+   seedCommitHash:"f6f958f44d762cb638098774f69a8fe4d88af259438aa1867d9668ab6571249c",fallbackRule:FALLBACK},
+ L002:{id:"L002",category:"ポケモン",series:"ロケット団の栄光",title:"ポケカ『ロケット団の栄光』1BOX 番号ランダム",quantity:1,sealedUnit:"BOX",referenceRetailPrice:5400,
+   partitionType:"CARDNO",selectionMode:"RANDOM",slots:slotsN(30,210,21),checklist:mockChecklist(2,98,[["C",50],["U",25],["R",10],["RR",13],["AR",12],["SR",8],["SAR",4]]),
+   guaranteeText:G_TEXT,guaranteeCard:{name:"プロモカード『ロケット団のミュウツー』（未開封）",ref:120,stock:29},selfOperated:false,merchantName:"トレカ工房ミナト",
    saleEndsAt:"2026-09-29T18:00:00+09:00",openingAt:"2026-09-29T21:00:00+09:00",seedCommittedAt:"2026-09-22T10:00:00+09:00",saleStartsAt:"2026-09-22T10:05:00+09:00",snapshotAt:"2026-09-22T10:00:00+09:00",
    photoAt:"2026-09-21T11:08:00+09:00",purchaseLimit:5,status:"ON_SALE",
-   seedCommitHash:"9bcc8d33a6495c1e0c51c3a0fd3c982ca10151e1d99d85ad6ffe805b879824f2",
-   fallbackRule:"パック番号で分けるため、リスト外のカードも入っていたパックの枠に帰属します。"},
- L005:{id:"L005",category:"ポケモン",series:"超電ブレイカー",title:"ポケカ『超電ブレイカー』4BOX キャラ枠",quantity:4,sealedUnit:"BOX",referenceRetailPrice:5400,
-   partitionType:"ENUMERATED",selectionMode:"PICK",guaranteeText:"各枠 カード5枚以上",selfOperated:true,merchantName:"BOXラッシュ（自営）",
-   slots:[["ピカチュウ枠",2400,["063/106","094/106","132/106","236/106"]],["ゼクロム枠",2200,["071/106","118/106","230/106"]],["ラティアス枠",2000,["076/106","121/106","233/106"]],
-     ["ミロカロス枠",1800,["031/106","110/106"]],["パーモット枠",1700,["067/106","124/106"]],["マスカーニャ枠",1600,["010/106","104/106"]],
-     ["サーフゴー枠",1500,["086/106","126/106"]],["アローラナッシー枠",1500,["003/106","101/106"]],["ニャオハ枠",1400,["008/106","102/106"]],
-     ["オーロット枠",1400,["014/106","103/106"]],["デンリュウ枠",1300,["065/106","113/106"]],["パチリス枠",1300,["068/106","114/106"]],
-     ["その他ポケモン（ex）枠",1200,["上記以外のポケモン ex 全種"]],["その他ポケモン（草・炎・水）枠",1200,["上記以外の草・炎・水タイプ全種"]],
-     ["その他ポケモン（その他タイプ）枠",1200,["上記以外の全タイプ"]],["トレーナーズ・エネルギー枠",1200,["グッズ・サポート・スタジアム・エネルギー全種"]]]
-     .map(([name,price,cards],i)=>({number:i+1,name,price,cardNumbers:cards,guaranteeText:"カード5枚以上",state:[1,2,4,7,10].includes(i+1)?"SOLD":"AVAILABLE"})),
+   seedCommitHash:"9bcc8d33a6495c1e0c51c3a0fd3c982ca10151e1d99d85ad6ffe805b879824f2",fallbackRule:FALLBACK},
+ L005:{id:"L005",category:"ポケモン",series:"超電ブレイカー",title:"ポケカ『超電ブレイカー』4BOX 番号ランダム",quantity:4,sealedUnit:"BOX",referenceRetailPrice:5400,
+   partitionType:"CARDNO",selectionMode:"RANDOM",slots:slotsN(16,1620,7),checklist:mockChecklist(5,106,[["C",50],["U",28],["R",14],["RR",14],["AR",20],["SR",15],["SAR",8]]),
+   guaranteeText:G_TEXT,guaranteeCard:{name:"プロモカード『ピカチュウ』（未開封）",ref:900,stock:15},selfOperated:true,merchantName:"BOXラッシュ（自営）",
    saleEndsAt:"2026-10-02T23:59:00+09:00",openingAt:"2026-10-03T20:00:00+09:00",seedCommittedAt:"2026-09-24T12:00:00+09:00",saleStartsAt:"2026-09-24T12:05:00+09:00",snapshotAt:"2026-09-24T12:00:00+09:00",
    photoAt:"2026-09-23T16:45:00+09:00",purchaseLimit:3,status:"ON_SALE",
-   seedCommitHash:"b2619087eb1dd4a2c3977476e60836d169b4a32c881fc87352af7257074c23ff",
-   fallbackRule:"リストにないカード（エラー品・封入外カード等）は、開封順に 1 番枠から順番に振り分けます。"},
- L009:{id:"L009",category:"ポケモン",series:"バトルパートナーズ",title:"ポケカ『バトルパートナーズ』2BOX キャラ枠",quantity:2,sealedUnit:"BOX",referenceRetailPrice:5400,
-   partitionType:"ENUMERATED",selectionMode:"PICK",slots:ENUM.map(s=>({...s,state:"SOLD"})),guaranteeText:"各枠 カード3枚以上",selfOperated:true,merchantName:"BOXラッシュ（自営）",
+   seedCommitHash:"b2619087eb1dd4a2c3977476e60836d169b4a32c881fc87352af7257074c23ff",fallbackRule:FALLBACK},
+ L009:{id:"L009",category:"ポケモン",series:"バトルパートナーズ",title:"ポケカ『バトルパートナーズ』2BOX 番号ランダム",quantity:2,sealedUnit:"BOX",referenceRetailPrice:5400,
+   partitionType:"CARDNO",selectionMode:"RANDOM",slots:slotsN(12,990,12),checklist:CL9,
+   guaranteeText:G_TEXT,guaranteeCard:{name:"プロモカード『イーブイ』（未開封）",ref:550,stock:11},selfOperated:true,merchantName:"BOXラッシュ（自営）",
    saleEndsAt:"2026-09-25T23:59:00+09:00",openingAt:"2026-09-26T20:00:00+09:00",seedCommittedAt:"2026-09-18T12:00:00+09:00",saleStartsAt:"2026-09-18T12:05:00+09:00",snapshotAt:"2026-09-18T12:00:00+09:00",
    photoAt:"2026-09-17T15:20:00+09:00",purchaseLimit:3,status:"READY",
-   seedCommitHash:"c6ebe0ed90a7cfd3421ca665ce0b0bc00313714b0c9ee9e1f2989fa7a81a0781",
-   fallbackRule:"リストにないカード（エラー品・封入外カード等）は、開封順に 1 番枠から順番に振り分けます。"}
+   seedCommitHash:"c6ebe0ed90a7cfd3421ca665ce0b0bc00313714b0c9ee9e1f2989fa7a81a0781",fallbackRule:FALLBACK}
 };
 const STATUS={ON_SALE:"販売中",READY:"開封待ち（満員・割り当て公開済み）",LOCKED:"満員・抽選待ち"};
 
@@ -382,7 +367,6 @@ function jstFull(iso){const t=new Date(new Date(iso).getTime()+9*3600e3);return 
 const yen=n=>"¥"+n.toLocaleString("ja-JP");
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const short=h=>h.slice(0,10)+"…"+h.slice(-8);
-
 let state={id:"L001",showRef:true,qty:1};
 try{if(localStorage.getItem("br-ab-ref")==="off") state.showRef=false;}catch(e){}
 const h=(location.hash||"").replace("#",""); if(L[h]) state.id=h;
@@ -396,15 +380,14 @@ function render(){
   const shots=["front","side","close"].map((k,i)=>`<div class="shot ${ART[l.category]} ${k}" role="img" aria-label="封印写真 ${i+1}/3">
       <div class="box"><small>${esc(l.category)}</small><strong>${esc(l.series)}</strong><em>${l.sealedUnit}</em></div><span class="tape"></span><span class="lens">${["正面","側面","封印アップ"][i]}</span></div>`).join("");
 
-  const slotList = l.partitionType==="ENUMERATED"
-    ? `<div class="slots">${l.slots.map(s=>`<details class="slot"><summary>
-          <span class="sn">${esc(s.name)}</span><span class="sp2 num">${yen(s.price)}</span>
-          <span class="sg">保証 ${esc(s.guaranteeText)}</span><span class="ss ${s.state==="SOLD"?"sold":"open"}">${s.state==="SOLD"?"販売済":"購入可"}</span></summary>
-          <div class="cards"><span class="lab">この枠に含まれるカード</span><ul>${s.cardNumbers.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div></details>`).join("")}</div>`
-    : `<p class="small muted" style="margin:0">パック 1〜${total}：各 <b class="mono" style="color:var(--ink)">${yen(minP)}</b>・保証 ${esc(l.slots[0].guaranteeText)}。
-        ${l.selectionMode==="RANDOM"?"どの番号の枠になるかは<b style=\"color:var(--ink)\">満員後に抽選し、開封前に公開</b>します。":""}</p>
-       <div class="packgrid" aria-label="パック番号">${l.slots.map(s=>`<span class="pk">${s.number}</span>`).join("")}</div>
-       ${l.selectionMode==="RANDOM"?'<p class="small muted" style="margin:0">満員前は番号と購入者が結びついていないため、番号ごとの販売状況は表示しません。</p>':""}`;
+  const per=Math.floor(l.checklist.length/total), RR=["C","U","R","RR","AR","SR","SAR"];
+  const byR=RR.map(r=>[r,l.checklist.filter(c=>c[2]===r).length]).filter(x=>x[1]);
+  const slotList=`<p class="small muted" style="margin:0">各枠 <b class="mono" style="color:var(--ink)">${yen(minP)}</b>。満員後の抽選で、収録カード <b style="color:var(--ink)">全 ${l.checklist.length} 種のカード番号</b>を各枠に順番に配ります（1 枠あたり約 ${per} 種）。
+      開封で出たカードは、<b style="color:var(--ink)">そのカード番号の持ち主の枠</b>に入ります。割り当ては開封前に公開します。</p>
+    <div class="packgrid" aria-label="レアリティ別の種類数" style="display:flex;flex-wrap:wrap;gap:6px">${byR.map(([r,n])=>`<span class="pk" style="width:auto;height:auto;padding:2px 8px;white-space:nowrap">${r} ${n}種</span>`).join("")}</div>
+    <details class="slot"><summary><span class="sn">収録カード一覧（全 ${l.checklist.length} 種・出品時に固定）</span></summary>
+      <div class="cards"><ul>${l.checklist.map(c=>`<li><span class="mono">${c[0]}</span> ${esc(c[1])} <span class="muted">${c[2]}</span></li>`).join("")}</ul></div></details>
+    ${l.status==="ON_SALE"?'<p class="small muted" style="margin:0">満員前は枠と購入者が結びついていないため、枠ごとの販売状況は表示しません。</p>':'<p class="small muted" style="margin:0">割り当ては公開済みです。各枠のカード番号は「検証」ページで確認できます。</p>'}`;
 
   const refLine = state.showRef ? `<span class="small muted num">参考: ${l.sealedUnit} ${yen(l.referenceRetailPrice)}${l.quantity>1?"×"+l.quantity:""}</span>` : "";
 
@@ -426,7 +409,11 @@ function render(){
         <span class="gi"><svg class="i"><use href="#i-cards"/></svg></span>
         <span class="gt"><span class="small muted">保証</span><b>${esc(l.guaranteeText)}</b></span>
         <button class="info" type="button" id="guar-btn" aria-expanded="false" aria-controls="guar-more" aria-label="保証について"><svg class="i"><use href="#i-info"/></svg></button>
-        <p class="guar-more" id="guar-more" hidden>すべての枠に実物のカードが届きます。どの枠にも保証があり、「何も届かない枠」はありません。</p>
+        <p class="guar-more" id="guar-more" hidden>すべての枠に実物のカードが届きます。開封でカードが 1 枚も出なかった枠には、出品時に公示した保証カードを 1 枚進呈します。「何も届かない枠」はありません。</p>
+      </section>
+      <section class="blk" aria-label="保証カード" style="display:flex;flex-direction:row;gap:12px;align-items:center;text-align:left">
+        <span class="gi" aria-hidden="true" style="width:44px;height:58px;border-radius:6px;background:linear-gradient(135deg,#f6e7a8,#e9c45a)"></span>
+        <span class="gt" style="display:flex;flex-direction:column;gap:2px"><span class="small muted">保証カード（入庫済み・${l.guaranteeCard.stock} 枚を確保）</span><b>${esc(l.guaranteeCard.name)}</b><span class="small muted num">参考価格 ${yen(l.guaranteeCard.ref)}</span></span>
       </section>
 
       <section class="blk" aria-labelledby="h-part">
@@ -446,7 +433,7 @@ function render(){
         <h2 id="h-fair"><svg class="i" style="color:var(--trust)"><use href="#i-shield"/></svg>抽選シード（コミット）</h2>
         <div class="hash"><code id="hash" title="${l.seedCommitHash}">${l.seedCommitHash}</code><button class="copy" type="button" id="copy">コピー</button></div>
         <dl class="kv"><dt>コミット日時</dt><dd class="num">${jst(l.seedCommittedAt)}</dd><dt>販売開始</dt><dd class="num">${jst(l.saleStartsAt)}</dd></dl>
-        <p class="small muted" style="margin:0">販売開始前にシードのハッシュを公開しています。${l.selectionMode==="RANDOM"?"満員後の割り当ては、このシードと外部の公開値から計算され、誰でも再計算できます。":"枠の割り当て記録と開封映像は、開封後に誰でも確認できます。"}</p>
+        <p class="small muted" style="margin:0">販売開始前にシードのハッシュを公開しています。満員後の割り当ては、このシードと公開する参加者リストから計算され、誰でも再計算できます。</p>
         <a class="link" href="#fairness" data-proto="公正性の仕組み">公正性の仕組み<svg class="i" style="width:14px;height:14px"><use href="#i-chev"/></svg></a>
       </section>
 
@@ -501,10 +488,10 @@ function openSheet(l){
     ["開封会ID",`<span class="mono">${l.id}</span>`],
     ["対象商品",`${esc(l.title)}（${l.sealedUnit} × ${l.quantity}・メーカー未開封品）`],
     ["出品者",esc(l.merchantName)],
-    ["分け方",`${PT[l.partitionType]}・全 ${total} 枠・${l.selectionMode==="PICK"?"枠を選んで購入":"ランダム割り当て"}`],
-    ["各枠の定義と価格", l.partitionType==="ENUMERATED"
-       ? l.slots.map(s=>`${s.number}. ${esc(s.name)}　${yen(s.price)}　保証 ${esc(s.guaranteeText)}`).join("<br>")
-       : `パック 1〜${total}　各 ${yen(l.slots[0].price)}　保証 ${esc(l.slots[0].guaranteeText)}`],
+    ["分け方",`${PT[l.partitionType]}・全 ${total} 枠・満員後の抽選でカード番号を各枠に配る`],
+    ["価格","各枠 "+yen(l.slots[0].price)+"（全枠同額）"],
+    ["カード番号リスト",`全 ${l.checklist.length} 種（出品時に固定）`],
+    ["保証",`各枠 1 枚以上。0 枚の枠には保証カード「${esc(l.guaranteeCard.name)}」（参考価格 ${yen(l.guaranteeCard.ref)}）を 1 枚進呈。保証カードは入庫済みで ${l.guaranteeCard.stock} 枚を確保`],
     ["リスト外のカード",esc(l.fallbackRule)],
     ["成立条件","全枠が売れた場合のみ開封（100%）。販売者・運営は枠を購入しません。"],
     ["販売期間",`${jst(l.saleStartsAt)} 〜 ${jst(l.saleEndsAt)}`],

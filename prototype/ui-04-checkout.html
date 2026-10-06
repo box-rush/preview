@@ -7,7 +7,7 @@
 <!-- Box Rush 原型 UI-04 确认与支付 + 支付结果。由 docs/breaking-platform.md §9.4 UI-04 prompt 生成；静态单文件，无需构建。
      支付区为 Stripe Payment Element 的本地模拟（不加载 Stripe.js、不发送任何数据）。不提供コンビニ払い（PD9）。
      深夜确认：JST 0–6 时当夜累计（含本单）达 ¥10,000 时弹出（PD10）。
-     #L005-3-5（默认：L005 的 3 号、5 号枠）/ #L002-r2（L002 随机 2 枠）。 -->
+     #L005-r2（默认：L005 随机 2 枠）/ #L002-r2 / #L001-r1。第一版只做卡号随机（PD17）。 -->
 <title>BOXラッシュ ご購入手続き</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -220,7 +220,7 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
     <summary>原型 UI-04 确认与支付 · 原型时钟 2026-09-26 18:00 JST · 本地模拟 Stripe Payment Element，不发送任何数据 · 点此切换</summary>
     <div class="opts">
       <div class="row"><span>订单</span>
-        <button type="button" data-order="L005-3-5" aria-pressed="true">L005 选 2 枠</button>
+        <button type="button" data-order="L005-r2" aria-pressed="true">L005 随机 2 枠</button>
         <button type="button" data-order="L002-r2" aria-pressed="false">L002 随机 2 枠</button>
       </div>
       <div class="row"><span>支付结果</span>
@@ -355,19 +355,18 @@ function jst(iso){const t=new Date(new Date(iso).getTime()+9*3600e3);
 const yen=n=>"¥"+n.toLocaleString("ja-JP");
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const pad=n=>String(n).padStart(2,"0");
-const LOTS={
- L005:{id:"L005",title:"ポケカ『超電ブレイカー』4BOX キャラ枠",mode:"PICK",openingAt:"2026-10-03T20:00:00+09:00",saleEndsAt:"2026-10-02T23:59:00+09:00",
-   slots:["ピカチュウ枠",2400,"ゼクロム枠",2200,"ラティアス枠",2000,"ミロカロス枠",1800,"パーモット枠",1700,"マスカーニャ枠",1600,"サーフゴー枠",1500,"アローラナッシー枠",1500,
-     "ニャオハ枠",1400,"オーロット枠",1400,"デンリュウ枠",1300,"パチリス枠",1300,"その他ポケモン（ex）枠",1200,"その他ポケモン（草・炎・水）枠",1200,"その他ポケモン（その他タイプ）枠",1200,"トレーナーズ・エネルギー枠",1200]},
- L002:{id:"L002",title:"ポケカ『ロケット団の栄光』1BOX パック番号",mode:"RANDOM",unit:210,openingAt:"2026-09-29T21:00:00+09:00",saleEndsAt:"2026-09-29T18:00:00+09:00"}
+const LOTS={ /* 第一版只做卡号随机（PD17）：每位统一价 */
+ L005:{id:"L005",title:"ポケカ『超電ブレイカー』4BOX 番号ランダム",mode:"RANDOM",unit:1620,openingAt:"2026-10-03T20:00:00+09:00",saleEndsAt:"2026-10-02T23:59:00+09:00"},
+ L001:{id:"L001",title:"ポケカ『テラスタルフェスex』2BOX 番号ランダム",mode:"RANDOM",unit:1080,openingAt:"2026-09-28T20:00:00+09:00",saleEndsAt:"2026-09-27T23:59:00+09:00"},
+ L002:{id:"L002",title:"ポケカ『ロケット団の栄光』1BOX 番号ランダム",mode:"RANDOM",unit:210,openingAt:"2026-09-29T21:00:00+09:00",saleEndsAt:"2026-09-29T18:00:00+09:00"}
 };
 const CAP=50000, HOLD_SEC=600;
 const NIGHT_LIMIT=10000;
-let st={order:"L005-3-5",res:"ok",used:12000,night:false,nightSpent:0,pm:"card",holdLeft:HOLD_SEC,lines:[],total:0,lot:null};
+let st={order:"L005-r2",res:"ok",used:12000,night:false,nightSpent:0,pm:"card",holdLeft:HOLD_SEC,lines:[],total:0,lot:null};
 
 function parseOrder(tok){
   const [id,...rest]=tok.split("-"); const lot=LOTS[id]||LOTS.L005; let lines=[];
-  if(lot.mode==="RANDOM"){const n=Math.max(1,parseInt((rest[0]||"r1").replace("r",""))||1); lines=[{label:`パック番号 ランダム × ${n} 枠`,sub:"番号は満員後の抽選で決まり、開封前に公開します",price:lot.unit*n}];}
+  if(lot.mode==="RANDOM"){const n=Math.max(1,parseInt((rest[0]||"r1").replace("r",""))||1); lines=[{label:`番号ランダム × ${n} 枠`,sub:"カード番号は満員後の抽選で各枠に配られ、開封前に公開します",price:lot.unit*n}];}
   else{const ns=(rest.length?rest:["3","5"]).map(Number).filter(n=>n>=1&&n<=lot.slots.length/2);
     lines=ns.map(n=>({no:n,label:lot.slots[(n-1)*2],price:lot.slots[(n-1)*2+1]}));}
   st.lot=lot; st.lines=lines; st.total=lines.reduce((a,l)=>a+l.price,0);
@@ -403,7 +402,7 @@ function updatePay(){
   const label=st.pm==="apple"?`Apple Pay で支払う ${yen(st.total)}`:st.pm==="google"?`Google Pay で支払う ${yen(st.total)}`:`支払う ${yen(st.total)}`;
   pay.textContent=label;
   pay.disabled=!agree||over||ended;
-  why.textContent=ended?"確保時間が終了しました。枠を選び直してください。":over?"今月の上限を超えるため購入できません":!agree?"「上記を確認しました」にチェックしてください":"満員にならなければ全額返金・購入後のキャンセル不可";
+  why.textContent=ended?"確保時間が終了しました。もう一度購入手続きをしてください。":over?"今月の上限を超えるため購入できません":!agree?"「上記を確認しました」にチェックしてください":"満員にならなければ全額返金・購入後のキャンセル不可";
 }
 
 /* payment element mock */

@@ -146,6 +146,7 @@ a{color:inherit;text-decoration:none}
 .ro .cc{cursor:default}
 .nav2{display:flex;gap:8px;justify-content:space-between}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:12.5px;padding:8px 14px;border-radius:999px;z-index:40}
+.types label.dis{opacity:.45;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -181,32 +182,33 @@ const pad=n=>String(n).padStart(2,"0");
 /* catalog + inventory (I7: only sealed manufacturer products exist in the master catalog) */
 const SKU={id:"PKM-SV8a",name:"ポケカ『テラスタルフェスex』",maker:"株式会社ポケモン",unit:"BOX",retail:5400};
 const LOTS=[{id:"B-0920-01",qty:2,state:"in",at:"9/20 10:40"},{id:"B-0920-02",qty:4,state:"in",at:"9/20 10:55"},{id:"B-0928-01",qty:2,state:"pending",at:"9/28 入庫予定"}];
-/* platform character template (from master data), plus 2 newly listed cards not yet grouped */
-const TPL=[["ブラッキー枠",1900,["006","061","183","217"]],["ニンフィア枠",1600,["029","092","190","212"]],["エーフィ枠",1400,["021","053","186"]],["リーフィア枠",1100,["008","112","208"]],
- ["グレイシア枠",1100,["033","117","201"]],["シャワーズ枠",900,["014","077","195"]],["サンダース枠",900,["018","081","197"]],["ブースター枠",900,["010","072","193"]],
- ["イーブイ枠",800,["001","074","180"]],["その他ポケモン（ex）枠",800,["040","105","150"]],["その他ポケモン枠",700,["003","045","130"]],["トレーナーズ・エネルギー枠",700,["160","165","170"]]];
-const st={step:1,lot:"B-0920-01",qty:2,type:"ENUMERATED",basis:"number",groups:TPL.map(([n,p,cards])=>({n,p,g:3,cards:cards.map(c=>c+"/187")})),
-  pool:["238/187","239/187"],fallback:"",draftRule:"",uniform:false,uniPrice:1100,limit:3,saleStart:"2026-09-27T12:00",saleEnd:"2026-10-04T23:59",slot:null,submitted:false,picked:null};
+/* 第一版只做卡号随机（J7，PD17）：从商品主数据取入官方收录清单；按位保底，0 张的位配保底卡（PD18）。
+   原型初始故意不合格：新收录 2 种未取入、保底卡在库不足、兜底条款未填、开封日时未选。 */
+const MASTER_N=187, NEW_CARDS=["238/187","239/187"];
+const GC=[{id:"G-EV-01",name:"プロモカード『イーブイ』（未開封）",ref:600,stock:6,isNew:true},{id:"G-PK-02",name:"プロモカード『ピカチュウ』（未開封）",ref:900,stock:24,isNew:true},
+  {id:"G-NJ-03",name:"単カード『ナンジャモ』SR",ref:2400,stock:15,isNew:false}];
+const st={step:1,lot:"B-0920-01",qty:2,slots:12,newIn:false,gc:"G-EV-01",fallback:"",uniPrice:1080,limit:3,saleStart:"2026-09-27T12:00",saleEnd:"2026-10-04T23:59",slot:null,submitted:false};
 const OPEN_SLOTS=[["2026-10-05 20:00","ST-02",1],["2026-10-05 21:00","ST-02",0],["2026-10-06 20:00","ST-01",2],["2026-10-06 21:00","ST-02",1]];
-const STEPS=["対象商品","分け方","販売設定","開封日時","確認"];
+const STEPS=["対象商品","分け方・保証","販売設定","開封日時","確認"];
+const gcard=()=>GC.find(g=>g.id===st.gc);
 
 function checks(){
-  const enumT=st.type==="ENUMERATED", g=st.groups;
+  const g=gcard();
   return [
-   {id:"guar",tag:"I1",label:"すべての枠に保証あり（最低枚数 > 0）",ok:!enumT||g.every(x=>x.g>0),step:2},
-   {id:"cover",tag:"I1",label:"すべてのカードがいずれかの枠に属する（漏れなし）",ok:!enumT||st.pool.length===0,step:2,detail:st.pool.length?`未割り当て ${st.pool.length} 枚：${st.pool.join("、")}`:""},
-   {id:"dup",tag:"",label:"重複なし（1枚が2つの枠に属さない）",ok:(()=>{const all=g.flatMap(x=>x.cards);return new Set(all).size===all.length;})(),step:2},
+   {id:"list",tag:"I1",label:"カード番号リスト＝公式収録リスト（全種を抽選で配布：漏れ・重複なし）",ok:st.newIn,step:2,detail:st.newIn?"":`新収録 ${NEW_CARDS.length} 種が未取り込み：${NEW_CARDS.join("、")}`},
+   {id:"gc",tag:"I1",label:"保証カードを選択（0 枚の枠に 1 枚進呈）",ok:!!g,step:2},
+   {id:"stock",tag:"",label:`保証カードの在庫 ≥ 枠数 − 1（${st.slots-1} 枚）`,ok:!!g&&g.stock>=st.slots-1,step:2,detail:g&&g.stock<st.slots-1?`在庫 ${g.stock} 枚：あと ${st.slots-1-g.stock} 枚の入庫が必要`:""},
+   {id:"gval",tag:"推奨",label:"保証カードの参考価格 ≥ 1 枠価格の 50%",ok:!!g&&g.ref>=st.uniPrice*0.5,step:2},
    {id:"i2",tag:"I2",label:"成団条件 = 100%（変更不可、表示のみ）",ok:true,fixed:true},
    {id:"i7",tag:"I7",label:"リパック商品ではない",ok:true,fixed:true,detail:"マスタ登録のメーカー未開封品のみ選択可能"},
-   {id:"i9",tag:"I9",label:"レアリティによる分け方ではない",ok:!(st.type==="ATTRIBUTE"&&st.basis==="rarity"),step:2},
-   {id:"fb",tag:"",label:"フォールバックルール記入済み",ok:st.fallback.trim().length>0,step:2},
-   ...(st.type==="DRAFT"?[{id:"draft",tag:"",label:"不在時の自動選択ルール記入済み",ok:st.draftRule.trim().length>0,step:2}]:[]),
+   {id:"i9",tag:"I9",label:"レアリティによる分け方ではない",ok:true,fixed:true,detail:"番号ランダムはレアリティを使わない"},
+   {id:"fb",tag:"",label:"リスト外カードの扱いを記入済み",ok:st.fallback.trim().length>0,step:2},
    {id:"lot",tag:"",label:"入庫・封印確認済みのロットを選択",ok:LOTS.find(l=>l.id===st.lot)?.state==="in",step:1},
    {id:"slot",tag:"",label:"開封日時を選択",ok:!!st.slot,step:4}
   ];
 }
-function prices(){return st.type==="ENUMERATED"?(st.uniform?st.groups.map(()=>st.uniPrice):st.groups.map(x=>x.p)):[];}
-function mValue(){const p=prices(); if(!p.length) return null; return p.reduce((a,b)=>a+b,0)/(SKU.retail*st.qty)-1;}
+function prices(){return Array(st.slots).fill(st.uniPrice);}
+function mValue(){return st.uniPrice*st.slots/(SKU.retail*st.qty)-1;}
 
 function stepNav(){document.getElementById("steps").innerHTML=STEPS.map((s,i)=>`<button type="button" data-step="${i+1}" ${st.step===i+1?'aria-current="step"':""}><b>${i+1}</b>${s}</button>`).join("");}
 function pane(){
@@ -223,43 +225,38 @@ function pane(){
     p.querySelectorAll("input[name=lot]").forEach(r=>r.onchange=()=>{st.lot=r.value;update();});
     p.querySelector("#qty").onchange=e=>{st.qty=Math.max(1,Math.min(4,+e.target.value||1));update();};
   }else if(st.step===2){
-    const T=[["ENUMERATED","キャラ枠"],["POSITIONAL","パック番号"],["ATTRIBUTE","番号レンジ"],["WHOLE","BOX丸ごと"],["DRAFT","ドラフト"]];
-    p.innerHTML=`<h2>2. 分け方</h2><div class="types" role="radiogroup">${T.map(([v,l])=>`<label><input type="radio" name="type" value="${v}" ${st.type===v?"checked":""}>${l}</label>`).join("")}</div>
-      ${st.type==="ATTRIBUTE"?`<div class="f ${bad("i9")?"err":""}" id="f-i9" style="max-width:320px"><label for="basis">分ける基準</label><select id="basis"><option value="number" ${st.basis==="number"?"selected":""}>カード番号の範囲</option><option value="rarity" ${st.basis==="rarity"?"selected":""}>レアリティ（禁止）</option></select></div>`:""}
-      ${st.type==="ENUMERATED"?`<p class="small muted" style="margin:0">運営のキャラ枠テンプレート（${SKU.name}・9/20 版）を読み込みました。カードをドラッグ、またはカードを選んでから枠の「ここへ」を押して移動します。</p>
-      <div class="editor">
-        <div class="pool ${st.pool.length?"err":""}" id="f-cover" data-drop="pool"><div class="gh">未割り当て <span class="mono">${st.pool.length} 枚</span>${st.picked?`<button class="mv" type="button" data-to="pool">ここへ</button>`:""}</div>
-          <div class="chips2">${st.pool.map(c=>`<span class="cc new ${st.picked===c?"picked":""}" draggable="true" data-card="${c}" tabindex="0">${c} 新収録</span>`).join("")||`<span class="small muted">すべて割り当て済み</span>`}</div></div>
-        <div class="groups" id="f-guar">${st.groups.map((g,i)=>`<div class="group" data-drop="${i}"><div class="gh">#${pad(i+1)} ${esc(g.n)} <span class="mono">${g.cards.length}</span>
-          <label class="small muted">保証 <input type="number" min="0" value="${g.g}" data-g="${i}" class="${g.g>0?"":"bad"}" aria-label="${esc(g.n)} の保証枚数"> 枚</label>${st.picked?`<button class="mv" type="button" data-to="${i}">ここへ</button>`:""}</div>
-          <div class="chips2">${g.cards.map(c=>`<span class="cc ${st.picked===c?"picked":""}" draggable="true" data-card="${c}" tabindex="0">${c}</span>`).join("")}</div></div>`).join("")}</div>
-      </div>`:`<p class="small muted" style="margin:0">${st.type==="WHOLE"?"1 枠で BOX をまるごと販売します。":st.type==="POSITIONAL"?"パック番号ごとに枠を作ります（各枠 1 パック保証）。":st.type==="DRAFT"?"開封後、抽選した順番で参加者がカードを選びます。":"カード番号の範囲で枠を作ります。"}</p>`}
-      ${st.type==="DRAFT"?`<div class="f ${bad("draft")?"err":""}" id="f-draft"><label for="draft">不在時の自動選択ルール（必須）</label><textarea id="draft" rows="2" placeholder="例：持ち時間内に選ばなかった場合、残りのうちカード番号が最も小さいものを自動で選びます">${esc(st.draftRule)}</textarea></div>`:""}
-      <div class="f ${bad("fb")?"err":""}" id="f-fb"><label for="fb">リスト外カードの扱い（必須）</label><textarea id="fb" rows="2" placeholder="例：リストにないカード（エラー品・封入外カード等）は、開封順に 1 番枠から順番に振り分けます">${esc(st.fallback)}</textarea>
+    const g=gcard();
+    p.innerHTML=`<h2>2. 分け方・保証</h2>
+      <div class="types" role="radiogroup"><label><input type="radio" checked>番号ランダム</label>
+        ${["キャラ枠","パック番号","BOX丸ごと","ドラフト"].map(t=>`<label class="dis" title="今後の版で対応"><input type="radio" disabled>${t}</label>`).join("")}</div>
+      <p class="small muted" style="margin:0">満員後の抽選で、収録カードの全カード番号を各枠に順番に配ります。開封で出たカードは、その番号の持ち主の枠に入ります（第一版は番号ランダムのみ）。</p>
+      <div class="row"><div class="f" style="max-width:160px"><label for="ns">枠数</label><input id="ns" type="number" min="2" max="40" value="${st.slots}"></div>
+        <div class="f ${bad("list")?"err":""}" id="f-list"><span class="lab">カード番号リスト（商品マスタ ${SKU.name}・9/20 版）</span>
+          <div class="mbox"><span>全 <b>${st.newIn?MASTER_N+NEW_CARDS.length:MASTER_N}</b> 種 · 1 枠あたり約 ${Math.floor((st.newIn?MASTER_N+NEW_CARDS.length:MASTER_N)/st.slots)} 種</span>
+          ${st.newIn?`<span class="small muted">新収録 ${NEW_CARDS.join("、")} を取り込み済み</span>`:`<span class="small">新収録 ${NEW_CARDS.length} 種（${NEW_CARDS.join("、")}）がリストにありません</span><button class="btn" type="button" id="import">新収録を取り込む</button>`}</div></div></div>
+      <div class="f ${bad("stock")||bad("gc")?"err":""}" id="f-stock"><span class="lab">保証カード（0 枚の枠に 1 枚進呈・倉庫に入庫済みのもの）</span><div class="lots">${GC.map(x=>`<label class="lot">
+        <input type="radio" name="gc" value="${x.id}" ${st.gc===x.id?"checked":""}><span class="lph" aria-hidden="true"></span>
+        <span class="t"><b>${esc(x.name)}</b><br><span class="small">在庫 ${x.stock} 枚 · 参考価格 ${yen(x.ref)}</span>${x.isNew?"":`<br><span class="small muted">単カードは古物にあたる可能性があります。未開封の新品を優先してください</span>`}</span></label>`).join("")}</div>
+        <span class="small muted">必要数：枠数 − 1 = ${st.slots-1} 枚（全カードが 1 枠に集中した場合でも保証できる数）。使わなかった分は在庫に戻ります。</span></div>
+      <div class="f ${bad("fb")?"err":""}" id="f-fb"><label for="fb">リスト外カードの扱い（必須）</label><textarea id="fb" rows="2" placeholder="例：カード番号リストにないカード（エラー品・封入外カード等）は、開封順に #01 から順番に振り分けます">${esc(st.fallback)}</textarea>
         <button class="btn" type="button" id="fb-std" style="align-self:flex-start">標準の文言を入れる</button></div>`;
-    p.querySelectorAll("input[name=type]").forEach(r=>r.onchange=()=>{st.type=r.value;update();});
-    const b=p.querySelector("#basis"); if(b) b.onchange=e=>{st.basis=e.target.value;update();};
+    p.querySelector("#ns").onchange=e=>{st.slots=Math.max(2,Math.min(40,+e.target.value||12));update();};
+    const im=p.querySelector("#import"); if(im) im.onclick=()=>{st.newIn=true;update();};
+    p.querySelectorAll("input[name=gc]").forEach(r=>r.onchange=()=>{st.gc=r.value;update();});
     p.querySelector("#fb").oninput=e=>{st.fallback=e.target.value;renderVal();};
-    p.querySelector("#fb-std").onclick=()=>{st.fallback="リストにないカード（エラー品・封入外カード等）は、開封順に 1 番枠から順番に振り分けます。";update();};
-    const dr=p.querySelector("#draft"); if(dr) dr.oninput=e=>{st.draftRule=e.target.value;renderVal();};
-    p.querySelectorAll("[data-g]").forEach(i=>i.onchange=e=>{st.groups[+i.dataset.g].g=Math.max(0,+e.target.value||0);update();});
-    bindDnD(p);
+    p.querySelector("#fb-std").onclick=()=>{st.fallback="カード番号リストにないカード（エラー品・封入外カード等）は、開封順に #01 から順番に振り分けます。";update();};
   }else if(st.step===3){
     const m=mValue();
     p.innerHTML=`<h2>3. 販売設定</h2>
-      <div class="row"><label class="small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="uni" ${st.uniform?"checked":""}>全枠同じ価格</label></div>
-      ${st.type==="ENUMERATED"?(st.uniform?`<div class="f" style="max-width:200px"><label for="up">1 枠の価格</label><input id="up" type="number" value="${st.uniPrice}"></div>`:
-        `<div class="tbl ptbl"><table><thead><tr><th>枠</th><th>価格</th></tr></thead><tbody>${st.groups.map((g,i)=>`<tr><td>#${pad(i+1)} ${esc(g.n)}</td><td><input type="number" value="${g.p}" data-p="${i}" aria-label="${esc(g.n)} の価格"></td></tr>`).join("")}</tbody></table></div>`):""}
+      <div class="f" style="max-width:200px"><label for="up">1 枠の価格（全枠同額）</label><input id="up" type="number" value="${st.uniPrice}"></div>
       <div class="mbox"><span class="small muted">参考小売 ${yen(SKU.retail)} × ${st.qty} = <b style="font-size:15px">${yen(SKU.retail*st.qty)}</b></span>
-        <span class="small muted">全枠の合計 <b style="font-size:15px">${yen(prices().reduce((a,b)=>a+b,0))}</b></span>
-        <span>想定上乗せ率 <b>m = ${m==null?"—":(m>=0?"+":"")+Math.round(m*100)+"%"}</b> <span class="small muted">（表示のみ）</span></span></div>
+        <span class="small muted">全枠の合計 ${yen(st.uniPrice)} × ${st.slots} = <b style="font-size:15px">${yen(st.uniPrice*st.slots)}</b></span>
+        <span>想定上乗せ率 <b>m = ${(m>=0?"+":"")+Math.round(m*100)+"%"}</b> <span class="small muted">（表示のみ）</span></span></div>
       <div class="row"><div class="f"><label for="lim">購入上限（1 人あたり）</label><input id="lim" type="number" min="1" value="${st.limit}"></div>
         <div class="f"><label for="ss">販売開始</label><input id="ss" type="datetime-local" value="${st.saleStart}"></div>
         <div class="f"><label for="se">販売締切</label><input id="se" type="datetime-local" value="${st.saleEnd}"></div></div>
       <p class="small muted" style="margin:0">成団条件は 100%（全枠完売）で固定です。締切までに完売しない場合は自動で不成立・全額返金になります。</p>`;
-    p.querySelector("#uni").onchange=e=>{st.uniform=e.target.checked;update();};
-    const up=p.querySelector("#up"); if(up) up.onchange=e=>{st.uniPrice=+e.target.value||0;update();};
-    p.querySelectorAll("[data-p]").forEach(i=>i.onchange=e=>{st.groups[+i.dataset.p].p=+e.target.value||0;update();});
+    p.querySelector("#up").onchange=e=>{st.uniPrice=+e.target.value||0;update();};
     p.querySelector("#lim").onchange=e=>{st.limit=+e.target.value||1;};
   }else if(st.step===4){
     p.innerHTML=`<h2>4. 開封日時</h2><p class="small muted" style="margin:0">集中開封ステーションの空き枠から選びます（販売締切の後のみ）。開封は運営が予定時刻に行い、録画も運営のカメラだけで行います。</p>
@@ -267,35 +264,17 @@ function pane(){
         <span class="mono">${t.replace("2026-","").replace("-","/")}</span><span>${stn}</span><span class="small muted" style="margin-left:auto">${cap?`空き ${cap}`:"満"}</span></label>`).join("")}</div>`;
     p.querySelectorAll("input[name=slot]").forEach(r=>r.onchange=()=>{st.slot=r.value;update();});
   }else{
-    const m=mValue(), T={ENUMERATED:"キャラ枠",POSITIONAL:"パック番号",ATTRIBUTE:"番号レンジ",WHOLE:"BOX丸ごと",DRAFT:"ドラフト"}[st.type];
+    const m=mValue(), g=gcard();
     p.innerHTML=`<h2>5. 確認</h2><dl class="sumdl">
       <dt>商品</dt><dd>${SKU.name} × ${st.qty} ${SKU.unit}（ロット <span class="mono">${st.lot}</span>）</dd>
-      <dt>分け方</dt><dd>${T}${st.type==="ENUMERATED"?`・${st.groups.length} 枠`:""}</dd>
-      <dt>価格</dt><dd>${st.type==="ENUMERATED"?`${yen(Math.min(...prices()))}〜${yen(Math.max(...prices()))}・想定上乗せ率 m = ${(m>=0?"+":"")+Math.round(m*100)}%`:"—"}</dd>
+      <dt>分け方</dt><dd>番号ランダム・${st.slots} 枠・カード番号 全 ${st.newIn?MASTER_N+NEW_CARDS.length:MASTER_N} 種</dd>
+      <dt>保証</dt><dd>各枠 1 枚以上。0 枚の枠に「${g?esc(g.name):"未選択"}」を進呈（${st.slots-1} 枚を確保）</dd>
+      <dt>価格</dt><dd>${yen(st.uniPrice)}（全枠同額）・想定上乗せ率 m = ${(m>=0?"+":"")+Math.round(m*100)}%</dd>
       <dt>販売</dt><dd>${st.saleStart.replace("T"," ")} 〜 ${st.saleEnd.replace("T"," ")}・1 人 ${st.limit} 枠まで・成団 100%</dd>
       <dt>開封</dt><dd>${st.slot||"未選択"}</dd><dt>リスト外</dt><dd>${esc(st.fallback)||"未記入"}</dd></dl>
-      <p class="small muted" style="margin:0">提出すると、運営がシードのハッシュを公開してから販売を開始します。提出後は分け方・保証・価格を変更できません。</p>`;
+      <p class="small muted" style="margin:0">提出すると、運営がシードのハッシュを公開してから販売を開始します。提出後は分け方・保証カード・価格を変更できません。</p>`;
   }
   document.getElementById("prev").disabled=st.step===1; document.getElementById("next").hidden=st.step===5;
-}
-function bindDnD(p){
-  p.querySelectorAll("[data-card]").forEach(c=>{
-    c.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",c.dataset.card);});
-    c.addEventListener("click",()=>{st.picked=st.picked===c.dataset.card?null:c.dataset.card;update();});
-    c.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();c.click();}});
-  });
-  p.querySelectorAll("[data-drop]").forEach(z=>{
-    z.addEventListener("dragover",e=>{e.preventDefault();z.classList.add("over");});
-    z.addEventListener("dragleave",()=>z.classList.remove("over"));
-    z.addEventListener("drop",e=>{e.preventDefault();z.classList.remove("over");move(e.dataTransfer.getData("text/plain"),z.dataset.drop);});
-  });
-  p.querySelectorAll("[data-to]").forEach(b=>b.onclick=e=>{e.stopPropagation();move(st.picked,b.dataset.to);});
-}
-function move(card,to){
-  if(!card||st.submitted) return;
-  st.pool=st.pool.filter(c=>c!==card); st.groups.forEach(g=>g.cards=g.cards.filter(c=>c!==card));   /* each card ends up in exactly one place */
-  if(to==="pool") st.pool.push(card); else st.groups[+to].cards.push(card);
-  st.picked=null; update();
 }
 function renderVal(){
   const c=checks(), all=c.every(x=>x.ok);
@@ -306,7 +285,7 @@ function renderVal(){
 function update(){stepNav();pane();renderVal();}
 document.addEventListener("click",e=>{
   const s=e.target.closest("[data-step]"); if(s){st.step=+s.dataset.step;update();return;}
-  const g=e.target.closest("[data-goto]"); if(g){st.step=+g.dataset.goto;update();const f=document.getElementById("f-"+g.dataset.field);if(f){f.scrollIntoView({block:"center"});const i=f.querySelector("input,textarea,select,.cc");if(i)i.focus();}return;}
+  const g=e.target.closest("[data-goto]"); if(g){st.step=+g.dataset.goto;update();const f=document.getElementById("f-"+(g.dataset.field==="gc"?"stock":g.dataset.field));if(f){f.scrollIntoView({block:"center"});const i=f.querySelector("input,textarea,select,button");if(i)i.focus();}return;}
   const p=e.target.closest("[data-proto]"); if(p){e.preventDefault();say(`原型：「${p.dataset.proto}」尚未生成`);}
 });
 document.getElementById("prev").onclick=()=>{st.step=Math.max(1,st.step-1);update();};

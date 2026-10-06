@@ -236,28 +236,28 @@ const pad=n=>String(n).padStart(2,"0");
 const DETAIL=new Set(["L001","L002","L005","L009"]);
 
 const H=[
- {id:"L005",cat:"poke",title:"ポケカ『超電ブレイカー』4BOX キャラ枠",status:"ON_SALE",mode:"PICK",total:16,sold:7,
-  mine:[{no:3,name:"ラティアス枠"},{no:5,name:"パーモット枠"}],
+ {id:"L005",cat:"poke",title:"ポケカ『超電ブレイカー』4BOX 番号ランダム",status:"ON_SALE",mode:"RANDOM",total:16,sold:7,
+  mine:[{random:2}],
   commitAt:"2026-09-24T12:00:00+09:00",saleStartAt:"2026-09-24T12:05:00+09:00",saleEndsAt:"2026-10-02T23:59:00+09:00",openAt:"2026-10-03T20:00:00+09:00"},
- {id:"L002",cat:"poke",title:"ポケカ『ロケット団の栄光』1BOX パック番号",status:"ON_SALE",mode:"RANDOM",total:30,sold:23,
+ {id:"L002",cat:"poke",title:"ポケカ『ロケット団の栄光』1BOX 番号ランダム",status:"ON_SALE",mode:"RANDOM",total:30,sold:23,
   mine:[{random:2}],
   commitAt:"2026-09-22T10:00:00+09:00",saleStartAt:"2026-09-22T10:05:00+09:00",saleEndsAt:"2026-09-29T18:00:00+09:00",openAt:"2026-09-29T21:00:00+09:00"},
- {id:"L009",cat:"poke",title:"ポケカ『バトルパートナーズ』2BOX キャラ枠",status:"READY",mode:"PICK",total:12,sold:12,
-  mine:[{no:2,name:"ニンフィア枠"}],
+ {id:"L009",cat:"poke",title:"ポケカ『バトルパートナーズ』2BOX 番号ランダム",status:"READY",mode:"RANDOM",total:12,sold:12,
+  mine:[{"no":2,"nums":["010/159","021/159","031/159","032/159","051/159","058/159","062/159","086/159","104/159","131/159","142/159","150/159","152/159","163/159","172/159","198/159","199/159"]}],
   commitAt:"2026-09-18T12:00:00+09:00",saleStartAt:"2026-09-18T12:05:00+09:00",fullAt:"2026-09-25T21:40:00+09:00",drawAt:"2026-09-25T21:41:00+09:00",openAt:"2026-09-26T20:00:00+09:00"},
- {id:"L010",cat:"op",title:"ワンピースカード『ロイヤルブラッド』1BOX パック番号",status:"LOCKED",mode:"RANDOM",total:24,sold:24,
+ {id:"L010",cat:"op",title:"ワンピースカード『ロイヤルブラッド』1BOX 番号ランダム",status:"LOCKED",mode:"RANDOM",total:24,sold:24,
   mine:[{random:2}],
   commitAt:"2026-09-20T15:00:00+09:00",saleStartAt:"2026-09-20T15:05:00+09:00",fullAt:"2026-09-26T17:52:00+09:00",openAt:"2026-09-26T21:00:00+09:00"},
- {id:"L011",cat:"poke",title:"ポケカ『シャイニートレジャーex』2BOX キャラ枠",status:"ATTRIBUTED",mode:"PICK",total:12,sold:12,
-  mine:[{no:3,name:"テラパゴス枠"}],cards:4,
+ {id:"L011",cat:"poke",title:"ポケカ『シャイニートレジャーex』2BOX 番号ランダム",status:"ATTRIBUTED",mode:"RANDOM",total:12,sold:12,
+  mine:[{"no":3,"nums":["005/190","011/190","017/190","022/190","025/190","035/190","041/190","054/190","070/190","084/190","085/190","101/190","104/190","130/190","142/190","151/190","161/190","164/190","182/190","187/190","218/190","227/190","249/190","258/190"]},{"no":8,"nums":["001/190","018/190","033/190","036/190","040/190","049/190","078/190","088/190","113/190","127/190","137/190","140/190","141/190","146/190","148/190","152/190","173/190","197/190","198/190","235/190","252/190","260/190","276/190"]}],cards:44,
   commitAt:"2026-09-12T12:00:00+09:00",saleStartAt:"2026-09-12T12:05:00+09:00",fullAt:"2026-09-19T22:10:00+09:00",drawAt:"2026-09-19T22:11:00+09:00",
   openAt:"2026-09-21T20:00:00+09:00",attribAt:"2026-09-21T21:05:00+09:00",doneAt:"2026-09-21T21:40:00+09:00",storeAt:"2026-09-22T11:00:00+09:00"},
- {id:"L013",cat:"ygo",title:"遊戯王OCG『インフィニット・フォビドゥン』1BOX パック番号",status:"FAILED",mode:"RANDOM",total:30,sold:18,
+ {id:"L013",cat:"ygo",title:"遊戯王OCG『インフィニット・フォビドゥン』1BOX 番号ランダム",status:"FAILED",mode:"RANDOM",total:30,sold:18,
   mine:[{random:1}],
   commitAt:"2026-09-13T10:00:00+09:00",saleStartAt:"2026-09-13T10:05:00+09:00",saleEndsAt:"2026-09-20T23:59:00+09:00",refundAt:"2026-09-21T10:00:00+09:00",
   reason:"販売締切（9/20 23:59）までに満員（30枠）にならなかったため、開封せずに不成立となりました。"},
- {id:"L014",cat:"op",title:"ワンピースカード『謀略の王国』2BOX キャラ枠",status:"ABORTED",mode:"PICK",total:12,sold:12,
-  mine:[{no:8,name:"ロー枠"}],
+ {id:"L014",cat:"op",title:"ワンピースカード『謀略の王国』2BOX 番号ランダム",status:"ABORTED",mode:"RANDOM",total:12,sold:12,
+  mine:[{no:8,nums:[]}],
   commitAt:"2026-09-15T12:00:00+09:00",saleStartAt:"2026-09-15T12:05:00+09:00",fullAt:"2026-09-21T19:30:00+09:00",drawAt:"2026-09-21T19:31:00+09:00",
   openAt:"2026-09-23T20:00:00+09:00",abortAt:"2026-09-23T20:14:00+09:00",refundAt:"2026-09-24T10:00:00+09:00",
   reason:"開封中に録画が中断したため、ルールに従いこの開封会を中止しました。開封済みのカードは運営が引き取り、再度の開封会には使いません。"}
@@ -268,8 +268,8 @@ const STLABEL={ON_SALE:["wait","販売中"],LOCKED:["lock","満員・抽選待�
 
 function mineHTML(h){
   if(h.mine[0].random){const n=h.mine[0].random;
-    return h.drawAt?`あなたの枠: <b>パック番号</b>`:`<b>ランダム ${n} 枠</b> <span class="muted small">（番号は満員後の抽選で決定）</span>`;}
-  return "あなたの枠: "+h.mine.map(m=>`<b>${esc(m.name)}</b> <span class="no">(#${pad(m.no)})</span>`).join("、");
+    return `<b>ランダム ${n} 枠</b> <span class="muted small">（カード番号は満員後の抽選で決定）</span>`;}
+  return "あなたの枠: "+h.mine.map(m=>`<b class="no">#${pad(m.no)}</b>${m.nums.length?` <span class="no">（カード番号 ${m.nums.length} 種）</span>`:""}`).join("、");
 }
 function gcal(h){
   const f=iso=>new Date(T(iso)).toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"");
@@ -285,7 +285,7 @@ function card(h){
       <div class="row"><span>販売済 <b>${h.sold}/${h.total}</b> 枠</span><span>販売締切 <b>${jst(h.saleEndsAt)}</b></span></div>
       <div class="refund">未満員の場合は全額返金</div>`;}
   else if(h.status==="READY"||h.status==="LOCKED"){
-    body=`<div class="mine">${h.status==="LOCKED"?`満員になりました。<b>抽選結果を準備中</b>です（外部の公開値の確定待ち）。`:mineHTML(h)}</div>
+    body=`<div class="mine">${h.status==="LOCKED"?`満員になりました。<b>抽選結果を準備中</b>です。`:mineHTML(h)}</div>
       <div class="row"><span>開封まで <span class="count num">${until(h.openAt)}</span></span><span>${jst(h.openAt)}</span></div>
       <div class="acts"><a class="btn" href="${gcal(h)}" target="_blank" rel="noopener" data-stop><svg class="i"><use href="#i-cal"/></svg>カレンダーに追加</a>
         ${h.status==="READY"?`<a class="btn" href="ui-09-verify.html#${h.id}" data-stop><svg class="i"><use href="#i-shield"/></svg>割り当てを検証</a>`:""}</div>`;}
@@ -319,7 +319,7 @@ function timeline(h){
     ["抽選（割り当て公開）","開封","振り分け","確定","保管 / 発送"].forEach((t,i)=>s.push(step("todo",t,i===1?`予定 ${jst(h.openAt)}`:"—")));return s.join("");}
   if(h.status==="FAILED"){s.push(step("fail","満員にならず不成立",`締切 ${jst(h.saleEndsAt)} 時点 ${h.sold}/${h.total} 枠`));s.push(step("done","全額返金",jst(h.refundAt)));return s.join("");}
   s.push(step("done","満員",jst(h.fullAt)));
-  if(h.status==="LOCKED"){s.push(step("now","抽選（割り当て公開）","外部の公開値の確定を待っています"));
+  if(h.status==="LOCKED"){s.push(step("now","抽選（割り当て公開）","まもなくカード番号の割り当てを公開します"));
     ["開封","振り分け","確定","保管 / 発送"].forEach((t,i)=>s.push(step("todo",t,i===0?`予定 ${jst(h.openAt)}`:"—")));return s.join("");}
   s.push(step("done","抽選（割り当て公開）",jst(h.drawAt)));
   if(h.status==="READY"){s.push(step("now","開封",`予定 ${jst(h.openAt)}（あと ${until(h.openAt)}）`));
@@ -336,12 +336,13 @@ function renderProgress(id){
   const abort=(h.status==="ABORTED"||h.status==="FAILED")?`<div class="alert full" role="alert"><svg class="i"><use href="#i-alert"/></svg><div><b>${h.status==="ABORTED"?"この開封会は中止されました":"この開封会は不成立になりました"}</b>${esc(h.reason)}<br><span class="small">返金状況：<b>全額返金済み</b>（${jst(h.refundAt)}・元のお支払い方法へ）</span></div></div>`:"";
   let assign="";
   if(h.status==="ON_SALE"){assign=`<section class="blk"><h2>あなたの枠</h2><div class="mine">${mineHTML(h)}</div>
-      <p class="small muted" style="margin:0">${h.mode==="RANDOM"?"満員になると抽選を行い、開封前にあなたの番号を公開します。":"満員になると割り当てが確定し、開封前に公開します。"}</p></section>`;}
-  else if(h.status==="LOCKED"){assign=`<section class="blk"><h2>割り当て</h2><p style="margin:0">満員になりました。抽選は外部の公開値が確定してから行い、<b>開封前</b>に結果を公開します。</p>
-      <p class="small muted" style="margin:0">抽選の入力（シード・参加者・公開値）はすべて公開され、誰でも再計算できます。</p></section>`;}
+      <p class="small muted" style="margin:0">${h.mode==="RANDOM"?"満員になると抽選を行い、開封前にあなたの枠のカード番号を公開します。":"満員になると抽選を行い、開封前にあなたの枠のカード番号を公開します。"}</p></section>`;}
+  else if(h.status==="LOCKED"){assign=`<section class="blk"><h2>割り当て</h2><p style="margin:0">満員になりました。抽選でカード番号を各枠に割り当て、<b>開封前</b>に結果を公開します。</p>
+      <p class="small muted" style="margin:0">抽選の入力（シード・参加者リスト）はすべて公開され、誰でも再計算できます。</p></section>`;}
   else if(h.status!=="FAILED"){
-    const rows=h.mine[0].random?[{no:7,name:"パック 7"},{no:18,name:"パック 18"}]:h.mine;
-    assign=`<section class="blk"><h2>割り当て（${jst(h.drawAt)} 公開）</h2><ul class="assign">${rows.map(m=>`<li><span><span class="no">#${pad(m.no)}</span> <b>${esc(m.name)}</b></span><span class="small muted">あなた</span></li>`).join("")}</ul>
+    const rows=h.mine[0].random?[]:h.mine;
+    assign=`<section class="blk"><h2>割り当て（${jst(h.drawAt)} 公開）</h2><ul class="assign">${rows.map(m=>`<li style="flex-direction:column;align-items:flex-start"><span><span class="no">#${pad(m.no)}</span> <b>カード番号 ${m.nums.length} 種</b> <span class="small muted">あなた</span></span>${m.nums.length?`<details class="small"><summary>カード番号を見る</summary><span class="no">${m.nums.join("、")}</span></details>`:""}</li>`).join("")}</ul>
+      <p class="small muted" style="margin:0">開封で出たカードは、そのカード番号の持ち主の枠に入ります。枠のカードが 0 枚だった場合は、出品時に公示した保証カードを進呈します。</p>
       <a class="link" href="ui-09-verify.html#${h.id}"><svg class="i" style="width:16px;height:16px"><use href="#i-shield"/></svg>割り当てを検証<svg class="i" style="width:14px;height:14px"><use href="#i-chev"/></svg></a></section>`;}
   const extra=h.status==="READY"?`<a class="btn" href="${gcal(h)}" target="_blank" rel="noopener"><svg class="i"><use href="#i-cal"/></svg>カレンダーに追加</a>`:
     h.status==="ATTRIBUTED"?`<a class="btn pri" href="ui-08-result.html#${h.id}">結果を見る</a><a class="btn" href="ui-07-recording.html#${h.id}">録画を見る</a><a class="btn" href="ui-10-collection.html#stored">コレクションを見る</a>`:"";

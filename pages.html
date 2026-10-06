@@ -164,7 +164,9 @@ LotteryCard component (reused elsewhere):
 
 States: loading skeleton for cards; empty state for a category with no lotteries
 (「現在販売中の開封会はありません」).
-Follow all HARD RULES from project instructions.</pre></details>
+Follow all HARD RULES from project instructions.
+First release (PD17): every lottery uses card-ID random (J7). Card tag 「番号ランダム」, uniform price 「¥1,080/枠」
+(no 「〜」), guarantee 「各枠 1枚以上」. Play-type filter chips show only 「番号ランダム」 (others are later releases).</pre></details>
 </article><article class="page" id="UI-02">
   <div class="ph"><span class="code">UI-02</span><h3>场次详情 + 规则快照（U07 / U09）</h3>
     <a class="open" href="prototype/ui-02-lottery.html#L001">打开原型 →</a></div>
@@ -208,7 +210,7 @@ photo and name, and the RANDOM buy bar. No PICK button. After the draw, each slo
 </article><article class="page" id="UI-03">
   <div class="ph"><span class="code">UI-03</span><h3>选位（U08）</h3>
     <a class="open" href="prototype/ui-03-pick.html#L005">打开原型 →</a></div>
-  <div class="shots"><figure class="f-m"><a href="shots/ui-03-pick-mobile.jpg" target="_blank" rel="noopener"><img src="shots/ui-03-pick-mobile.jpg" alt="UI-03 手机 · 已选 #03 #05 截图" loading="lazy"></a><figcaption>手机 · 已选 #03 #05</figcaption></figure><figure class="f-d"><a href="shots/ui-03-pick-desktop.jpg" target="_blank" rel="noopener"><img src="shots/ui-03-pick-desktop.jpg" alt="UI-03 桌面 截图" loading="lazy"></a><figcaption>桌面</figcaption></figure></div>
+  <div class="shots"><figure class="f-m"><a href="shots/ui-03-pick-mobile.jpg" target="_blank" rel="noopener"><img src="shots/ui-03-pick-mobile.jpg" alt="UI-03 手机 · 后续版本（第一版不做选位） 截图" loading="lazy"></a><figcaption>手机 · 后续版本（第一版不做选位）</figcaption></figure><figure class="f-d"><a href="shots/ui-03-pick-desktop.jpg" target="_blank" rel="noopener"><img src="shots/ui-03-pick-desktop.jpg" alt="UI-03 桌面 截图" loading="lazy"></a><figcaption>桌面</figcaption></figure></div>
   <dl class="proc"><dt>暴露的问题</dt><dd>10 分钟确保到期 / 释放规则未定义</dd><dt>处理</dt><dd>实时锁位模拟（25 秒售出或释放，不动已选位）</dd><dt>回写</dt><dd>UI-03 prompt</dd><dt>类</dt><dd>GD2</dd></dl>
   <details><summary>页面 prompt（§9.4–§9.6 原文）</summary><pre>Build the slot picker at "/lottery/[id]/pick" for PICK mode.
 
@@ -282,7 +284,10 @@ Result page:
   シードコミット → 販売開始 → 満員 → 抽選（割り当て公開） → 開封 → 振り分け → 確定 → 保管/発送.
   Completed steps teal with check; current step accent; future steps grey.
 - Assignment card (after LOCKED): my slots with names; link 「割り当てを検証」 → verify page.
-- If status is ABORTED show a red notice with the reason and refund status.</pre></details>
+- If status is ABORTED show a red notice with the reason and refund status.
+First release (PD17): 開封待ち cards show 「あなたの枠: #03（カード番号 16 種）」 and an expandable list of the slot's card
+numbers; a user may own several slots in one lottery — list each slot. Progress-page assignment card lists card numbers
+per slot. Step 「抽選（割り当て公開）」 = card numbers dealt to slots.</pre></details>
 </article><article class="page" id="UI-07">
   <div class="ph"><span class="code">UI-07</span><h3>录像回放（U19）</h3>
     <a class="open" href="prototype/ui-07-recording.html#L011-t754">打开原型 →</a></div>
@@ -303,11 +308,13 @@ Result page:
 - "Raw footage" means exactly what the camera recorded, including the camera's own timestamp
   burn-in. Pack number, attributed slot and any other system info must live in a separate overlay
   layer so that 「元映像のみ表示」 removes all of it.
-- Support deep links to a timestamp (e.g. from a card's 「映像で確認」) and a playback-speed control.</pre></details>
+- Support deep links to a timestamp (e.g. from a card's 「映像で確認」) and a playback-speed control.
+First release (PD17): the overlay shows, for each revealed card, its card number and the owning slot (「#03 の番号」),
+resolved by card number. Filter 「あなたの枠」 = cards whose number belongs to any of my slots.</pre></details>
 </article><article class="page" id="UI-08">
   <div class="ph"><span class="code">UI-08</span><h3>开盒结果（U20）</h3>
     <a class="open" href="prototype/ui-08-result.html#L011">打开原型 →</a></div>
-  <div class="shots"><figure class="f-m"><a href="shots/ui-08-result-mobile.jpg" target="_blank" rel="noopener"><img src="shots/ui-08-result-mobile.jpg" alt="UI-08 手机 截图" loading="lazy"></a><figcaption>手机</figcaption></figure><figure class="f-d"><a href="shots/ui-08-result-desktop.jpg" target="_blank" rel="noopener"><img src="shots/ui-08-result-desktop.jpg" alt="UI-08 桌面 截图" loading="lazy"></a><figcaption>桌面</figcaption></figure></div>
+  <div class="shots"><figure class="f-m"><a href="shots/ui-08-result-mobile.jpg" target="_blank" rel="noopener"><img src="shots/ui-08-result-mobile.jpg" alt="UI-08 手机 截图" loading="lazy"></a><figcaption>手机</figcaption></figure><figure class="f-d"><a href="shots/ui-08-result-desktop.jpg" target="_blank" rel="noopener"><img src="shots/ui-08-result-desktop.jpg" alt="UI-08 桌面 截图" loading="lazy"></a><figcaption>桌面</figcaption></figure><figure class="f-m"><a href="shots/ui-08-result-guarantee-mobile.jpg" target="_blank" rel="noopener"><img src="shots/ui-08-result-guarantee-mobile.jpg" alt="UI-08 手机 · 模拟 0 张的位（保底卡） 截图" loading="lazy"></a><figcaption>手机 · 模拟 0 张的位（保底卡）</figcaption></figure></div>
   <dl class="proc"><dt>暴露的问题</dt><dd>金色在 UI-07 用于 R；「手動」易被做成警告</dd><dt>处理</dt><dd>金色仅 SR 以上（跨页统一）；手動为中性标识；卡片与 UI-07 同种子</dd><dt>回写</dt><dd>UI-08 prompt、§9.7 #16</dd><dt>类</dt><dd>GD1 · GD2</dd></dl>
   <details><summary>页面 prompt（§9.4–§9.6 原文）</summary><pre>Build the opening result page at "/lottery/[id]/result".
 
@@ -322,11 +329,14 @@ Result page:
 - Do NOT show totals, values, profit, or rankings of who got the best cards.
 - 「手動」 attribution means a human resolved an edge card with two-person review; show it as a
   neutral badge, not a warning. Gold styling is for SR and above only, consistently across pages.
-- Next action card: 「カードは倉庫で保管中です」 → link to /collection.</pre></details>
+- Next action card: 「カードは倉庫で保管中です」 → link to /collection.
+First release (PD17 / PD18): group my cards by slot. A slot that received 0 cards shows the guarantee card
+(「保証カード」 badge, photo, name) instead of an empty state — never a "miss" style. The all-cards table adds a
+「カード番号の持ち主」 column; guarantee cards are listed separately below it.</pre></details>
 </article><article class="page" id="UI-09">
   <div class="ph"><span class="code">UI-09</span><h3>验证页 + 公开验证站（U21 / V01 / V02）</h3>
     <a class="open" href="prototype/ui-09-verify.html#L015">打开原型 →</a></div>
-  <div class="shots"><figure class="f-m"><a href="shots/ui-09-verify-mobile.jpg" target="_blank" rel="noopener"><img src="shots/ui-09-verify-mobile.jpg" alt="UI-09 手机 · 验证完成 截图" loading="lazy"></a><figcaption>手机 · 验证完成</figcaption></figure><figure class="f-d"><a href="shots/ui-09-verify-desktop.jpg" target="_blank" rel="noopener"><img src="shots/ui-09-verify-desktop.jpg" alt="UI-09 桌面 截图" loading="lazy"></a><figcaption>桌面</figcaption></figure></div>
+  <div class="shots"><figure class="f-m"><a href="shots/ui-09-verify-mobile.jpg" target="_blank" rel="noopener"><img src="shots/ui-09-verify-mobile.jpg" alt="UI-09 手机 · 卡号分配验证完成 截图" loading="lazy"></a><figcaption>手机 · 卡号分配验证完成</figcaption></figure><figure class="f-d"><a href="shots/ui-09-verify-desktop.jpg" target="_blank" rel="noopener"><img src="shots/ui-09-verify-desktop.jpg" alt="UI-09 桌面 截图" loading="lazy"></a><figcaption>桌面</figcaption></figure></div>
   <dl class="proc"><dt>暴露的问题</dt><dd>算法只有文字描述，无法真实复算；选位场次没有抽选</dd><dt>处理</dt><dd>定义 bx-shuffle-v1 并在浏览器内真算；选位场次只验 commit 与参与者 hash；新增随机场次 L015</dd><dt>回写</dt><dd>UI-09 prompt</dd><dt>类</dt><dd>GD2 · GD5</dd></dl>
   <details><summary>页面 prompt（§9.4–§9.6 原文）</summary><pre>Build "/verify/[lotteryId]" (works without login; also used as a public share page).
 
@@ -398,7 +408,9 @@ participants list and can be recomputed by anyone.</pre></details>
 3. 「開封前にあなたの枠が決まる」 – assignment is published before opening and verifiable.
 4. 「すべて録画、いつでも確認」 – recordings are kept permanently.
 Final button 「はじめる」 → home. Skippable; show a 「スキップ」 link on every screen.
-Do not add identity or age verification steps.</pre></details>
+Do not add identity or age verification steps.
+First release (PD17): slide 3 explains that card numbers are dealt to slots before opening (「開封前に、あなたの枠の
+カード番号が決まる」) and that a slot with 0 cards receives the guarantee card.</pre></details>
 </article><article class="page" id="UI-12">
   <div class="ph"><span class="code">UI-12</span><h3>消费保护设置（U27）</h3>
     <a class="open" href="prototype/ui-12-spending.html">打开原型 →</a></div>
@@ -418,7 +430,7 @@ Tone: supportive, not judgmental.</pre></details>
 </article></section><section><div class="sec-h"><h2>商家端</h2><span>1 页</span></div><article class="page" id="UI-13">
   <div class="ph"><span class="code">UI-13</span><h3>场次创建向导 + 分位编辑器（B04 / B05）</h3>
     <a class="open" href="prototype/ui-13-merchant-wizard.html">打开原型 →</a></div>
-  <div class="shots"><figure class="f-d"><a href="shots/ui-13-merchant-wizard-desktop.jpg" target="_blank" rel="noopener"><img src="shots/ui-13-merchant-wizard-desktop.jpg" alt="UI-13 桌面 · 步骤 2 分位编辑 截图" loading="lazy"></a><figcaption>桌面 · 步骤 2 分位编辑</figcaption></figure></div>
+  <div class="shots"><figure class="f-d"><a href="shots/ui-13-merchant-wizard-desktop.jpg" target="_blank" rel="noopener"><img src="shots/ui-13-merchant-wizard-desktop.jpg" alt="UI-13 桌面 · 步骤 2 分け方・保証（初始不合格） 截图" loading="lazy"></a><figcaption>桌面 · 步骤 2 分け方・保証（初始不合格）</figcaption></figure></div>
   <dl class="proc"><dt>暴露的问题</dt><dd>初始全通过看不出校验；拖拽对触屏 / 键盘不可用；CSS 类名冲突</dd><dt>处理</dt><dd>故意不合格开场；加点选移动；类名改名</dd><dt>回写</dt><dd>UI-13 prompt</dd><dt>类</dt><dd>GD5 · GD4</dd></dl>
   <details><summary>页面 prompt（§9.4–§9.6 原文）</summary><pre>Build the merchant console page "/merchant/lotteries/new" (desktop, 1280px, left sidebar).
 
@@ -454,7 +466,11 @@ so the live validation is visible. Offer click-to-move (select card → 「こ�
 for touch and keyboard users. I7 is satisfied structurally: only sealed manufacturer SKUs exist in master data.
 
 There is NO UI to trigger the draw, upload video, or edit after submission.
-After submission the lottery becomes read-only with 「上架後は変更できません」.</pre></details>
+After submission the lottery becomes read-only with 「上架後は変更できません」.
+First release (PD17 / PD18): the wizard offers only 「番号ランダム」. Step 2 imports the official card checklist
+(read-only, count shown) instead of grouping cards. Add a 「保証カード」 step: pick a checked-in guarantee card,
+quantity must be ≥ slots − 1 (validation rule 「保証カードの在庫 ≥ 枠数 − 1」), reference price ≥ 50% of the slot price
+(recommended, pending confirmation). Pricing is uniform only.</pre></details>
 </article></section><section><div class="sec-h"><h2>运营端</h2><span>4 页</span></div><article class="page" id="UI-14">
   <div class="ph"><span class="code">UI-14</span><h3>开盒工位端（O11）</h3>
     <a class="open" href="prototype/ui-14-station.html">打开原型 →</a></div>
@@ -482,7 +498,9 @@ Interruption handling: if BOTH paths are missing for the same moment (e.g. the c
 「責任者に連絡」. No resume button.
 Big touch targets (56px). High contrast.
 The station is used at a dim opening table: a single dark high-contrast theme is allowed here (does not follow
-system light/dark). Show the platform camera feed without overlays — it is the raw footage being recorded.</pre></details>
+system light/dark). Show the platform camera feed without overlays — it is the raw footage being recorded.
+First release (PD17): scanning a card's number shows the owning slot immediately (auto attribution by number).
+Unknown numbers go to 「リスト外」.</pre></details>
 </article><article class="page" id="UI-15">
   <div class="ph"><span class="code">UI-15</span><h3>归属工作台（O12）</h3>
     <a class="open" href="prototype/ui-15-attribution.html#L009">打开原型 →</a></div>
@@ -501,7 +519,10 @@ system light/dark). Show the platform camera feed without overlays — it is the
   its resulting slot. Finalizing produces the OpeningRecord and shows its SHA-256.
 - Filter chips: 要確認 only / リスト外 only.
 - Top bar: progress 「確定 184 / 200」 and 「すべて確定して記録を生成」 (disabled until
-  all cards are confirmed). Every action writes to an audit log panel (bottom drawer).</pre></details>
+  all cards are confirmed). Every action writes to an audit log panel (bottom drawer).
+First release (PD17 / PD18): attribution is automatic by card number, so 要確認 is limited to unreadable or off-list cards.
+After all cards are confirmed, a 「0枚の枠」 panel lists slots with no cards and assigns one guarantee card each
+(second-person approval, audit log), before 「すべて確定して記録を生成」.</pre></details>
 </article><article class="page" id="UI-16">
   <div class="ph"><span class="code">UI-16</span><h3>仓储拣货与合单（O13）</h3>
     <a class="open" href="prototype/ui-16-warehouse.html#pack">打开原型 →</a></div>
@@ -518,7 +539,9 @@ Tabs: 入庫（振り分け後） / 出荷依頼 / 梱包 / 出荷済.
   rule reminder, print label button.
 - 出荷済: tracking numbers.
 Keyboard and barcode-scanner first; large monospace codes. Enter in the auto-focused input = one scan.
-The k shown here and on the dashboard must be computed from the same shipping requests.</pre></details>
+The k shown here and on the dashboard must be computed from the same shipping requests.
+First release (PD18): add guarantee-card stock per lottery to 入庫 (reserved quantity, released back to stock
+after the lottery is finalized).</pre></details>
 </article><article class="page" id="UI-17">
   <div class="ph"><span class="code">UI-17</span><h3>数据看板（O01）</h3>
     <a class="open" href="prototype/ui-17-dashboard.html">打开原型 →</a></div>
@@ -679,6 +702,15 @@ type CollectionItem = {
   id: string; card: OpenedCard; lotteryTitle: string;
   state: "STORED" | "SHIPPING" | "RECEIVED"; storedSince: string; freeStorageUntil: string;
 };
+
+// First release (PD17 / PD18): card-ID random (J7, §6.4.5)
+type ChecklistEntry = { number: string; name: string; rarity: string };   // e.g. "201/190"
+// Lottery additions:
+//   checklist: ChecklistEntry[];                 // frozen at listing, official order
+//   entropy: "PARTICIPANTS" | "PUBLIC_BEACON";   // first release: "PARTICIPANTS" (beacon = "")
+//   guaranteeCard: { name: string; photo: string; referencePrice: number; stock: number }; // stock &gt;= slots - 1
+// Slot additions (after the draw):
+//   assignedNumbers: string[];  guaranteeAwarded: boolean;   // true when the slot opened 0 cards
 
 Mock data: create 8 lotteries across ポケモン / ワンピース / 遊戯王 in varied statuses.
 Example: "ポケカ『テラスタルフェスex』2BOX キャラ枠", ¥700〜/枠 (prices differ by character),
