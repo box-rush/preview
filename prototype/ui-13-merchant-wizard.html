@@ -198,7 +198,6 @@ function checks(){
    {id:"list",tag:"I1",label:"カード番号リスト＝公式収録リスト（全種を抽選で配布：漏れ・重複なし）",ok:st.newIn,step:2,detail:st.newIn?"":`新収録 ${NEW_CARDS.length} 種が未取り込み：${NEW_CARDS.join("、")}`},
    {id:"gc",tag:"I1",label:"保証カードを選択（0 枚の枠に 1 枚進呈）",ok:!!g,step:2},
    {id:"stock",tag:"",label:`保証カードの在庫 ≥ 枠数 − 1（${st.slots-1} 枚）`,ok:!!g&&g.stock>=st.slots-1,step:2,detail:g&&g.stock<st.slots-1?`在庫 ${g.stock} 枚：あと ${st.slots-1-g.stock} 枚の入庫が必要`:""},
-   {id:"gval",tag:"推奨",label:"保証カードの参考価格 ≥ 1 枠価格の 50%",ok:!!g&&g.ref>=st.uniPrice*0.5,step:2},
    {id:"i2",tag:"I2",label:"成団条件 = 100%（変更不可、表示のみ）",ok:true,fixed:true},
    {id:"i7",tag:"I7",label:"リパック商品ではない",ok:true,fixed:true,detail:"マスタ登録のメーカー未開封品のみ選択可能"},
    {id:"i9",tag:"I9",label:"レアリティによる分け方ではない",ok:true,fixed:true,detail:"番号ランダムはレアリティを使わない"},
@@ -236,8 +235,8 @@ function pane(){
           ${st.newIn?`<span class="small muted">新収録 ${NEW_CARDS.join("、")} を取り込み済み</span>`:`<span class="small">新収録 ${NEW_CARDS.length} 種（${NEW_CARDS.join("、")}）がリストにありません</span><button class="btn" type="button" id="import">新収録を取り込む</button>`}</div></div></div>
       <div class="f ${bad("stock")||bad("gc")?"err":""}" id="f-stock"><span class="lab">保証カード（0 枚の枠に 1 枚進呈・倉庫に入庫済みのもの）</span><div class="lots">${GC.map(x=>`<label class="lot">
         <input type="radio" name="gc" value="${x.id}" ${st.gc===x.id?"checked":""}><span class="lph" aria-hidden="true"></span>
-        <span class="t"><b>${esc(x.name)}</b><br><span class="small">在庫 ${x.stock} 枚 · 参考価格 ${yen(x.ref)}</span>${x.isNew?"":`<br><span class="small muted">単カードは古物にあたる可能性があります。未開封の新品を優先してください</span>`}</span></label>`).join("")}</div>
-        <span class="small muted">必要数：枠数 − 1 = ${st.slots-1} 枚（全カードが 1 枠に集中した場合でも保証できる数）。使わなかった分は在庫に戻ります。</span></div>
+        <span class="t"><b>${esc(x.name)}</b><br><span class="small">在庫 ${x.stock} 枚 · 参考価格 ${yen(x.ref)}</span>${x.isNew?"":`<br><span class="small muted">単カードは古物にあたる可能性があります（古物商許可の要否を確認してください）</span>`}</span></label>`).join("")}</div>
+        <span class="small muted">どのカードを保証カードにするか（新品・単カード、価格）は出品者が決めます。必要数：枠数 − 1 = ${st.slots-1} 枚（全カードが 1 枠に集中した場合でも保証できる数）。使わなかった分は在庫に戻ります。</span></div>
       <div class="f ${bad("fb")?"err":""}" id="f-fb"><label for="fb">リスト外カードの扱い（必須）</label><textarea id="fb" rows="2" placeholder="例：カード番号リストにないカード（エラー品・封入外カード等）は、開封順に #01 から順番に振り分けます">${esc(st.fallback)}</textarea>
         <button class="btn" type="button" id="fb-std" style="align-self:flex-start">標準の文言を入れる</button></div>`;
     p.querySelector("#ns").onchange=e=>{st.slots=Math.max(2,Math.min(40,+e.target.value||12));update();};
