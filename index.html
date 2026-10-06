@@ -82,7 +82,7 @@ footer{font-size:12.5px;color:var(--ink-2);border-top:1px solid var(--line);padd
   <header>
     <div class="mark"><i>BOX</i>ラッシュ<small>预览 · 团队内部</small></div>
     <p class="lede">Box Rush 的产品模块示意图和界面原型汇总。所有页面都是静态 HTML，数据为示例；原型的布局与规则来自设计文档第 9 章的 prompt。</p>
-    <div class="meta"><span>最后更新 2026-10-04</span><span>设计文档 <code>card-lottery-docs / docs/breaking-platform.md</code></span></div>
+    <div class="meta"><span>最后更新 2026-10-06</span><span>设计文档 <code>card-lottery-docs / docs/breaking-platform.md</code></span></div>
   </header>
 
   <section aria-labelledby="h-product">
@@ -117,18 +117,18 @@ footer{font-size:12.5px;color:var(--ink-2);border-top:1px solid var(--line);padd
       <div class="card" style="cursor:default">
         <div class="top"><span class="code">UI-02</span><span class="status">已生成</span></div>
         <h3>场次详情 + 规则快照</h3>
-        <p>封印写真、保底、分位方案、满员进度、种子承诺、开封时刻、规则全文；底部购买栏三种状态。</p>
+        <p>第一版只做卡号随机：封印写真、按位保底与保底卡、收录卡号清单、统一价、满员进度、种子承诺、开封时刻、规则全文。</p>
         <div class="deep">
-          <a href="prototype/ui-02-lottery.html#L001">キャラ枠 · 12 枠</a>
-          <a href="prototype/ui-02-lottery.html#L005">キャラ枠 · 16 枠</a>
-          <a href="prototype/ui-02-lottery.html#L002">パック番号 · 随机</a>
+          <a href="prototype/ui-02-lottery.html#L001">12 枠</a>
+          <a href="prototype/ui-02-lottery.html#L005">16 枠</a>
+          <a href="prototype/ui-02-lottery.html#L002">30 枠 · 低单价</a>
           <a href="prototype/ui-02-lottery.html#L009">已结束</a>
         </div>
       </div>
       <a class="card" href="prototype/ui-03-pick.html#L005">
         <div class="top"><span class="code">UI-03</span><span class="status">已生成</span></div>
-        <h3>选位</h3>
-        <p>キャラ枠位图（可选 / 手续中 / 已售 / 已选），点位打开底部弹层看包含的卡，多选到上限，进入前说明"10 分钟确保"。可开关实时锁位模拟。</p>
+        <h3>选位（后续版本）</h3>
+        <p>第一版不做选位（PD17），页面保留供后续版本：キャラ枠位图、底部弹层看包含的卡、多选到上限、"10 分钟确保"、实时锁位模拟。</p>
         <span class="go">打开 →</span>
       </a>
       <div class="card" style="cursor:default">
@@ -136,14 +136,14 @@ footer{font-size:12.5px;color:var(--ink-2);border-top:1px solid var(--line);padd
         <h3>确认与支付 + 结果</h3>
         <p>订单与规则确认、月度上限、模拟 Stripe 支付（信用卡 + 3D Secure / Apple Pay / Google Pay），深夜累计确认，以及成功、失败两种结果。</p>
         <div class="deep">
-          <a href="prototype/ui-04-checkout.html#L005-3-5">选位订单</a>
-          <a href="prototype/ui-04-checkout.html#L002-r2">随机订单</a>
+          <a href="prototype/ui-04-checkout.html#L005-r2">随机 2 枠</a>
+          <a href="prototype/ui-04-checkout.html#L002-r2">低单价场</a>
         </div>
       </div>
       <div class="card" style="cursor:default">
         <div class="top"><span class="code">UI-05</span><span class="status">已生成</span></div>
         <h3>マイ枠 + 场次进度</h3>
-        <p>满员待ち / 開封待ち / 確定 / 終了 四个 Tab；进度页有生命周期时间线、我的分配结果、中止 / 不成立说明。原型时钟固定在 9/26 18:00。</p>
+        <p>满员待ち / 開封待ち / 確定 / 終了 四个 Tab；进度页有生命周期时间线、我各枠分到的卡号、中止 / 不成立说明。原型时钟固定在 9/26 18:00。</p>
         <div class="deep">
           <a href="prototype/ui-05-my-slots.html#wait">列表</a>
           <a href="prototype/ui-05-my-slots.html#p-L009">开封待ち</a>
@@ -154,23 +154,23 @@ footer{font-size:12.5px;color:var(--ink-2);border-top:1px solid var(--line);padd
       <a class="card" href="prototype/ui-07-recording.html#L011">
         <div class="top"><span class="code">UI-07</span><span class="status">已生成</span></div>
         <h3>录像回放</h3>
-        <p>Canvas 模拟的 24 分钟开盒录像：章节时间轴、「元映像のみ表示」原始画面开关、区段哈希、随播放高亮的卡片归属列表（可筛选"あなたの枠"）、画中画。</p>
+        <p>Canvas 模拟的 24 分钟开盒录像：章节时间轴、「元映像のみ表示」原始画面开关、区段哈希、随播放高亮的卡片归属列表（按卡号的持有人，可筛选"あなたの枠"）、画中画。</p>
         <span class="go">打开 →</span>
       </a>
       <a class="card" href="prototype/ui-08-result.html#L011">
         <div class="top"><span class="code">UI-08</span><span class="status">已生成</span></div>
         <h3>开盒结果</h3>
-        <p>我的卡（每张可跳到录像时刻）、全部 200 张的归属表（自动 / 手动判定）、申诉入口；不显示总价值或排名。</p>
+        <p>按枠分组的我的卡（每张可跳到录像时刻）、0 张的枠显示保底卡（#L011-g 模拟）、全部 200 张的卡号持有人表、申诉入口；不显示总价值或排名。</p>
         <span class="go">打开 →</span>
       </a>
       <div class="card" style="cursor:default">
         <div class="top"><span class="code">UI-09</span><span class="status">已生成</span></div>
         <h3>验证页 + 公开验证站</h3>
-        <p>浏览器内真实计算 SHA-256 与洗牌，和公开结果比对；可切换"篡改值"看不一致；附 Python 验证脚本。免登录。</p>
+        <p>浏览器内真实计算 SHA-256，把卡号清单洗牌后按枠发放，与公开结果比对；第一版无公开信标；可切换"篡改值"看不一致；附 Python 验证脚本。免登录。</p>
         <div class="deep">
           <a href="prototype/ui-09-verify.html">公开入口</a>
-          <a href="prototype/ui-09-verify.html#L015">随机场次</a>
-          <a href="prototype/ui-09-verify.html#L011">选位场次</a>
+          <a href="prototype/ui-09-verify.html#L011">已开盒（L011）</a>
+          <a href="prototype/ui-09-verify.html#L009">开盒前（L009）</a>
         </div>
       </div>
       <a class="card" href="prototype/ui-10-collection.html#stored">
@@ -191,15 +191,15 @@ footer{font-size:12.5px;color:var(--ink-2);border-top:1px solid var(--line);padd
     <div class="sec-h"><h2 id="h-ops">运营端 · 商家端</h2><span>桌面优先；模拟 9/26 20:00 L009 的开盒班次</span></div>
     <div class="grid">
       <a class="card" href="prototype/ui-14-station.html"><div class="top"><span class="code">UI-14</span><span class="status">已生成</span></div><h3>开盒工位端</h3>
-        <p>平板横屏、深色高对比。扫码 → 开盒前检查（只能用平台相机录像）→ 逐张录入 → 完成；可模拟摄像头断开（整屏红色，只能联系负责人）。</p><span class="go">打开 →</span></a>
+        <p>平板横屏、深色高对比。扫码 → 开盒前检查（只能用平台相机录像）→ 逐张录入（扫卡号即显示持有的枠）→ 完成；云端 + 本地双路录像，两路都断才中止（可模拟）。</p><span class="go">打开 →</span></a>
       <a class="card" href="prototype/ui-15-attribution.html#L009"><div class="top"><span class="code">UI-15</span><span class="status">已生成</span></div><h3>归属工作台</h3>
-        <p>原始录像 + 300 张卡表 + 候选归属位；人工归属须二人确认（不能批准自己的），审计日志，全部确认后生成开盒记录哈希。</p><span class="go">打开 →</span></a>
+        <p>原始录像 + 300 张卡表；按卡号自动归属，读不清的卡给出候选卡号；人工归属与保底卡配给须二人确认（#L009-g 模拟 0 张的枠），审计日志，生成开盒记录哈希。</p><span class="go">打开 →</span></a>
       <a class="card" href="prototype/ui-16-warehouse.html"><div class="top"><span class="code">UI-16</span><span class="status">已生成</span></div><h3>仓储拣货与合单</h3>
         <p>扫码优先：入库按用户货位、出货申请（k = 3.4）、逐件扫码梱包与高额包装规范、已出货追踪号。</p><span class="go">打开 →</span></a>
       <a class="card" href="prototype/ui-17-dashboard.html"><div class="top"><span class="code">UI-17</span><span class="status">已生成</span></div><h3>数据看板（m / k）</h3>
         <p>m、k、满员率、每场工时；价格档售罄率、k 趋势与成立线、满员时长分布、验证 / 录像浏览量；可模拟生存变量告警。</p><span class="go">打开 →</span></a>
       <a class="card" href="prototype/ui-13-merchant-wizard.html"><div class="top"><span class="code">UI-13</span><span class="status">已生成</span></div><h3>场次创建向导（商家端）</h3>
-        <p>5 步向导 + 实时不变量校验面板；キャラ枠分组编辑（拖拽 / 点选移动）、兜底条款必填、隐含溢价 m、开封时段；提交后只读。</p><span class="go">打开 →</span></a>
+        <p>5 步向导 + 实时校验面板；第一版只有番号ランダム：取入官方卡号清单、选择保底卡（在库 ≥ 枠数 − 1）、兜底条款必填、统一价与隐含溢价 m、开封时段；提交后只读。</p><span class="go">打开 →</span></a>
     </div>
   </section>
 
