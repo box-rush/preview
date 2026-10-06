@@ -199,7 +199,12 @@ Also show under the button in small text: 「満員にならなければ全額�
 「購入後のキャンセルはできません」.
 The reference retail price in the title block follows the same `showReferencePrice` flag as UI-01.
 
-Do not show any expected value, odds of profit, or total card value.</pre></details>
+Do not show any expected value, odds of profit, or total card value.
+
+First release (PD17): the ONLY mode is card-ID random (J7, §6.4.5). Replace the slot list with:
+the frozen card-number checklist (collapsible, 「収録カード一覧（全 190 種）」), the uniform price per slot,
+the guarantee 「各枠 カード1枚以上（該当カードが0枚の枠には、指定のカードを進呈）」 with the guarantee card's
+photo and name, and the RANDOM buy bar. No PICK button. After the draw, each slot shows its card numbers.</pre></details>
 </article><article class="page" id="UI-03">
   <div class="ph"><span class="code">UI-03</span><h3>选位（U08）</h3>
     <a class="open" href="prototype/ui-03-pick.html#L005">打开原型 →</a></div>
@@ -346,7 +351,11 @@ Prototype algorithm (bx-shuffle-v1, an instance of §6.6.1): final = SHA-256(ser
 Fisher–Yates from the last index, j = first 8 hex of SHA-256(final:i) mod (i+1); participants are one line
 per purchased slot in purchase order. For PICK lotteries there is no draw: verify the seed commitment and the
 participants-list hash only, and say so on the page. Downloads are blocked in some previews, so show the
-verification script inline with a copy button. Provide a 「改ざんされた値で試す」 toggle in prototypes.</pre></details>
+verification script inline with a copy button. Provide a 「改ざんされた値で試す」 toggle in prototypes.
+First release (PD20): there is NO external beacon. beacon = "" (empty string); drop the beacon row and step ② wording
+about 外部ビーコン; the shuffled units are the card-number checklist dealt round-robin to slots (§10.4.1). Do NOT claim
+「運営も操作できない」 or similar — state only that the result is computed from the pre-committed seed and the published
+participants list and can be recomputed by anyone.</pre></details>
 </article><article class="page" id="UI-10">
   <div class="ph"><span class="code">UI-10</span><h3>仓库 + 发货申请（U22 / U24）</h3>
     <a class="open" href="prototype/ui-10-collection.html#stored">打开原型 →</a></div>
@@ -466,7 +475,9 @@ Flow:
    Unknown cards go to 「リスト外」 queue.
 5. Finish: 「開封完了」 → summary counts → 「振り分けへ送る」.
 
-Interruption handling: if the camera disconnects, show a blocking red screen
+Two recording paths run at once (cloud via IVS + local backup, PD19). If only the cloud path drops, show a persistent
+warning 「クラウド送信が中断しています（ローカル録画は継続中）」 and keep going; the local segment is uploaded later.
+Interruption handling: if BOTH paths are missing for the same moment (e.g. the camera itself disconnects), show a blocking red screen
 「録画が中断されました。この開封会は中止されます」 with only one action
 「責任者に連絡」. No resume button.
 Big touch targets (56px). High contrast.
@@ -677,7 +688,7 @@ Use one fixed prototype clock for every page: NOW = 2026-09-26 18:00 JST (const 
 countdowns, "today", sale deadlines and lifecycle states are computed against it, never Date.now();
 show 「原型时钟 2026-09-26 18:00 JST」 in the prototype control strip.
 Use realistic Japanese card names. Use placeholder images from /public/mock/*.jpg.</pre></details>
-    <details><summary>§9.7 生成结果检查清单</summary><div class="tw"><table><thead><tr><th>#</th><th>检查项</th><th>对应</th></tr></thead><tbody><tr><td>1</td><td>全站无积分、余额、充值、提现、卖回、ポイント変換 相关 UI</td><td>UR1 · I3</td></tr><tr><td>2</td><td>无"盈亏""期待值""本场总价值""谁拿了最好的卡"类展示</td><td>UR2 · §8.1.3</td></tr><tr><td>3</td><td>所有演出都是回放已确定结果、可跳过、结尾有「検証する」</td><td>UR3 · §8.12.3</td></tr><tr><td>4</td><td>有购买入口的页面都显示「満員にならなければ全額返金」与截止时间</td><td>UR4 · I2</td></tr><tr><td>5</td><td>场次详情首屏可见种子承诺 hash</td><td>UR5 · I6</td></tr><tr><td>6</td><td>播放器可关闭叠加层看原始画面</td><td>UR6 · I5</td></tr><tr><td>7</td><td>无虚假稀缺、施压倒计时；「残りわずか」仅在剩余 ≤ 10% 时出现</td><td>UR7 · PD4</td></tr><tr><td>8</td><td>自营场次有「自営」标识</td><td>UR8 · G2</td></tr><tr><td>9</td><td>无打赏 / 礼物 UI</td><td>UR9 · §6.6.4</td></tr><tr><td>10</td><td>商家端无触发随机、上传录像、上架后编辑的入口</td><td>I4 · I5 · §6.7.2</td></tr><tr><td>11</td><td>工位端录像中断只有"中止"路径，无"继续"</td><td>§6.5.2 原则 2</td></tr><tr><td>12</td><td>文案为日文；金额 ¥ 千分位；时间为 JST 格式</td><td>§9.2 Formatting</td></tr><tr><td>13</td><td>购买处明示「購入後のキャンセルはできません」及例外；参考价受 <code>showReferencePrice</code> 开关控制</td><td>PD1 · PD2</td></tr><tr><td>14</td><td>时间全部按 <code>PROTO_NOW</code>（2026-09-26 18:00 JST）计算，原型设置条标明时钟</td><td>§9.3</td></tr><tr><td>15</td><td>跨页同一事实数字一致（价格、k、本月用量、我的枠、卡片归属）；卡片由共享种子生成，不手写</td><td>§9.8 GD1</td></tr><tr><td>16</td><td>金色样式仅用于 SR 及以上；「手動」归属为中性标识，不作警告</td><td>UI-08</td></tr><tr><td>17</td><td>页面声明的演示状态都可在原型中切出（失败态、中断、篡改、空 / 加载）</td><td>§9.8 GD5</td></tr><tr><td>18</td><td>单文件交付：内联 CSS/JS，外部仅 Google Fonts；无死链；有 noindex</td><td>CLAUDE.md 原型规则</td></tr></tbody></table></div></details>
+    <details><summary>§9.7 生成结果检查清单</summary><div class="tw"><table><thead><tr><th>#</th><th>检查项</th><th>对应</th></tr></thead><tbody><tr><td>1</td><td>全站无积分、余额、充值、提现、卖回、ポイント変換 相关 UI</td><td>UR1 · I3</td></tr><tr><td>2</td><td>无"盈亏""期待值""本场总价值""谁拿了最好的卡"类展示</td><td>UR2 · §8.1.3</td></tr><tr><td>3</td><td>所有演出都是回放已确定结果、可跳过、结尾有「検証する」</td><td>UR3 · §8.12.3</td></tr><tr><td>4</td><td>有购买入口的页面都显示「満員にならなければ全額返金」与截止时间</td><td>UR4 · I2</td></tr><tr><td>5</td><td>场次详情首屏可见种子承诺 hash</td><td>UR5 · I6</td></tr><tr><td>6</td><td>播放器可关闭叠加层看原始画面</td><td>UR6 · I5</td></tr><tr><td>7</td><td>无虚假稀缺、施压倒计时；「残りわずか」仅在剩余 ≤ 10% 时出现</td><td>UR7 · PD4</td></tr><tr><td>8</td><td>自营场次有「自営」标识</td><td>UR8 · G2</td></tr><tr><td>9</td><td>无打赏 / 礼物 UI</td><td>UR9 · §6.6.4</td></tr><tr><td>10</td><td>商家端无触发随机、上传录像、上架后编辑的入口</td><td>I4 · I5 · §6.7.2</td></tr><tr><td>11</td><td>工位端录像中断（两路同时缺失，PD19）只有"中止"路径，无"继续"；仅云端断开时显示警告并继续</td><td>§6.5.2 原则 2 · PD19</td></tr><tr><td>12</td><td>文案为日文；金额 ¥ 千分位；时间为 JST 格式</td><td>§9.2 Formatting</td></tr><tr><td>13</td><td>购买处明示「購入後のキャンセルはできません」及例外；参考价受 <code>showReferencePrice</code> 开关控制</td><td>PD1 · PD2</td></tr><tr><td>14</td><td>时间全部按 <code>PROTO_NOW</code>（2026-09-26 18:00 JST）计算，原型设置条标明时钟</td><td>§9.3</td></tr><tr><td>15</td><td>跨页同一事实数字一致（价格、k、本月用量、我的枠、卡片归属）；卡片由共享种子生成，不手写</td><td>§9.8 GD1</td></tr><tr><td>16</td><td>金色样式仅用于 SR 及以上；「手動」归属为中性标识，不作警告</td><td>UI-08</td></tr><tr><td>17</td><td>页面声明的演示状态都可在原型中切出（失败态、中断、篡改、空 / 加载）</td><td>§9.8 GD5</td></tr><tr><td>18</td><td>单文件交付：内联 CSS/JS，外部仅 Google Fonts；无死链；有 noindex</td><td>CLAUDE.md 原型规则</td></tr></tbody></table></div></details>
   </section>
 
   <footer>
