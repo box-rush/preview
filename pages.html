@@ -486,7 +486,9 @@ Flow:
    platform camera; there is no upload option.
 3. Recording state: persistent red 「REC 00:12:34」 indicator, current pack counter
    「パック 7 / 20」, button 「次のパック」.
-4. Card entry: after each pack, scan or select cards (search by card number).
+4. Card entry: after each pack, type each card's number on a numeric keypad (the set prefix such as 「/159」 is fixed per lottery);
+   the screen shows the card name and owning slot for confirmation. Cards that could not be entered in time are flagged for
+   the attribution desk to enter from the footage afterwards. A second camera shows the 「読み取りエリア」 (card reading area).
    Each entry is timestamped automatically and shows the auto-attributed slot.
    Unknown cards go to 「リスト外」 queue.
 5. Finish: 「開封完了」 → summary counts → 「振り分けへ送る」.
@@ -499,7 +501,7 @@ Interruption handling: if BOTH paths are missing for the same moment (e.g. the c
 Big touch targets (56px). High contrast.
 The station is used at a dim opening table: a single dark high-contrast theme is allowed here (does not follow
 system light/dark). Show the platform camera feed without overlays — it is the raw footage being recorded.
-First release (PD17): scanning a card's number shows the owning slot immediately (auto attribution by number).
+First release (PD17): entering a card's number shows the owning slot immediately (auto attribution by number).
 Unknown numbers go to 「リスト外」.</pre></details>
 </article><article class="page" id="UI-15">
   <div class="ph"><span class="code">UI-15</span><h3>归属工作台（O12）</h3>
