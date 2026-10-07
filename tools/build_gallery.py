@@ -29,7 +29,7 @@ PAGES = {
     "UI-11": ("ui-11-welcome.html", [("ui-11-welcome-mobile", "手机"), ("ui-11-welcome-desktop", "桌面")]),
     "UI-12": ("ui-12-spending.html", [("ui-12-spending-mobile", "手机"), ("ui-12-spending-desktop", "桌面")]),
     "UI-13": ("ui-13-merchant-wizard.html", [("ui-13-merchant-wizard-desktop", "桌面 · 步骤 2 分け方・保証（初始不合格）")]),
-    "UI-14": ("ui-14-station.html", [("ui-14-station-tablet", "平板 1024×768 · 录像中")]),
+    "UI-14": ("ui-14-station.html", [("ui-14-station-tablet", "平板 1024×768 · 录像中（数字键盘录入）")]),
     "UI-15": ("ui-15-attribution.html#L009", [("ui-15-attribution-desktop", "桌面 · 选中一行")]),
     "UI-16": ("ui-16-warehouse.html#pack", [("ui-16-warehouse-desktop", "桌面 · 梱包扫码中")]),
     "UI-17": ("ui-17-dashboard.html", [("ui-17-dashboard-desktop", "桌面")]),

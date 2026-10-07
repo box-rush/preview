@@ -71,7 +71,7 @@ button,input{font:inherit;color:inherit}
 .check .t small{display:block;font-weight:400;color:var(--ink-2);font-size:12px}
 .check button{min-height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel);font-weight:700;cursor:pointer}
 .counter{display:flex;align-items:baseline;gap:10px}
-.counter b{font-family:var(--mono);font-size:34px}
+.counter b{font-family:var(--mono);font-size:26px;white-space:nowrap}
 .counter span{color:var(--ink-2)}
 .entry{display:flex;gap:8px}
 .entry input{flex:1;min-height:56px;border-radius:12px;border:2px solid var(--line);background:var(--bg);padding:0 14px;font-family:var(--mono);font-size:18px}
@@ -96,6 +96,25 @@ button,input{font:inherit;color:inherit}
 .abort p{margin:0;max-width:560px;font-size:15px;opacity:.9}
 .abort .big{background:#fff;color:#7A0E0E;min-width:260px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:13px;padding:10px 16px;border-radius:999px;z-index:120}
+.cams{display:flex;flex-direction:column;gap:10px;min-width:0}
+.cam.sub{aspect-ratio:21/9}
+.numrow{display:flex;align-items:center;gap:8px}
+.numbox{flex:1;min-height:60px;border-radius:12px;border:2px solid var(--line);background:var(--bg);display:flex;align-items:center;padding:0 14px;font-family:var(--mono);font-size:28px;font-weight:700;letter-spacing:.04em}
+.numbox .pre{color:var(--ink-2);margin-left:4px}
+.numbox.err{border-color:var(--rec)}
+.preview{min-height:52px;border-radius:12px;background:var(--panel2);padding:8px 12px;display:flex;align-items:center;gap:10px;font-size:15px}
+.preview b{font-size:16px}
+.preview .no{font-family:var(--mono);color:var(--ink-2)}
+.preview.warn{background:rgba(255,77,77,.12);color:#ffb3b3}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pad button{min-height:56px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);font-family:var(--mono);font-size:22px;font-weight:700;cursor:pointer}
+.pad button.ok{background:var(--accent);color:var(--accent-ink);font-family:var(--sans);font-size:17px;font-weight:900}
+.pad button:disabled{opacity:.35;cursor:not-allowed}
+.alt{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.alt button{min-height:48px;border-radius:12px;border:1px solid var(--line);background:var(--panel);font-weight:700;cursor:pointer}
+.hint{font-size:12px;color:var(--ink-2)}
+.hint button{background:transparent;border:1px dashed var(--line);border-radius:8px;padding:2px 8px;font-size:12px;cursor:pointer;color:var(--ink-2)}
+.tag.later{background:rgba(142,145,247,.15);color:var(--accent)}
 @media (min-width:900px){
   .station{grid-template-columns:3fr 2fr}
   .lot{grid-template-columns:1fr 1fr}
@@ -104,7 +123,7 @@ button,input{font:inherit;color:inherit}
 </style>
 </head>
 <body>
-<details class="proto"><summary>原型 UI-14 开盒工位端 · 模拟 9/26 20:00 L009 开盒班次 · 原型时钟 2026-09-26 18:00 JST · 点此模拟异常</summary>
+<details class="proto"><summary>原型 UI-14 开盒工位端 · 模拟 9/26 20:00 L009 开盒班次 · 卡片录入：数字键盘 + 事后补录（T4）· 原型时钟 2026-09-26 18:00 JST · 点此模拟异常</summary>
   <div class="opts"><button type="button" id="sim-cut">模拟：摄像头断开</button><button type="button" id="sim-fast">原型：剩余各包一键录入</button></div></details>
 <header class="topbar" id="topbar">
   <b>開封ステーション ST-02</b><span class="st" id="st">担当：佐藤（開封）</span><span class="sp"></span>
@@ -191,33 +210,84 @@ function preView(){
   document.getElementById("go").onclick=()=>{stage="rec";render();};
 }
 
+/* second camera: card reading area (MVP = second angle so the number is legible on video; later = AI recognition input) */
+let cv2,ctx2;
+function readLoop(){
+  if(!cv2) return; const W=cv2.width,H=cv2.height, c=CARDS9[idx];
+  ctx2.fillStyle="#141414";ctx2.fillRect(0,0,W,H);
+  ctx2.strokeStyle="rgba(255,255,255,.35)";ctx2.setLineDash([8,6]);ctx2.strokeRect(W*.32,H*.08,W*.36,H*.84);ctx2.setLineDash([]);
+  if(c&&stage==="rec"){ctx2.fillStyle=c.r==="SR"||c.r==="SAR"?"#e7cf7a":"#ecebe6";ctx2.fillRect(W*.34,H*.11,W*.32,H*.78);
+    ctx2.fillStyle="#1a1a1a";ctx2.font="900 18px 'Noto Sans JP',sans-serif";ctx2.fillText(c.name.slice(0,12),W*.355,H*.24);
+    ctx2.fillStyle="#fff59d";ctx2.fillRect(W*.35,H*.74,W*.13,H*.1);ctx2.fillStyle="#1a1a1a";ctx2.font="700 16px 'JetBrains Mono',monospace";ctx2.fillText(c.no,W*.355,H*.815);}
+  else{ctx2.fillStyle="rgba(255,255,255,.4)";ctx2.font="700 14px 'Noto Sans JP',sans-serif";ctx2.fillText("読み取りエリア：カードをここに置く",W*.36,H*.52);}
+  requestAnimationFrame(readLoop);
+}
+function mountRead(){cv2=document.getElementById("cv2");if(cv2){ctx2=cv2.getContext("2d");readLoop();}}
+
+const PREFIX="/159", ON_LIST=new Map(); CARDS9.forEach(c=>{if(c.no!=="—")ON_LIST.set(c.no,c);});
+const CHECKLIST_NO=new Set(L009.slots.flatMap(x=>x.numbers)), OWNER=new Map(); L009.slots.forEach(x=>x.numbers.forEach(n=>OWNER.set(n,x.n)));
+let digits="";
+const fullNo=()=>digits?String(+digits).padStart(3,"0")+PREFIX:"";
 function packCards(p){return entered.filter(c=>c.pack===p);}
+function record(status,no){
+  if(idx>=CARDS9.length) return; const actual=CARDS9[idx++];
+  const c={...actual, at:Math.floor((Date.now()-recStart)/1000), status};
+  if(status==="auto"||status==="review"){const n=no, ref=ON_LIST.get(n); c.typed=n; c.slot=OWNER.get(n); if(ref) c.name=ref.name;}
+  if(status==="later"){c.name="（未入力）";c.typed="—";}
+  if(status==="outside"){c.name="リスト外のカード";c.typed="—";}
+  entered.push(c); digits=""; render();
+}
 function recView(){
-  const inPack=packCards(pack), full=inPack.length>=C9;
-  const rev=entered.filter(c=>c.status==="review").length, out=entered.filter(c=>c.status==="outside").length;
+  const inPack=packCards(pack), full=inPack.length>=C9, actual=CARDS9[idx];
+  const n=fullNo(), known=n&&CHECKLIST_NO.has(n), ref=known?ON_LIST.get(n):null;
+  const cnt=k=>entered.filter(c=>c.status===k).length;
+  let prev=`<span class="hint">番号を入力すると、カード名と持ち主の枠が表示されます</span>`, cls="";
+  if(n&&!known){prev=`<span><b>${n}</b> はこの弾のカード番号リストにありません</span>`;cls="warn";}
+  else if(n){prev=`<span class="no">${n}</span><b>${esc(ref?ref.name:"（リスト掲載カード）")}</b><span class="tag auto">→ #${pad(OWNER.get(n))} の枠</span>`;}
   view.innerHTML=`<div class="station">
-    <div class="cam"><canvas id="cv" width="960" height="540" aria-label="プラットフォームカメラの映像"></canvas><span class="lab">CAM-02 · 録画中</span></div>
+    <div class="cams">
+      <div class="cam"><canvas id="cv" width="960" height="540" aria-label="プラットフォームカメラの映像"></canvas><span class="lab">CAM-02 · 録画中</span></div>
+      <div class="cam sub"><canvas id="cv2" width="840" height="360" aria-label="読み取りエリアの映像"></canvas><span class="lab">CAM-03 · 読み取りエリア（第 2 機位・録画中）</span></div>
+    </div>
     <section class="panel">
       <div class="counter"><b>パック ${pack} / ${P9}</b><span>このパック ${inPack.length} / ${C9} 枚</span></div>
-      <div class="entry"><input id="code" placeholder="カードをスキャン / 番号を入力" aria-label="カード番号" autocomplete="off" ${full?"disabled":""}><button class="big" type="button" id="add" ${full?"disabled":""}>入力</button></div>
-      <ul class="entries" id="entries">${inPack.slice().reverse().map(c=>`<li><span class="tm">${hms(c.at)}</span><span class="nm">${esc(c.name)}<small>${c.no}</small></span>
-        ${c.status==="auto"?`<span class="tag auto">→ #${pad(c.slot)} の枠</span>`:c.status==="review"?`<span class="tag rev">要確認 → 振り分けへ</span>`:`<span class="tag out">リスト外</span>`}</li>`).join("")||`<li><span></span><span style="color:var(--ink-2)">パックを開けたら 1 枚ずつスキャンしてください</span><span></span></li>`}</ul>
-      <div class="queues"><span>入力済み <b>${entered.length}</b> / ${P9*C9}</span><span>要確認 <b>${rev}</b></span><span>リスト外 <b>${out}</b></span></div>
+      <div class="numrow"><div class="numbox ${n&&!known?"err":""}" aria-live="polite">${digits?String(+digits).padStart(3,"0"):"<span style='color:var(--line)'>000</span>"}<span class="pre">${PREFIX}</span></div></div>
+      <div class="preview ${cls}">${prev}</div>
+      <div class="pad" role="group" aria-label="数字キー">${[1,2,3,4,5,6,7,8,9].map(d=>`<button type="button" data-d="${d}" ${full?"disabled":""}>${d}</button>`).join("")}
+        <button type="button" data-d="del" ${full?"disabled":""} aria-label="1文字消す">⌫</button><button type="button" data-d="0" ${full?"disabled":""}>0</button>
+        <button type="button" class="ok" id="commit" ${full||!known?"disabled":""}>確定</button></div>
+      <div class="alt"><button type="button" id="later" ${full?"disabled":""}>後で入力（振り分けで補録）</button><button type="button" id="outside" ${full?"disabled":""}>リスト外（番号なし等）</button></div>
+      ${actual&&!full?`<span class="hint">原型：読み取りエリアのカードは <span class="mono">${actual.no}</span>${actual.no==="—"?"（番号なし → 「リスト外」）":""}
+        ${actual.no!=="—"?`<button type="button" id="h-fill">正しい番号を入れる</button> <button type="button" id="h-wrong">わざと違う番号を入れる</button>`:""}</span>`:""}
+      <ul class="entries" id="entries">${inPack.slice().reverse().map(c=>`<li><span class="tm">${hms(c.at)}</span><span class="nm">${esc(c.name)}<small>${c.typed||c.no}</small></span>
+        ${c.status==="auto"?`<span class="tag auto">→ #${pad(c.slot)} の枠</span>`:c.status==="review"?`<span class="tag rev">要確認（録画と照合）</span>`:c.status==="later"?`<span class="tag later">後で入力 → 振り分け</span>`:`<span class="tag out">リスト外</span>`}</li>`).join("")||`<li><span></span><span style="color:var(--ink-2)">パックを開けたら 1 枚ずつ読み取りエリアに置き、番号を入力してください</span><span></span></li>`}</ul>
+      <div class="queues"><span>入力済み <b>${entered.length}</b> / ${P9*C9}</span><span>後で入力 <b>${cnt("later")}</b></span><span>要確認 <b>${cnt("review")}</b></span><span>リスト外 <b>${cnt("outside")}</b></span></div>
       <div class="row">${pack<P9?`<button class="big ok" type="button" id="next" ${full?"":"disabled"}>次のパック</button>`:`<button class="big ok" type="button" id="finish" ${full?"":"disabled"}>開封完了</button>`}</div>
     </section></div>`;
-  mountCam();
-  const code=document.getElementById("code"); if(code) code.focus();
-  const add=()=>{if(idx>=CARDS9.length) return; const c=CARDS9[idx++]; c.at=Math.floor((Date.now()-recStart)/1000); entered.push(c); render();};
-  document.getElementById("add").onclick=add; if(code) code.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();add();}});
+  mountCam(); mountRead();
+  view.querySelectorAll("[data-d]").forEach(btn=>btn.onclick=()=>key(btn.dataset.d));
+  document.getElementById("commit").onclick=commit;
+  document.getElementById("later").onclick=()=>record("later");
+  document.getElementById("outside").onclick=()=>record("outside");
+  const hf=document.getElementById("h-fill"); if(hf) hf.onclick=()=>{digits=String(parseInt(actual.no,10));render();};
+  const hw=document.getElementById("h-wrong"); if(hw) hw.onclick=()=>{const k=parseInt(actual.no,10);digits=String(k===1?2:k-1);render();};
   const nx=document.getElementById("next"); if(nx) nx.onclick=()=>{pack++;render();};
   const fi=document.getElementById("finish"); if(fi) fi.onclick=()=>{stage="done";recOn=false;document.body.classList.remove("recording");render();};
 }
+function key(d){ if(d==="del") digits=digits.slice(0,-1); else if(digits.length<3) digits=(digits+d).replace(/^0+/,""); render(); }
+function commit(){
+  const n=fullNo(); if(!n||!CHECKLIST_NO.has(n)) return;
+  const actual=CARDS9[idx]; /* 原型：入力番号と実物が違う場合は「要確認」として残し、振り分けで録画と照合する */
+  record(actual&&actual.no===n?"auto":"review",n);
+}
+document.addEventListener("keydown",e=>{ if(stage!=="rec") return;
+  if(/^[0-9]$/.test(e.key)){key(e.key);} else if(e.key==="Backspace"){key("del");} else if(e.key==="Enter"){commit();} });
 function doneView(){
-  const auto=entered.filter(c=>c.status==="auto").length, rev=entered.filter(c=>c.status==="review").length, out=entered.filter(c=>c.status==="outside").length;
+  const auto=entered.filter(c=>c.status==="auto").length, rev=entered.filter(c=>c.status==="review").length, out=entered.filter(c=>c.status==="outside").length, later=entered.filter(c=>c.status==="later").length;
   view.innerHTML=`<section class="panel" style="max-width:760px;margin:20px auto"><h3>開封完了 · L009</h3>
     <div class="sum"><div><b>${P9}</b><span>パック</span></div><div><b>${entered.length}</b><span>カード</span></div>
-      <div><b>${auto}</b><span>自動で振り分け</span></div><div><b>${rev+out}</b><span>振り分けで確認（要確認 ${rev} · リスト外 ${out}）</span></div></div>
-    <p style="margin:0;color:var(--ink-2);font-size:13px">録画は自動で保存され、区間ハッシュを計算しています。録画ファイルを手元に保存・編集することはできません。</p>
+      <div><b>${auto}</b><span>自動で振り分け</span></div><div><b>${rev+out+later}</b><span>振り分けで確認（後で入力 ${later} · 要確認 ${rev} · リスト外 ${out}）</span></div></div>
+    <p style="margin:0;color:var(--ink-2);font-size:13px">「後で入力」「要確認」のカードは、振り分け担当が録画（CAM-02 / CAM-03）を見て番号を補録・訂正します。録画は自動で保存され、区間ハッシュを計算しています。録画ファイルを手元に保存・編集することはできません。</p>
     <a class="big" href="ui-15-attribution.html#L009" style="display:grid;place-items:center;text-decoration:none">振り分けへ送る</a></section>`;
 }
 function render(){ if(stage==="scan") scanView(false); else if(stage==="pre") preView(); else if(stage==="rec") recView(); else doneView(); }
@@ -227,7 +297,10 @@ setInterval(()=>{if(recOn) document.getElementById("rec-t").textContent="REC "+h
 document.getElementById("sim-cut").onclick=()=>{if(!recOn){say("録画中のみ模擬できます（チェック 2 の録画開始後）");return;}recOn=false;document.getElementById("abort").hidden=false;document.getElementById("call").focus();};
 document.getElementById("call").onclick=()=>say("責任者に通知しました（原型：送信はしていません）");
 document.getElementById("sim-fast").onclick=()=>{if(stage!=="rec"){say("開封中のみ使えます");return;}
-  const base=Math.floor((Date.now()-recStart)/1000); while(idx<CARDS9.length){const c=CARDS9[idx++];c.at=base+Math.floor(c.t-DRAW9);entered.push(c);} pack=P9; render();};
+  const base=Math.floor((Date.now()-recStart)/1000);
+  while(idx<CARDS9.length){const c={...CARDS9[idx++]};c.at=base+Math.floor(c.t-DRAW9);
+    if(c.status==="review") c.status="later";   /* 原型：読み取りにくかったカードは「後で入力」に回したと仮定 */
+    entered.push(c);} pack=P9; render();};
 const toast=document.getElementById("toast"); let tt;
 function say(m){toast.textContent=m;toast.hidden=false;clearTimeout(tt);tt=setTimeout(()=>toast.hidden=true,2600);}
 render();

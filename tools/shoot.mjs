@@ -21,7 +21,7 @@ const S=[
  ['ui-11-welcome','ui-11-welcome.html',['m','d']],
  ['ui-12-spending','ui-12-spending.html',['m','d']],
  ['ui-13-merchant-wizard','ui-13-merchant-wizard.html',['d'],async p=>{await p.click('[data-step="2"]');}],
- ['ui-14-station','ui-14-station.html',['t'],async p=>{await p.click('#scan');await p.click('#prep');await p.waitForTimeout(1000);await p.click('#c-rec');await p.click('#c-seal');await p.click('#go');for(let i=0;i<3;i++)await p.click('#add');}],
+ ['ui-14-station','ui-14-station.html',['t'],async p=>{await p.click('#scan');await p.click('#prep');await p.waitForTimeout(1000);await p.click('#c-rec');await p.click('#c-seal');await p.click('#go');for(let i=0;i<3;i++){await p.click('#h-fill');await p.click('#commit');}await p.click('#h-wrong');await p.click('#commit');await p.click('#h-fill');}],
  ['ui-15-attribution','ui-15-attribution.html#L009',['d'],async p=>{await p.click('tr[data-row]');}],
  ['ui-16-warehouse','ui-16-warehouse.html#pack',['d'],async p=>{await p.press('#scan','Enter');await p.press('#scan','Enter');}],
  ['ui-17-dashboard','ui-17-dashboard.html',['d']],
