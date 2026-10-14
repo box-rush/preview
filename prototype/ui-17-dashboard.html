@@ -125,6 +125,18 @@ details.tv summary::-webkit-details-marker{display:none}
 details.tv table{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
 details.tv th,details.tv td{text-align:left;padding:4px 6px;border-bottom:1px solid var(--line);font-family:var(--mono)}
 @media (min-width:900px){.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}.charts{grid-template-columns:1fr 1fr}}
+.card.wide{grid-column:1 / -1}
+.card.wide .chart{max-width:640px}
+.ftbl{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+.ftbl th,.ftbl td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.ftbl th:first-child,.ftbl td:first-child{text-align:left;white-space:normal}
+.ftbl th{font-size:12px;color:var(--ink-2);font-weight:700}
+.ftbl td.num{font-family:var(--mono)}
+.ftbl tfoot td{font-weight:700}
+.ftwrap{overflow-x:auto}
+.acq-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.acq-head .sp{flex:1}
+.acq-head button{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 12px;font-size:12.5px;font-weight:700;cursor:pointer}
 </style>
 </head>
 <body>
@@ -143,7 +155,7 @@ details.tv th,details.tv td{text-align:left;padding:4px 6px;border-bottom:1px so
     </nav><span class="who">ログイン中：高橋（事業）</span>
   </aside>
   <main class="main">
-    <div class="ph"><div><h1>ダッシュボード</h1><span class="sub">MVP の検証指標 · 直近 8 週（〜9/26） · 自営のみ</span></div></div>
+    <div class="ph"><div><h1>ダッシュボード</h1><span class="sub">MVP の検証指標と獲得経路 · 直近 8 週（〜9/26） · 自営のみ</span></div></div>
     <div class="alert" id="alert" role="alert" hidden><svg width="20" height="20" aria-hidden="true"><use href="#i-alert"/></svg><div><b>生存変数がしきい値を下回っています</b><span class="small" id="alert-d"></span></div></div>
     <div class="kpis" id="kpis"></div>
     <div class="charts" id="charts"></div>
@@ -161,6 +173,15 @@ const M_MED=15, M_SPARK=[11,12,13,14,14,15,15,15];
 const FILL=82, TTF_MED=41, WORK=[71,66,63,58,55,52,50,48];
 const TTF=[["0–12",3],["12–24",8],["24–48",14],["48–72",9],["72–96",4],["96+",2]];
 const VIEWS=[["L011",412,286],["L014",198,240],["L013",54,0],["L015",367,201],["L016",231,155],["L017",289,190],["L018",305,214],["L009",176,0]];
+/* 获客来源（F26.6 首次来源）× 漏斗（F26.7）。示例数据；费用为手动导入（CSV） */
+const UNIT=1050; /* 示例：平均位价 */
+const ACQ=[ /* 来源, 访问, 注册, SMS 认证, 首购, 二购, 购位数, 费用 */
+ ["検証・結果ページの共有（ref=share）",1840,260,231,74,31,196,0],
+ ["X（オーガニック）",3120,310,262,58,19,132,0],
+ ["LINE 公式アカウント",960,140,128,41,22,118,10000],
+ ["店頭 QR（カードショップ）",420,96,90,29,12,77,60000],
+ ["クーポン招待（コード）",610,120,109,24,6,51,38000],
+ ["直接・不明",2240,180,150,31,9,70,0]];
 let sc="ok";
 
 /* ---------- helpers ---------- */
@@ -250,6 +271,25 @@ function render(){
   c.querySelector("h2").insertAdjacentHTML("afterend",`<div class="legend"><span><i style="background:var(--s1)"></i>検証ページ</span><span><i style="background:var(--s2)"></i>録画</span></div>`);
   barChart(c.querySelector(".chart"),{cats:VIEWS.map(v=>v[0]),series:[{name:"検証ページ",color:"--s1",data:VIEWS.map(v=>v[1])},{name:"録画",color:"--s2",data:VIEWS.map(v=>v[2])}],max:500,ticks:[0,100,200,300,400,500],fmt:v=>String(v)});
   c.insertAdjacentHTML("beforeend",table(["開封会","検証ページ","録画"],VIEWS.map(v=>[v[0],v[1],v[2]])));
+
+  /* 獲得経路（F26.6 / F26.7） */
+  const A=ACQ.slice().sort((a,b)=>b[4]-a[4]), yen=n=>"¥"+n.toLocaleString("ja-JP"), pct=(a,b)=>b?Math.round(a/b*100)+"%":"—";
+  c=card("獲得経路別のファネル","初回の流入元（最初に訪れたときの経路）ごと · 直近 8 週 · 示例データ");
+  c.classList.add("wide");
+  c.querySelector(".small.muted").insertAdjacentHTML("afterend",`<div class="acq-head"><span class="small muted">流入元は utm パラメータと ref（共有リンク・クーポン・店頭 QR）から記録。広告ピクセルは使っていません</span><span class="sp"></span><button type="button" data-proto="費用 CSV の取り込み">費用 CSV を取り込む</button></div>`);
+  barChart(c.querySelector(".chart"),{cats:A.map((r,i)=>"#"+(i+1)),series:[{name:"初回購入者",color:"--s1",data:A.map(r=>r[4])}],max:80,ticks:[0,20,40,60,80],fmt:v=>String(v),labelFmt:v=>String(v)});
+  /* tooltip text uses full source names */
+  c.querySelectorAll(".chart .hit").forEach((h,i)=>{const r=A[i];h.addEventListener("mousemove",()=>{const t=c.querySelector(".tip");if(!t)return;t.innerHTML=`${r[0]}<br>訪問 <b>${r[1].toLocaleString()}</b> → 登録 <b>${r[2]}</b> → 認証 <b>${r[3]}</b> → 初回購入 <b>${r[4]}</b> → 2 回目 <b>${r[5]}</b>`;
+    const bx=t.parentElement.getBoundingClientRect(), tr=t.getBoundingClientRect(), L=parseFloat(t.style.left)||0; /* keep inside the chart */
+    if(tr.left<bx.left) t.style.left=(L+bx.left-tr.left+4)+"px"; else if(tr.right>bx.right) t.style.left=(L-(tr.right-bx.right)-4)+"px";});});
+  const tot=A.reduce((t,r)=>t.map((v,k)=>k===0?v:v+r[k]),["合計",0,0,0,0,0,0,0]);
+  const row=(r,foot)=>`<tr><td>${foot?r[0]:`<span class="mono muted">#${A.indexOf(r)+1}</span> ${r[0]}`}</td>${[r[1],r[2],r[3],r[4],r[5]].map(v=>`<td class="num">${v.toLocaleString()}</td>`).join("")}
+    <td class="num">${pct(r[4],r[2])}</td><td class="num">${pct(r[5],r[4])}</td><td class="num">${r[6]}</td><td class="num">${yen(r[6]*UNIT)}</td>
+    <td class="num">${r[7]?yen(r[7]):"—"}</td><td class="num">${r[7]?yen(Math.round(r[7]/r[4])):"—"}</td></tr>`;
+  c.insertAdjacentHTML("beforeend",`<div class="ftwrap"><table class="ftbl"><thead><tr><th>流入元</th><th>訪問</th><th>登録</th><th>SMS 認証</th><th>初回購入</th><th>2 回目購入</th>
+    <th>登録→初回</th><th>リピート率</th><th>購入枠数</th><th>購入金額</th><th>費用</th><th>獲得単価</th></tr></thead>
+    <tbody>${A.map(r=>row(r)).join("")}</tbody><tfoot>${row(tot,true)}</tfoot></table></div>
+    <p class="small muted" style="margin:6px 0 0">獲得単価 = 費用 ÷ 初回購入者。費用は手動で取り込み（広告・印刷物・クーポン原価など）。購入金額は示例の平均枠単価 ¥${UNIT.toLocaleString()} で概算。</p>`);
 }
 document.querySelectorAll("[data-sc]").forEach(b=>b.onclick=()=>{sc=b.dataset.sc;document.querySelectorAll("[data-sc]").forEach(x=>x.setAttribute("aria-pressed",x===b));render();});
 const toast=document.createElement("div");toast.className="tip";toast.style.cssText="position:fixed;left:50%;bottom:24px;top:auto;transform:translateX(-50%)";toast.hidden=true;document.body.appendChild(toast);let tt;
